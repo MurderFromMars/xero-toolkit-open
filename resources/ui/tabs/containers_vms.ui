@@ -1,60 +1,130 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <interface>
-  <requires lib="gtk" version="4.0"/>
+  <requires lib="gtk" version="4.0" />
 
   <object class="GtkBox" id="page_containers_vms">
     <property name="orientation">vertical</property>
-    <property name="spacing">20</property>
-    <property name="margin-top">24</property>
-    <property name="margin-bottom">24</property>
-    <property name="margin-start">24</property>
-    <property name="margin-end">24</property>
+    <property name="spacing">24</property>
+    <property name="margin-top">48</property>
+    <property name="margin-bottom">48</property>
+    <property name="margin-start">48</property>
+    <property name="margin-end">48</property>
     <property name="hexpand">true</property>
     <property name="vexpand">true</property>
+    <property name="halign">fill</property>
+    <property name="valign">fill</property>
 
-    <!-- Page Header -->
+    <!-- Header Section -->
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
-        <property name="spacing">8</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+
+        <child>
+          <object class="GtkImage">
+            <property name="icon-name">xero-toolkit</property>
+            <property name="pixel-size">96</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
 
         <child>
           <object class="GtkLabel">
             <property name="label">Containers/VMs</property>
             <property name="css-classes">title-1</property>
-            <property name="halign">start</property>
+            <property name="halign">center</property>
           </object>
         </child>
 
         <child>
           <object class="GtkLabel">
-            <property name="label">Manage containers and virtual machines</property>
+            <property
+                            name="label"
+                        >Manage containers and virtual machines</property>
             <property name="css-classes">dim</property>
-            <property name="halign">start</property>
+            <property name="halign">center</property>
+            <property name="wrap">true</property>
+            <property name="justify">center</property>
           </object>
         </child>
       </object>
     </child>
 
-    <!-- Main Content Area -->
+    <!-- Plus Buttons Layout -->
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
-        <property name="spacing">12</property>
-        <property name="margin-top">12</property>
-        <property name="margin-bottom">12</property>
-        <property name="hexpand">true</property>
-        <property name="vexpand">true</property>
-        <property name="halign">fill</property>
-        <property name="valign">fill</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+        <property name="vexpand">false</property>
 
-        <!-- Placeholder content -->
+        <!-- Top (single) -->
         <child>
-          <object class="GtkLabel">
-            <property name="label">Container and VM management tools will be implemented here.</property>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
             <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="css-classes">dim</property>
+            <child>
+              <object class="GtkButton" id="btn_docker">
+                <property name="label">Docker</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <!-- Middle row (three buttons) -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">32</property>
+            <property name="halign">center</property>
+
+            <child>
+              <object class="GtkButton" id="btn_podman">
+                <property name="label">Podman</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkButton" id="btn_vbox">
+                <property name="label">vBox</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkButton" id="btn_distrobox">
+                <property name="label">DistroBox</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <!-- Bottom (single) -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_kvm">
+                <property name="label">KVM</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>

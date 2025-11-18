@@ -248,6 +248,14 @@ fn load_page_from_resource(
     if page_name == "main_page" {
         setup_main_page_buttons(&page_builder, main_builder);
     }
+    // Set up button connections for gaming tools page
+    if page_name == "gaming_tools" {
+        setup_gaming_tools_buttons(&page_builder);
+    }
+    // Set up button connections for containers/VMs page
+    if page_name == "containers_vms" {
+        setup_containers_vms_buttons(&page_builder);
+    }
 
     Ok(())
 }
@@ -315,6 +323,84 @@ fn setup_main_page_buttons(page_builder: &Builder, _main_builder: &Builder) {
             let _ = std::process::Command::new("xdg-open")
                 .arg("https://ko-fi.com/xerolinux")
                 .spawn();
+        });
+    }
+}
+/// Set up button functionality for the gaming tools page
+fn setup_gaming_tools_buttons(page_builder: &Builder) {
+    // Steam AiO
+    if let Some(btn_steam_aio) = page_builder.object::<gtk4::Button>("btn_steam_aio") {
+        btn_steam_aio.connect_clicked(move |_| {
+            info!("Gaming tools: Steam AiO button clicked - functionality not implemented yet");
+        });
+    }
+
+    // Controllers
+    if let Some(btn_controllers) = page_builder.object::<gtk4::Button>("btn_controllers") {
+        btn_controllers.connect_clicked(move |_| {
+            info!("Gaming tools: Controllers button clicked - functionality not implemented yet");
+        });
+    }
+
+    // Gamescope CFG
+    if let Some(btn_gamescope_cfg) = page_builder.object::<gtk4::Button>("btn_gamescope_cfg") {
+        btn_gamescope_cfg.connect_clicked(move |_| {
+            info!("Gaming tools: Gamescope CFG button clicked - functionality not implemented yet");
+        });
+    }
+
+    // LACT OC
+    if let Some(btn_lact_oc) = page_builder.object::<gtk4::Button>("btn_lact_oc") {
+        btn_lact_oc.connect_clicked(move |_| {
+            info!("Gaming tools: LACT OC button clicked - functionality not implemented yet");
+        });
+    }
+
+    // Lutris/Heroic & Bottles
+    if let Some(btn_lutris_heroic_bottles) =
+        page_builder.object::<gtk4::Button>("btn_lutris_heroic_bottles")
+    {
+        btn_lutris_heroic_bottles.connect_clicked(move |_| {
+            info!("Gaming tools: Lutris/Heroic & Bottles button clicked - functionality not implemented yet");
+        });
+    }
+
+    // Future reserved button removed from UI; handler no longer needed
+}
+/// Set up button functionality for the containers/VMs page
+fn setup_containers_vms_buttons(page_builder: &Builder) {
+    // Docker
+    if let Some(btn_docker) = page_builder.object::<gtk4::Button>("btn_docker") {
+        btn_docker.connect_clicked(move |_| {
+            info!("Containers/VMs: Docker button clicked - functionality not implemented yet");
+        });
+    }
+
+    // Podman
+    if let Some(btn_podman) = page_builder.object::<gtk4::Button>("btn_podman") {
+        btn_podman.connect_clicked(move |_| {
+            info!("Containers/VMs: Podman button clicked - functionality not implemented yet");
+        });
+    }
+
+    // vBox
+    if let Some(btn_vbox) = page_builder.object::<gtk4::Button>("btn_vbox") {
+        btn_vbox.connect_clicked(move |_| {
+            info!("Containers/VMs: vBox button clicked - functionality not implemented yet");
+        });
+    }
+
+    // DistroBox
+    if let Some(btn_distrobox) = page_builder.object::<gtk4::Button>("btn_distrobox") {
+        btn_distrobox.connect_clicked(move |_| {
+            info!("Containers/VMs: DistroBox button clicked - functionality not implemented yet");
+        });
+    }
+
+    // KVM
+    if let Some(btn_kvm) = page_builder.object::<gtk4::Button>("btn_kvm") {
+        btn_kvm.connect_clicked(move |_| {
+            info!("Containers/VMs: KVM button clicked - functionality not implemented yet");
         });
     }
 }

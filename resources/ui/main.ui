@@ -4,9 +4,10 @@
 
   <object class="GtkApplicationWindow" id="app_window">
     <property name="title">Xero Toolkit</property>
-    <property name="default-width">1200</property>
-    <property name="default-height">800</property>
+    <property name="default-width">1000</property>
+    <property name="default-height">900</property>
 
+    <!-- Main Paned Content (sidebar + right split) -->
     <child>
       <object class="GtkPaned" id="main_paned">
         <property name="orientation">horizontal</property>
@@ -67,118 +68,211 @@
           </object>
         </child>
 
-        <!-- Right Content Area -->
+        <!-- Right Content Area: vertical split between pages (top) and terminal (bottom) -->
         <child>
-          <object class="GtkStack" id="stack">
+          <object class="GtkPaned" id="right_paned">
+            <property name="orientation">vertical</property>
             <property name="hexpand">true</property>
             <property name="vexpand">true</property>
-            <property name="transition-type">crossfade</property>
+            <!-- Default split: more space for content, smaller terminal -->
+            <property name="position">650</property>
+            <!-- Allow both children to resize while keeping them visible -->
+            <property name="resize-start-child">true</property>
+            <property name="shrink-start-child">true</property>
+            <property name="resize-end-child">true</property>
+            <property name="shrink-end-child">true</property>
+            <property name="wide-handle">true</property>
 
-            <!-- Main Page -->
+            <!-- Top: page stack wrapped in scrolled window to prevent content from being pushed out -->
             <child>
-              <object class="GtkStackPage">
-                <property name="name">main_page</property>
-                <property name="title">Main Page</property>
-                <property name="child">
-                  <object class="GtkBox" id="page_main_page_container">
+              <object class="GtkScrolledWindow" id="page_scroll">
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+
+                <child>
+                  <object class="GtkBox" id="right_container">
                     <property name="orientation">vertical</property>
                     <property name="hexpand">true</property>
-                    <property name="vexpand">true</property>
+
+                    <child>
+                      <object class="GtkStack" id="stack">
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                        <property name="transition-type">crossfade</property>
+
+                        <!-- Main Page -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">main_page</property>
+                            <property name="title">Main Page</property>
+                            <property name="child">
+                              <object class="GtkBox" id="page_main_page_container">
+                                <property name="orientation">vertical</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+
+                        <!-- Customization Page -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">customization</property>
+                            <property name="title">Customization</property>
+                            <property name="child">
+                              <object class="GtkBox" id="page_customization_container">
+                                <property name="orientation">vertical</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+
+                        <!-- Gaming Tools Page -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">gaming_tools</property>
+                            <property name="title">Gaming Tools</property>
+                            <property name="child">
+                              <object class="GtkBox" id="page_gaming_tools_container">
+                                <property name="orientation">vertical</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+
+                        <!-- Containers/VMs Page -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">containers_vms</property>
+                            <property name="title">Containers/VMs</property>
+                            <property name="child">
+                              <object class="GtkBox" id="page_containers_vms_container">
+                                <property name="orientation">vertical</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+
+                        <!-- Multimedia Tools Page -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">multimedia_tools</property>
+                            <property name="title">Multimedia Tools</property>
+                            <property name="child">
+                              <object class="GtkBox" id="page_multimedia_tools_container">
+                                <property name="orientation">vertical</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+
+                        <!-- Kernel Manager/SCX Page -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">kernel_manager_scx</property>
+                            <property name="title">Kernel Manager/SCX</property>
+                            <property name="child">
+                              <object class="GtkBox" id="page_kernel_manager_scx_container">
+                                <property name="orientation">vertical</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+
+                        <!-- Servicing/System tweaks Page -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">servicing_system_tweaks</property>
+                            <property name="title">Servicing/System tweaks</property>
+                            <property name="child">
+                              <object class="GtkBox" id="page_servicing_system_tweaks_container">
+                                <property name="orientation">vertical</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
-                </property>
+                </child>
               </object>
             </child>
 
-            <!-- Customization Page -->
+            <!-- Bottom: Shared Terminal Output Area (global for all pages) -->
             <child>
-              <object class="GtkStackPage">
-                <property name="name">customization</property>
-                <property name="title">Customization</property>
-                <property name="child">
-                  <object class="GtkBox" id="page_customization_container">
-                    <property name="orientation">vertical</property>
-                    <property name="hexpand">true</property>
-                    <property name="vexpand">true</property>
-                  </object>
-                </property>
-              </object>
-            </child>
+              <object class="GtkBox" id="global_terminal_card">
+                <property name="orientation">vertical</property>
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
+                <property name="margin-start">16</property>
+                <property name="margin-end">16</property>
+                <property name="margin-bottom">8</property>
+                <property name="spacing">4</property>
+                <property name="css-classes">card</property>
 
-            <!-- Gaming Tools Page -->
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">gaming_tools</property>
-                <property name="title">Gaming Tools</property>
-                <property name="child">
-                  <object class="GtkBox" id="page_gaming_tools_container">
-                    <property name="orientation">vertical</property>
+                <!-- Card header: small title for the terminal -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
                     <property name="hexpand">true</property>
-                    <property name="vexpand">true</property>
-                  </object>
-                </property>
-              </object>
-            </child>
 
-            <!-- Containers/VMs Page -->
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">containers_vms</property>
-                <property name="title">Containers/VMs</property>
-                <property name="child">
-                  <object class="GtkBox" id="page_containers_vms_container">
-                    <property name="orientation">vertical</property>
-                    <property name="hexpand">true</property>
-                    <property name="vexpand">true</property>
+                    <child>
+                      <object class="GtkLabel" id="global_terminal_title">
+                        <property name="label">Terminal Output</property>
+                        <property name="xalign">0</property>
+                        <property name="css-classes">caption-heading</property>
+                      </object>
+                    </child>
                   </object>
-                </property>
-              </object>
-            </child>
+                </child>
 
-            <!-- Multimedia Tools Page -->
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">multimedia_tools</property>
-                <property name="title">Multimedia Tools</property>
-                <property name="child">
-                  <object class="GtkBox" id="page_multimedia_tools_container">
-                    <property name="orientation">vertical</property>
-                    <property name="hexpand">true</property>
-                    <property name="vexpand">true</property>
+                <!-- Separator between header and output -->
+                <child>
+                  <object class="GtkSeparator">
+                    <property name="orientation">horizontal</property>
                   </object>
-                </property>
-              </object>
-            </child>
+                </child>
 
-            <!-- Kernel Manager/SCX Page -->
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">kernel_manager_scx</property>
-                <property name="title">Kernel Manager/SCX</property>
-                <property name="child">
-                  <object class="GtkBox" id="page_kernel_manager_scx_container">
-                    <property name="orientation">vertical</property>
+                <!-- Terminal output body -->
+                <child>
+                  <object class="GtkScrolledWindow" id="global_terminal_frame">
                     <property name="hexpand">true</property>
                     <property name="vexpand">true</property>
-                  </object>
-                </property>
-              </object>
-            </child>
 
-            <!-- Servicing/System tweaks Page -->
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">servicing_system_tweaks</property>
-                <property name="title">Servicing/System tweaks</property>
-                <property name="child">
-                  <object
-                                        class="GtkBox"
-                                        id="page_servicing_system_tweaks_container"
-                                    >
-                    <property name="orientation">vertical</property>
-                    <property name="hexpand">true</property>
-                    <property name="vexpand">true</property>
+                    <child>
+                      <object class="GtkTextView" id="global_terminal_output_view">
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                        <property name="monospace">true</property>
+                        <property name="editable">false</property>
+                        <property name="cursor-visible">false</property>
+                        <!-- Allow multiline content by wrapping long lines -->
+                        <property name="wrap-mode">word-char</property>
+                        <property name="css-classes">terminal-output</property>
+                        <property name="top-margin">8</property>
+                        <property name="bottom-margin">8</property>
+                        <property name="left-margin">12</property>
+                        <property name="right-margin">12</property>
+                        <property name="accepts-tab">false</property>
+                      </object>
+                    </child>
                   </object>
-                </property>
+                </child>
               </object>
             </child>
           </object>

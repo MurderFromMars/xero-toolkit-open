@@ -4,25 +4,36 @@
 
   <object class="GtkBox" id="page_customization">
     <property name="orientation">vertical</property>
-    <property name="spacing">20</property>
-    <property name="margin-top">24</property>
-    <property name="margin-bottom">24</property>
-    <property name="margin-start">24</property>
-    <property name="margin-end">24</property>
+    <property name="spacing">24</property>
+    <property name="margin-top">48</property>
+    <property name="margin-bottom">48</property>
+    <property name="margin-start">48</property>
+    <property name="margin-end">48</property>
     <property name="hexpand">true</property>
     <property name="vexpand">true</property>
+    <property name="halign">fill</property>
+    <property name="valign">fill</property>
 
-    <!-- Page Header -->
+    <!-- Header Section (mirrors style of other tabs) -->
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
-        <property name="spacing">8</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+
+        <child>
+          <object class="GtkImage">
+            <property name="icon-name">xero-toolkit</property>
+            <property name="pixel-size">96</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
 
         <child>
           <object class="GtkLabel">
             <property name="label">Customization</property>
             <property name="css-classes">title-1</property>
-            <property name="halign">start</property>
+            <property name="halign">center</property>
           </object>
         </child>
 
@@ -30,31 +41,81 @@
           <object class="GtkLabel">
             <property name="label">Customize your system appearance and behavior</property>
             <property name="css-classes">dim</property>
-            <property name="halign">start</property>
+            <property name="halign">center</property>
+            <property name="wrap">true</property>
+            <property name="justify">center</property>
           </object>
         </child>
       </object>
     </child>
 
-    <!-- Main Content Area -->
+    <!-- Buttons Layout -->
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
-        <property name="spacing">12</property>
-        <property name="margin-top">12</property>
-        <property name="margin-bottom">12</property>
-        <property name="hexpand">true</property>
-        <property name="vexpand">true</property>
-        <property name="halign">fill</property>
-        <property name="valign">fill</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+        <property name="vexpand">false</property>
 
-        <!-- Placeholder content -->
+        <!-- Top row (single) -->
         <child>
-          <object class="GtkLabel">
-            <property name="label">Customization tools will be implemented here.</property>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
             <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="css-classes">dim</property>
+
+            <child>
+              <object class="GtkButton" id="btn_zsh_aio">
+                <property name="label">ZSH AiO</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <!-- Middle row (two buttons) -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">32</property>
+            <property name="halign">center</property>
+
+            <child>
+              <object class="GtkButton" id="btn_grub_themes">
+                <property name="label">Grub themes</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkButton" id="btn_wallpaper">
+                <property name="label">Wallpaper</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <!-- Bottom row (single) -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="halign">center</property>
+
+            <child>
+              <object class="GtkButton" id="btn_reset_rice">
+                <property name="label">Reset Rice</property>
+                <property name="width-request">180</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
