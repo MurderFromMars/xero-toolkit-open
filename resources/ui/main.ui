@@ -222,8 +222,8 @@
                 <property name="margin-start">16</property>
                 <property name="margin-end">16</property>
                 <property name="margin-bottom">8</property>
-                <property name="spacing">4</property>
-                <property name="css-classes">card</property>
+                <property name="spacing">0</property>
+                <property name="css-classes">terminal-container</property>
 
                 <!-- Card header: small title for the terminal -->
                 <child>
@@ -235,16 +235,9 @@
                       <object class="GtkLabel" id="global_terminal_title">
                         <property name="label">Terminal Output</property>
                         <property name="xalign">0</property>
-                        <property name="css-classes">caption-heading</property>
+                        <property name="css-classes">terminal-title</property>
                       </object>
                     </child>
-                  </object>
-                </child>
-
-                <!-- Separator between header and output -->
-                <child>
-                  <object class="GtkSeparator">
-                    <property name="orientation">horizontal</property>
                   </object>
                 </child>
 

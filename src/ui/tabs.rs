@@ -36,13 +36,18 @@ impl Tab {
     }
 
     /// Connect this tab's button to navigate to its associated page.
-    pub fn connect_navigation(&self, stack: &Stack) {
+    pub fn connect_navigation(&self, stack: &Stack, tabs_container: &Box) {
         let stack_clone = stack.clone();
         let page_name = self.page_name.clone();
+        let button_clone = self.button.clone();
+        let tabs_clone = tabs_container.clone();
 
         self.button.connect_clicked(move |_| {
             info!("Tab clicked: navigating to page '{}'", page_name);
             stack_clone.set_visible_child_name(&page_name);
+
+            // Update active state for all tabs
+            update_active_tab(&tabs_clone, &button_clone);
         });
     }
 }
@@ -66,12 +71,23 @@ pub fn setup_tabs(tabs_container: &Box, stack: &Stack) {
         ("Servicing/System tweaks", "servicing_system_tweaks"),
     ];
 
+    let mut first_button: Option<Button> = None;
+
     for (label, page_name) in tabs_config {
         let tab = Tab::new(label, page_name);
-        tab.connect_navigation(stack);
+        tab.connect_navigation(stack, tabs_container);
+
+        if first_button.is_none() {
+            first_button = Some(tab.button.clone());
+        }
 
         tabs_container.append(&tab.button);
         info!("Added tab: {} -> page '{}'", label, page_name);
+    }
+
+    // Set first tab as active
+    if let Some(button) = first_button {
+        button.add_css_class("active");
     }
 }
 
@@ -85,10 +101,26 @@ pub fn setup_tabs(tabs_container: &Box, stack: &Stack) {
 #[allow(dead_code)]
 pub fn add_tab(tabs_container: &Box, stack: &Stack, label: &str, page_name: &str) {
     let tab = Tab::new(label, page_name);
-    tab.connect_navigation(stack);
+    tab.connect_navigation(stack, tabs_container);
 
     tabs_container.append(&tab.button);
     info!("Dynamically added tab: {} -> page '{}'", label, page_name);
+}
+
+/// Update which tab is marked as active
+fn update_active_tab(tabs_container: &Box, clicked_button: &Button) {
+    let mut child = tabs_container.first_child();
+
+    while let Some(widget) = child {
+        if let Ok(button) = widget.clone().downcast::<Button>() {
+            if button == *clicked_button {
+                button.add_css_class("active");
+            } else {
+                button.remove_css_class("active");
+            }
+        }
+        child = widget.next_sibling();
+    }
 }
 
 /// Set the active tab by page name.
