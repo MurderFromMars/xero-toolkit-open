@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+
+  <object class="GtkBox" id="page_drivers">
+    <property name="orientation">vertical</property>
+    <property name="spacing">24</property>
+    <property name="margin-top">48</property>
+    <property name="margin-bottom">48</property>
+    <property name="margin-start">48</property>
+    <property name="margin-end">48</property>
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+    <property name="halign">fill</property>
+    <property name="valign">fill</property>
+
+    <!-- Header Section -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+
+        <child>
+          <object class="GtkImage">
+            <property name="icon-name">xero-toolkit</property>
+            <property name="pixel-size">96</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Drivers &amp; Hardware Tools</property>
+            <property name="css-classes">title-1</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Install and configure drivers and hardware-specific tools</property>
+            <property name="css-classes">dim</property>
+            <property name="halign">center</property>
+            <property name="wrap">true</property>
+            <property name="justify">center</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <!-- Buttons Layout -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+        <property name="vexpand">false</property>
+
+        <!-- Row 1: GPU Drivers, Tailscale, ASUS ROG -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+
+            <child>
+              <object class="GtkButton" id="btn_gpu_drivers">
+                <property name="label">GPU Drivers &amp; Codecs</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkButton" id="btn_tailscale">
+                <property name="label">Tailscale VPN</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkButton" id="btn_asus_rog">
+                <property name="label">ASUS ROG Tools</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
+

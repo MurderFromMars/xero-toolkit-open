@@ -78,7 +78,8 @@ pub fn setup_tabs(tabs_container: &Box, stack: &Stack) {
     // These correspond to stack page names defined in main.ui
     let tabs_config = vec![
         ("Main Page", "main_page", "house-symbolic"),
-        ("Customization", "customization", "gear-symbolic"),
+        ("Drivers", "drivers", "gear-symbolic"),
+        ("Customization", "customization", "brush-symbolic"),
         ("Gaming Tools", "gaming_tools", "gamepad-symbolic"),
         ("Containers/VMs", "containers_vms", "box-symbolic"),
         ("Multimedia Tools", "multimedia_tools", "play-symbolic"),

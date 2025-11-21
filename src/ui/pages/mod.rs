@@ -1,7 +1,8 @@
 //! Page-specific button handlers and logic.
 //!
 //! This module organizes button handlers by page:
-//! - `main_page`: System update, drivers, package managers
+//! - `main_page`: System update, package managers
+//! - `drivers`: GPU drivers, Tailscale, ASUS ROG tools
 //! - `gaming_tools`: Steam, controllers, game launchers
 //! - `containers_vms`: Docker, Podman, VirtualBox, KVM
 //! - `multimedia_tools`: OBS, Jellyfin
@@ -10,6 +11,7 @@
 
 pub mod containers_vms;
 pub mod customization;
+pub mod drivers;
 pub mod gaming_tools;
 pub mod main_page;
 pub mod multimedia_tools;

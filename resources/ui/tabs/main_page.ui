@@ -94,24 +94,6 @@
                 </child>
               </object>
             </child>
-
-            <!-- Row 3: Install Drivers -->
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">16</property>
-                <property name="halign">center</property>
-
-                <child>
-                  <object class="GtkButton" id="btn_install_drivers">
-                    <property name="label">Install Drivers</property>
-                    <property name="width-request">200</property>
-                    <property name="height-request">50</property>
-                    <property name="css-classes">suggested-action</property>
-                  </object>
-                </child>
-              </object>
-            </child>
           </object>
         </child>
 

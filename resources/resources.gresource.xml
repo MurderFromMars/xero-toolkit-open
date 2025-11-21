@@ -11,6 +11,10 @@
     <file
             preprocess="xml-stripblanks"
             compressed="true"
+        >ui/tabs/drivers.ui</file>
+    <file
+            preprocess="xml-stripblanks"
+            compressed="true"
         >ui/tabs/customization.ui</file>
     <file
             preprocess="xml-stripblanks"
@@ -49,6 +53,7 @@
 
     <file compressed="true">icons/scalable/apps/xero-toolkit.png</file>
     <!-- Icons -->
+    <file compressed="true">icons/scalable/actions/brush-symbolic.svg</file>
     <file compressed="true">icons/scalable/actions/discord-symbolic.svg</file>
     <file compressed="true">icons/scalable/actions/youtube-symbolic.svg</file>
     <file compressed="true">icons/scalable/actions/coffee-symbolic.svg</file>

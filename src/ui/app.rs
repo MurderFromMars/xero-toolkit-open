@@ -147,6 +147,11 @@ fn load_page_contents(main_builder: &Builder) {
             "page_main_page_container",
         ),
         (
+            "drivers",
+            "/xyz/xerolinux/xero-toolkit/ui/tabs/drivers.ui",
+            "page_drivers_container",
+        ),
+        (
             "customization",
             "/xyz/xerolinux/xero-toolkit/ui/tabs/customization.ui",
             "page_customization_container",
@@ -221,6 +226,7 @@ fn load_page_from_resource(
 
     match page_name {
         "main_page" => pages::main_page::setup_handlers(&page_builder, main_builder),
+        "drivers" => pages::drivers::setup_handlers(&page_builder, main_builder),
         "gaming_tools" => pages::gaming_tools::setup_handlers(&page_builder, main_builder),
         "containers_vms" => pages::containers_vms::setup_handlers(&page_builder, main_builder),
         "multimedia_tools" => pages::multimedia_tools::setup_handlers(&page_builder, main_builder),
