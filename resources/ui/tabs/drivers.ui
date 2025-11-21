@@ -67,7 +67,7 @@
 
             <child>
               <object class="GtkButton" id="btn_gpu_drivers">
-                <property name="label">GPU Drivers &amp; Codecs</property>
+                <property name="label">NVIDIA Drivers</property>
                 <property name="width-request">200</property>
                 <property name="height-request">50</property>
                 <property name="css-classes">suggested-action</property>

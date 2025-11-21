@@ -1,7 +1,7 @@
 //! Drivers and hardware tools page button handlers.
 //!
 //! Handles:
-//! - GPU drivers (AMD, Intel, NVIDIA) via selection dialog
+//! - NVIDIA GPU drivers (closed and open source) via selection dialog
 //! - Tailscale VPN
 //! - ASUS ROG laptop tools
 
@@ -62,30 +62,18 @@ fn show_gpu_driver_selection(button: &gtk4::Button, terminal: &Terminal, termina
         let window_ref = window.upcast_ref::<gtk4::Window>();
 
         let config = selection_dialog::SelectionDialogConfig::new(
-            "GPU Driver Selection",
-            "Select your GPU vendor. Note: Dual/Hybrid GPU setups require manual terminal configuration.",
+            "NVIDIA Driver Selection",
+            "Select which NVIDIA driver version to install.",
         )
         .add_option(selection_dialog::SelectionOption::new(
-            "amd",
-            "AMD GPU",
-            "Radeon graphics drivers and Vulkan support",
-            false,
-        ))
-        .add_option(selection_dialog::SelectionOption::new(
-            "intel",
-            "Intel GPU",
-            "Intel graphics drivers and media acceleration",
-            false,
-        ))
-        .add_option(selection_dialog::SelectionOption::new(
             "nvidia_closed",
-            "NVIDIA (Closed Source)",
+            "NVIDIA Closed Source",
             "Proprietary NVIDIA drivers with CUDA support",
             false,
         ))
         .add_option(selection_dialog::SelectionOption::new(
             "nvidia_open",
-            "NVIDIA (Open Source)",
+            "NVIDIA Open Source",
             "Open source NVIDIA drivers (Turing+ GPUs)",
             false,
         ))
@@ -108,44 +96,6 @@ fn show_gpu_driver_selection(button: &gtk4::Button, terminal: &Terminal, termina
 
             let mut commands = vec![];
 
-            if selected_ids.contains(&"amd".to_string()) {
-                commands.push(terminal::TerminalCommand::new(
-                    helper,
-                    &[
-                        "-S",
-                        "--needed",
-                        "--noconfirm",
-                        "linux-headers",
-                        "vulkan-radeon",
-                        "lib32-vulkan-radeon",
-                        "vulkan-icd-loader",
-                        "lib32-vulkan-icd-loader",
-                        "linux-firmware-radeon",
-                        "vulkan-mesa-layers",
-                        "lib32-vulkan-mesa-layers",
-                    ],
-                ));
-            }
-
-            if selected_ids.contains(&"intel".to_string()) {
-                commands.push(terminal::TerminalCommand::new(
-                    helper,
-                    &[
-                        "-S",
-                        "--needed",
-                        "--noconfirm",
-                        "linux-headers",
-                        "vulkan-intel",
-                        "lib32-vulkan-intel",
-                        "vulkan-icd-loader",
-                        "lib32-vulkan-icd-loader",
-                        "intel-media-driver",
-                        "intel-gmmlib",
-                        "onevpl-intel-gpu",
-                        "gstreamer-vaapi",
-                    ],
-                ));
-            }
 
             if selected_ids.contains(&"nvidia_closed".to_string()) {
                 commands.push(terminal::TerminalCommand::new(
