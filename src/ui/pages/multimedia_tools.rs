@@ -194,12 +194,7 @@ fn setup_obs_studio_aio(page_builder: &Builder) {
 
                     if !commands.is_empty() {
                         let window_ref2 = window_clone.upcast_ref::<gtk4::Window>();
-                        task_runner::run(
-                            window_ref2,
-                            commands,
-                            "OBS-Studio Setup",
-                            None,
-                        );
+                        task_runner::run(window_ref2, commands, "OBS-Studio Setup");
                     }
                 });
             }
@@ -236,7 +231,7 @@ fn setup_jellyfin(page_builder: &Builder) {
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok());
             if let Some(window) = window {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Jellyfin Server Setup", None);
+                task_runner::run(window_ref, commands, "Jellyfin Server Setup");
             }
         });
     }

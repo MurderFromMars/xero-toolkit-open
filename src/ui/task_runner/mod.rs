@@ -17,7 +17,7 @@
 //!     Command::aur(&["-S", "package-name"], "Install AUR package"),
 //! ];
 //!
-//! run(&parent_window, commands, "Installation", None);
+//! run(&parent_window, commands, "Installation");
 //! ```
 
 mod command;
@@ -58,12 +58,10 @@ pub fn is_running() -> bool {
 /// * `parent` - Parent window for the dialog
 /// * `commands` - Vector of commands to execute
 /// * `title` - Dialog title
-/// * `on_complete` - Optional callback when all commands complete
 pub fn run(
     parent: &Window,
     commands: Vec<Command>,
     title: &str,
-    on_complete: Option<Box<dyn Fn(bool) + 'static>>,
 ) {
     if commands.is_empty() {
         error!("No commands provided");
@@ -76,8 +74,6 @@ pub fn run(
     }
 
     ACTION_RUNNING.store(true, Ordering::SeqCst);
-
-    let on_complete = on_complete.map(|cb| Rc::new(cb) as Rc<dyn Fn(bool) + 'static>);
 
     let builder =
         gtk4::Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/task_list_dialog.ui");
@@ -143,35 +139,20 @@ pub fn run(
 
     // Close button handler
     let widgets_clone = widgets.clone();
-    let on_complete_clone = on_complete.clone();
     close_button.connect_clicked(move |_| {
         widgets_clone.window.close();
-        if let Some(ref callback) = on_complete_clone {
-            callback(true);
-        }
     });
 
     // Window close handler
-    let on_complete_clone = on_complete.clone();
     let cancelled_clone = cancelled.clone();
     window.connect_close_request(move |_| {
         ACTION_RUNNING.store(false, Ordering::SeqCst);
         *cancelled_clone.borrow_mut() = true;
-        if let Some(ref callback) = on_complete_clone {
-            callback(false);
-        }
         glib::Propagation::Proceed
     });
 
     window.present();
 
     // Start executing commands
-    execute_commands(
-        widgets,
-        commands,
-        0,
-        cancelled,
-        on_complete,
-        current_process,
-    );
+    execute_commands(widgets, commands, 0, cancelled, current_process);
 }

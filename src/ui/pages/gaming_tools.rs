@@ -106,12 +106,7 @@ fn setup_steam_aio(builder: &Builder) {
             "Installing Steam and gaming dependencies...",
         )];
 
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Steam AiO Installation",
-            None,
-        );
+        task_runner::run(window.upcast_ref(), commands, "Steam AiO Installation");
     });
 }
 
@@ -152,7 +147,7 @@ fn setup_lact_oc(builder: &Builder) {
             ),
         ];
 
-        task_runner::run(window.upcast_ref(), commands, "LACT GPU Tools", None);
+        task_runner::run(window.upcast_ref(), commands, "LACT GPU Tools");
     });
 }
 
@@ -180,7 +175,7 @@ fn setup_lutris(builder: &Builder) {
             "Installing Lutris and Vulkan layers...",
         )];
 
-        task_runner::run(window.upcast_ref(), commands, "Lutris Installation", None);
+        task_runner::run(window.upcast_ref(), commands, "Lutris Installation");
     });
 }
 
@@ -208,12 +203,7 @@ fn setup_heroic(builder: &Builder) {
             "Installing Heroic Games Launcher...",
         )];
 
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Heroic Launcher Installation",
-            None,
-        );
+        task_runner::run(window.upcast_ref(), commands, "Heroic Launcher Installation");
     });
 }
 
@@ -241,7 +231,7 @@ fn setup_bottles(builder: &Builder) {
             "Installing Bottles and Vulkan layers...",
         )];
 
-        task_runner::run(window.upcast_ref(), commands, "Bottles Installation", None);
+        task_runner::run(window.upcast_ref(), commands, "Bottles Installation");
     });
 }
 

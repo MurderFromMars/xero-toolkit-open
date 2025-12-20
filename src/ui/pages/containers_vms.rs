@@ -72,11 +72,6 @@ fn setup_docker(builder: &Builder) {
             window.upcast_ref(),
             commands,
             "Docker Setup",
-            Some(Box::new(|success| {
-                if success {
-                    info!("Docker setup completed");
-                }
-            })),
         );
     });
 }
@@ -134,7 +129,7 @@ fn setup_podman(builder: &Builder) {
             }
 
             if !commands.is_empty() {
-                task_runner::run(window_clone.upcast_ref(), commands, "Podman Setup", None);
+                task_runner::run(window_clone.upcast_ref(), commands, "Podman Setup");
             }
         });
     });
@@ -157,7 +152,7 @@ fn setup_vbox(builder: &Builder) {
             "Installing VirtualBox...",
         )];
 
-        task_runner::run(window.upcast_ref(), commands, "VirtualBox Setup", None);
+        task_runner::run(window.upcast_ref(), commands, "VirtualBox Setup");
     });
 }
 
@@ -185,7 +180,7 @@ fn setup_distrobox(builder: &Builder) {
             ),
         ];
 
-        task_runner::run(window.upcast_ref(), commands, "DistroBox Setup", None);
+        task_runner::run(window.upcast_ref(), commands, "DistroBox Setup");
     });
 }
 
@@ -244,7 +239,7 @@ fn setup_kvm(builder: &Builder) {
             "Restarting libvirtd service...",
         ));
 
-        task_runner::run(window.upcast_ref(), commands, "KVM / QEMU Setup", None);
+        task_runner::run(window.upcast_ref(), commands, "KVM / QEMU Setup");
     });
 }
 

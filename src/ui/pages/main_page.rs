@@ -44,7 +44,7 @@ fn setup_update_system(builder: &Builder) {
             "Updating system packages...",
         )];
 
-        task_runner::run(window.upcast_ref(), commands, "System Update", None);
+        task_runner::run(window.upcast_ref(), commands, "System Update");
     });
 }
 
@@ -110,15 +110,10 @@ fn setup_pkg_manager(builder: &Builder) {
             let commands = build_pkg_manager_commands(&selected);
 
             if !commands.is_empty() {
-                task_runner::run(
-                    window_clone.upcast_ref(),
-                    commands,
-                    "Package Manager GUI Installation",
-                    None,
-                );
-            }
-        });
-    });
+                task_runner::run(window_clone.upcast_ref(), commands, "Package Manager GUI Installation");
+             }
+         });
+     });
 }
 
 /// Build commands for selected package managers.

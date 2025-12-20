@@ -49,7 +49,7 @@ fn setup_clr_pacman(page_builder: &Builder) {
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok())
             {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Clear Pacman Cache", None);
+                task_runner::run(window_ref, commands, "Clear Pacman Cache");
             }
         });
     }
@@ -70,7 +70,7 @@ fn setup_unlock_pacman(page_builder: &Builder) {
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok())
             {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Unlock Pacman Database", None);
+                task_runner::run(window_ref, commands, "Unlock Pacman Database");
             }
         });
     }
@@ -90,7 +90,7 @@ fn setup_plasma_x11(page_builder: &Builder) {
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok())
             {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Install KDE X11 Session", None);
+                task_runner::run(window_ref, commands, "Install KDE X11 Session");
             }
         });
     }
@@ -151,7 +151,7 @@ fn setup_vm_guest_utils(page_builder: &Builder) {
                     .and_then(|r| r.downcast::<ApplicationWindow>().ok())
                 {
                     let window_ref = window.upcast_ref::<gtk4::Window>();
-                    task_runner::run(window_ref, commands, "Install VM Guest Utilities", None);
+                    task_runner::run(window_ref, commands, "Install VM Guest Utilities");
                 }
             }
         });
@@ -187,7 +187,7 @@ fn setup_fix_gpgme(page_builder: &Builder) {
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok())
             {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Fix GPGME Database Issue", None);
+                task_runner::run(window_ref, commands, "Fix GPGME Database Issue");
             }
         });
     }
@@ -230,12 +230,7 @@ fn setup_fix_arch_keyring(page_builder: &Builder) {
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok())
             {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(
-                    window_ref,
-                    commands,
-                    "Fix GnuPG Keyring",
-                    None,
-                );
+                task_runner::run(window_ref, commands, "Fix GnuPG Keyring");
             }
         });
     }
@@ -297,7 +292,7 @@ fn setup_update_mirrorlist(page_builder: &Builder) {
 
                     if !commands.is_empty() {
                         let window_ref2 = window_clone.upcast_ref::<gtk4::Window>();
-                        task_runner::run(window_ref2, commands, "Update System Mirrorlist", None);
+                        task_runner::run(window_ref2, commands, "Update System Mirrorlist");
                     }
                 });
             }
@@ -322,10 +317,9 @@ fn setup_parallel_downloads(page_builder: &Builder) {
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok())
             {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Change Parallel Downloads", None);
+                task_runner::run(window_ref, commands, "Change Parallel Downloads");
             }
         });
     }
 }
-
 

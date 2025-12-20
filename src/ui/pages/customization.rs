@@ -135,7 +135,6 @@ fn setup_zsh_aio(builder: &Builder) {
             window.upcast_ref(),
             commands,
             "ZSH All-in-One Setup",
-            None,
         );
     });
 }
@@ -162,7 +161,6 @@ fn setup_save_desktop(builder: &Builder) {
             window.upcast_ref(),
             commands,
             "Save Desktop Tool Installation",
-            None,
         );
     });
 }
@@ -209,7 +207,6 @@ fn setup_grub_theme(builder: &Builder) {
             window.upcast_ref(),
             commands,
             "XeroLinux GRUB Theme Installation",
-            None,
         );
     });
 }
@@ -235,7 +232,6 @@ fn setup_wallpapers(builder: &Builder) {
             window.upcast_ref(),
             commands,
             "Plasma Wallpapers Installation (~1.2GB)",
-            None,
         );
     });
 }
@@ -309,7 +305,6 @@ fn setup_layan_patch(builder: &Builder) {
             window.upcast_ref(),
             commands,
             "Layan GTK4 Patch & Update",
-            None,
         );
     });
 }

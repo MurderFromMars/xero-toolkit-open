@@ -15,7 +15,6 @@ pub struct RunningContext {
     pub commands: Rc<Vec<Command>>,
     pub index: usize,
     pub cancelled: Rc<RefCell<bool>>,
-    pub on_complete: Option<Rc<dyn Fn(bool) + 'static>>,
     pub current_process: Rc<RefCell<Option<gio::Subprocess>>>,
     exit_result: RefCell<Option<CommandResult>>,
 }
@@ -27,7 +26,6 @@ impl RunningContext {
         commands: Rc<Vec<Command>>,
         index: usize,
         cancelled: Rc<RefCell<bool>>,
-        on_complete: Option<Rc<dyn Fn(bool) + 'static>>,
         current_process: Rc<RefCell<Option<gio::Subprocess>>>,
     ) -> Rc<Self> {
         Rc::new(Self {
@@ -35,7 +33,6 @@ impl RunningContext {
             commands,
             index,
             cancelled,
-            on_complete,
             current_process,
             exit_result: RefCell::new(None),
         })
@@ -67,9 +64,6 @@ impl RunningContext {
             self.widgets
                 .update_task_status(self.index, TaskStatus::Cancelled);
             finalize_execution(&self.widgets, false, "Operation cancelled by user");
-            if let Some(callback) = &self.on_complete {
-                callback(false);
-            }
             return;
         }
 
@@ -83,7 +77,6 @@ impl RunningContext {
                     self.commands.clone(),
                     self.index + 1,
                     self.cancelled.clone(),
-                    self.on_complete.clone(),
                     self.current_process.clone(),
                 );
             }
@@ -99,9 +92,6 @@ impl RunningContext {
                         self.commands.len()
                     ),
                 );
-                if let Some(callback) = &self.on_complete {
-                    callback(false);
-                }
             }
         }
     }
@@ -113,7 +103,6 @@ pub fn execute_commands(
     commands: Rc<Vec<Command>>,
     index: usize,
     cancelled: Rc<RefCell<bool>>,
-    on_complete: Option<Rc<dyn Fn(bool) + 'static>>,
     current_process: Rc<RefCell<Option<gio::Subprocess>>>,
 ) {
     if *cancelled.borrow() {
@@ -122,17 +111,11 @@ pub fn execute_commands(
             widgets.update_task_status(index, TaskStatus::Cancelled);
         }
         finalize_execution(&widgets, false, "Operation cancelled by user");
-        if let Some(callback) = on_complete {
-            callback(false);
-        }
         return;
     }
 
     if index >= commands.len() {
         finalize_execution(&widgets, true, "All operations completed successfully!");
-        if let Some(callback) = on_complete {
-            callback(true);
-        }
         return;
     }
 
@@ -152,9 +135,6 @@ pub fn execute_commands(
                 false,
                 &format!("Failed to prepare command: {}", err),
             );
-            if let Some(callback) = on_complete {
-                callback(false);
-            }
             return;
         }
     };
@@ -179,9 +159,6 @@ pub fn execute_commands(
                 false,
                 &format!("Failed to start operation: {}", err),
             );
-            if let Some(callback) = on_complete {
-                callback(false);
-            }
             return;
         }
     };
@@ -193,7 +170,6 @@ pub fn execute_commands(
         commands.clone(),
         index,
         cancelled.clone(),
-        on_complete.clone(),
         current_process.clone(),
     );
 

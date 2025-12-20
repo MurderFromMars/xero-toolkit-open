@@ -36,7 +36,7 @@ fn setup_tailscale(builder: &Builder) {
             "Installing Tailscale VPN...",
         )];
 
-        task_runner::run(window.upcast_ref(), commands, "Install Tailscale VPN", None);
+        task_runner::run(window.upcast_ref(), commands, "Install Tailscale VPN");
     });
 }
 
@@ -71,12 +71,7 @@ fn setup_asus_rog(builder: &Builder) {
             ),
         ];
 
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Install ASUS ROG Tools",
-            None,
-        );
+        task_runner::run(window.upcast_ref(), commands, "Install ASUS ROG Tools");
     });
 }
 
