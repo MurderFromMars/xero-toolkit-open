@@ -11,7 +11,7 @@ use crate::core;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
-use crate::ui::task_runner::{self, Command};
+use crate::ui::task_runner::{self, Command, CommandSequence};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder, Button};
 use log::info;
@@ -39,40 +39,48 @@ fn setup_docker(builder: &Builder) {
 
         let user = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
 
-        let commands = vec![
-            Command::aur(
-                &[
-                    "-S",
-                    "--noconfirm",
-                    "--needed",
-                    "docker",
-                    "docker-compose",
-                    "docker-buildx",
-                ],
-                "Installing Docker engine and tools...",
-            ),
-            Command::privileged(
-                "systemctl",
-                &["enable", "--now", "docker.service"],
-                "Enabling Docker service...",
-            ),
-            Command::privileged(
-                "groupadd",
-                &["-f", "docker"],
-                "Ensuring docker group exists...",
-            ),
-            Command::privileged(
-                "usermod",
-                &["-aG", "docker", &user],
-                "Adding your user to docker group...",
-            ),
-        ];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&[
+                        "-S",
+                        "--noconfirm",
+                        "--needed",
+                        "docker",
+                        "docker-compose",
+                        "docker-buildx",
+                    ])
+                    .description("Installing Docker engine and tools...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("systemctl")
+                    .args(&["enable", "--now", "docker.service"])
+                    .description("Enabling Docker service...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("groupadd")
+                    .args(&["-f", "docker"])
+                    .description("Ensuring docker group exists...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("usermod")
+                    .args(&["-aG", "docker", &user])
+                    .description("Adding your user to docker group...")
+                    .build(),
+            )
+            .build();
 
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Docker Setup",
-        );
+        task_runner::run(window.upcast_ref(), commands, "Docker Setup");
     });
 }
 
@@ -103,33 +111,41 @@ fn setup_podman(builder: &Builder) {
         .confirm_label("Install");
 
         show_selection_dialog(window.upcast_ref(), config, move |selected| {
-            let mut commands = vec![
-                Command::aur(
-                    &["-S", "--noconfirm", "--needed", "podman", "podman-docker"],
-                    "Installing Podman container engine...",
-                ),
-                Command::privileged(
-                    "systemctl",
-                    &["enable", "--now", "podman.socket"],
-                    "Enabling Podman socket...",
-                ),
-            ];
+            let mut commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .aur()
+                        .args(&["-S", "--noconfirm", "--needed", "podman", "podman-docker"])
+                        .description("Installing Podman container engine...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("systemctl")
+                        .args(&["enable", "--now", "podman.socket"])
+                        .description("Enabling Podman socket...")
+                        .build(),
+                );
 
             if selected.contains(&"podman_desktop".to_string()) {
-                commands.push(Command::normal(
-                    "flatpak",
-                    &[
-                        "install",
-                        "-y",
-                        "flathub",
-                        "io.podman_desktop.PodmanDesktop",
-                    ],
-                    "Installing Podman Desktop GUI...",
-                ));
+                commands = commands.then(
+                    Command::builder()
+                        .normal()
+                        .program("flatpak")
+                        .args(&[
+                            "install",
+                            "-y",
+                            "flathub",
+                            "io.podman_desktop.PodmanDesktop",
+                        ])
+                        .description("Installing Podman Desktop GUI...")
+                        .build(),
+                );
             }
 
             if !commands.is_empty() {
-                task_runner::run(window_clone.upcast_ref(), commands, "Podman Setup");
+                task_runner::run(window_clone.upcast_ref(), commands.build(), "Podman Setup");
             }
         });
     });
@@ -147,10 +163,15 @@ fn setup_vbox(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::aur(
-            &["-S", "--noconfirm", "--needed", "virtualbox-meta"],
-            "Installing VirtualBox...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&["-S", "--noconfirm", "--needed", "virtualbox-meta"])
+                    .description("Installing VirtualBox...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "VirtualBox Setup");
     });
@@ -168,17 +189,23 @@ fn setup_distrobox(builder: &Builder) {
             return;
         };
 
-        let commands = vec![
-            Command::aur(
-                &["-S", "--noconfirm", "--needed", "distrobox"],
-                "Installing DistroBox...",
-            ),
-            Command::normal(
-                "flatpak",
-                &["install", "-y", "io.github.dvlv.boxbuddyrs"],
-                "Installing BoxBuddy GUI...",
-            ),
-        ];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&["-S", "--noconfirm", "--needed", "distrobox"])
+                    .description("Installing DistroBox...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("flatpak")
+                    .args(&["install", "-y", "io.github.dvlv.boxbuddyrs"])
+                    .description("Installing BoxBuddy GUI...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "DistroBox Setup");
     });
@@ -196,50 +223,65 @@ fn setup_kvm(builder: &Builder) {
             return;
         };
 
-        let mut commands: Vec<Command> = Vec::new();
+        let mut commands = CommandSequence::new();
 
         // Remove conflicting packages if installed
         if core::is_package_installed("iptables") {
-            commands.push(Command::aur(
-                &["-Rdd", "--noconfirm", "iptables"],
-                "Removing conflicting iptables...",
-            ));
+            commands = commands.then(
+                Command::builder()
+                    .aur()
+                    .args(&["-Rdd", "--noconfirm", "iptables"])
+                    .description("Removing conflicting iptables...")
+                    .build(),
+            );
         }
 
         if core::is_package_installed("gnu-netcat") {
-            commands.push(Command::aur(
-                &["-Rdd", "--noconfirm", "gnu-netcat"],
-                "Removing conflicting gnu-netcat...",
-            ));
+            commands = commands.then(
+                Command::builder()
+                    .aur()
+                    .args(&["-Rdd", "--noconfirm", "gnu-netcat"])
+                    .description("Removing conflicting gnu-netcat...")
+                    .build(),
+            );
         }
 
-        commands.push(Command::aur(
-            &[
-                "-S",
-                "--noconfirm",
-                "--needed",
-                "virt-manager-meta",
-                "openbsd-netcat",
-            ],
-            "Installing virtualization packages...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .aur()
+                .args(&[
+                    "-S",
+                    "--noconfirm",
+                    "--needed",
+                    "virt-manager-meta",
+                    "openbsd-netcat",
+                ])
+                .description("Installing virtualization packages...")
+                .build(),
+        );
 
-        commands.push(Command::privileged(
-            "sh",
-            &[
-                "-c",
-                "echo 'options kvm-intel nested=1' > /etc/modprobe.d/kvm-intel.conf",
-            ],
-            "Enabling nested virtualization...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .privileged()
+                .program("sh")
+                .args(&[
+                    "-c",
+                    "echo 'options kvm-intel nested=1' > /etc/modprobe.d/kvm-intel.conf",
+                ])
+                .description("Enabling nested virtualization...")
+                .build(),
+        );
 
-        commands.push(Command::privileged(
-            "systemctl",
-            &["restart", "libvirtd.service"],
-            "Restarting libvirtd service...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .privileged()
+                .program("systemctl")
+                .args(&["restart", "libvirtd.service"])
+                .description("Restarting libvirtd service...")
+                .build(),
+        );
 
-        task_runner::run(window.upcast_ref(), commands, "KVM / QEMU Setup");
+        task_runner::run(window.upcast_ref(), commands.build(), "KVM / QEMU Setup");
     });
 }
 

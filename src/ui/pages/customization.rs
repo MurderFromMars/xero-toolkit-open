@@ -7,7 +7,7 @@
 //! - Plasma wallpapers
 //! - Layan GTK4 patch
 
-use crate::ui::task_runner::{self, Command};
+use crate::ui::task_runner::{self, Command, CommandSequence};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder, Button};
 use log::info;
@@ -36,28 +36,31 @@ fn setup_zsh_aio(builder: &Builder) {
         let home = std::env::var("HOME").unwrap_or_default();
         let user = std::env::var("USER").unwrap_or_default();
 
-        let commands = vec![
-            Command::aur(
-                &[
+        let commands = CommandSequence::new()
+            .then(Command::builder()
+                .aur()
+                .args(&[
                     "-S",
                     "--needed",
                     "--noconfirm",
                     "zsh",
                     "grml-zsh-config",
                     "fastfetch",
-                ],
-                "Installing ZSH and dependencies...",
-            ),
-            Command::privileged(
-                "sh",
-                &[
+                ])
+                .description("Installing ZSH and dependencies...")
+                .build())
+            .then(Command::builder()
+                .privileged()
+                .program("sh")
+                .args(&[
                     "-c",
                     "sh -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\" \"\" --unattended",
-                ],
-                "Installing Oh My Zsh framework...",
-            ),
-            Command::aur(
-                &[
+                ])
+                .description("Installing Oh My Zsh framework...")
+                .build())
+            .then(Command::builder()
+                .aur()
+                .args(&[
                     "-S",
                     "--noconfirm",
                     "--needed",
@@ -73,63 +76,69 @@ fn setup_zsh_aio(builder: &Builder) {
                     "noto-fonts-emoji",
                     "powerline-fonts",
                     "oh-my-posh-bin",
-                ],
-                "Installing fonts and terminal enhancements...",
-            ),
-            Command::normal(
-                "git",
-                &[
+                ])
+                .description("Installing fonts and terminal enhancements...")
+                .build())
+            .then(Command::builder()
+                .normal()
+                .program("git")
+                .args(&[
                     "clone",
                     "https://github.com/zsh-users/zsh-completions",
                     &format!("{}/.oh-my-zsh/custom/plugins/zsh-completions", home),
-                ],
-                "Installing ZSH completions plugin...",
-            ),
-            Command::normal(
-                "git",
-                &[
+                ])
+                .description("Installing ZSH completions plugin...")
+                .build())
+            .then(Command::builder()
+                .normal()
+                .program("git")
+                .args(&[
                     "clone",
                     "https://github.com/zsh-users/zsh-autosuggestions",
                     &format!("{}/.oh-my-zsh/custom/plugins/zsh-autosuggestions", home),
-                ],
-                "Installing ZSH autosuggestions plugin...",
-            ),
-            Command::normal(
-                "git",
-                &[
+                ])
+                .description("Installing ZSH autosuggestions plugin...")
+                .build())
+            .then(Command::builder()
+                .normal()
+                .program("git")
+                .args(&[
                     "clone",
                     "https://github.com/zsh-users/zsh-syntax-highlighting.git",
                     &format!("{}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting", home),
-                ],
-                "Installing ZSH syntax highlighting plugin...",
-            ),
-            Command::normal(
-                "sh",
-                &[
+                ])
+                .description("Installing ZSH syntax highlighting plugin...")
+                .build())
+            .then(Command::builder()
+                .normal()
+                .program("sh")
+                .args(&[
                     "-c",
                     &format!(
                         "mv -f {}/.zshrc {}/.zshrc.user 2>/dev/null || true",
                         home, home
                     ),
-                ],
-                "Backing up existing ZSH configuration...",
-            ),
-            Command::normal(
-                "wget",
-                &[
+                ])
+                .description("Backing up existing ZSH configuration...")
+                .build())
+            .then(Command::builder()
+                .normal()
+                .program("wget")
+                .args(&[
                     "-q",
                     "-P",
                     &home,
                     "https://raw.githubusercontent.com/xerolinux/xero-fixes/main/conf/.zshrc",
-                ],
-                "Downloading XeroLinux ZSH configuration...",
-            ),
-            Command::privileged(
-                "chsh",
-                &[&user, "-s", "/bin/zsh"],
-                "Setting ZSH as default shell...",
-            ),
-        ];
+                ])
+                .description("Downloading XeroLinux ZSH configuration...")
+                .build())
+            .then(Command::builder()
+                .privileged()
+                .program("chsh")
+                .args(&[&user, "-s", "/bin/zsh"])
+                .description("Setting ZSH as default shell...")
+                .build())
+            .build();
 
         task_runner::run(
             window.upcast_ref(),
@@ -151,11 +160,16 @@ fn setup_save_desktop(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::normal(
-            "flatpak",
-            &["install", "-y", "io.github.vikdevelop.SaveDesktop"],
-            "Installing Save Desktop tool from Flathub...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("flatpak")
+                    .args(&["install", "-y", "io.github.vikdevelop.SaveDesktop"])
+                    .description("Installing Save Desktop tool from Flathub...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(
             window.upcast_ref(),
@@ -179,29 +193,38 @@ fn setup_grub_theme(builder: &Builder) {
 
         let home = std::env::var("HOME").unwrap_or_default();
 
-        let commands = vec![
-            Command::normal(
-                "git",
-                &[
-                    "clone",
-                    "--depth",
-                    "1",
-                    "https://github.com/xerolinux/xero-grubs",
-                    &format!("{}/xero-grubs", home),
-                ],
-                "Downloading GRUB theme repository...",
-            ),
-            Command::privileged(
-                "sh",
-                &["-c", &format!("cd {}/xero-grubs && ./install.sh", home)],
-                "Installing GRUB theme...",
-            ),
-            Command::normal(
-                "rm",
-                &["-rf", &format!("{}/xero-grubs", home)],
-                "Cleaning up temporary files...",
-            ),
-        ];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("git")
+                    .args(&[
+                        "clone",
+                        "--depth",
+                        "1",
+                        "https://github.com/xerolinux/xero-grubs",
+                        &format!("{}/xero-grubs", home),
+                    ])
+                    .description("Downloading GRUB theme repository...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("sh")
+                    .args(&["-c", &format!("cd {}/xero-grubs && ./install.sh", home)])
+                    .description("Installing GRUB theme...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("rm")
+                    .args(&["-rf", &format!("{}/xero-grubs", home)])
+                    .description("Cleaning up temporary files...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(
             window.upcast_ref(),
@@ -223,10 +246,15 @@ fn setup_wallpapers(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::aur(
-            &["-S", "--noconfirm", "--needed", "kde-wallpapers-extra"],
-            "Installing KDE wallpapers collection (~1.2GB)...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&["-S", "--noconfirm", "--needed", "kde-wallpapers-extra"])
+                    .description("Installing KDE wallpapers collection (~1.2GB)...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(
             window.upcast_ref(),
@@ -250,62 +278,76 @@ fn setup_layan_patch(builder: &Builder) {
 
         let home = std::env::var("HOME").unwrap_or_default();
 
-        let commands = vec![
-            Command::normal(
-                "git",
-                &[
-                    "clone",
-                    "--depth",
-                    "1",
-                    "https://github.com/vinceliuice/Layan-gtk-theme.git",
-                    &format!("{}/Layan-gtk-theme", home),
-                ],
-                "Downloading Layan GTK theme...",
-            ),
-            Command::privileged(
-                "sh",
-                &[
-                    "-c",
-                    &format!(
-                        "cd {}/Layan-gtk-theme && sh install.sh -l -c dark -d {}/.themes",
-                        home, home
-                    ),
-                ],
-                "Installing Layan GTK theme...",
-            ),
-            Command::normal(
-                "rm",
-                &["-rf", &format!("{}/Layan-gtk-theme", home)],
-                "Cleaning up GTK theme files...",
-            ),
-            Command::normal(
-                "git",
-                &[
-                    "clone",
-                    "--depth",
-                    "1",
-                    "https://github.com/vinceliuice/Layan-kde.git",
-                    &format!("{}/Layan-kde", home),
-                ],
-                "Downloading Layan KDE theme...",
-            ),
-            Command::privileged(
-                "sh",
-                &["-c", &format!("cd {}/Layan-kde && sh install.sh", home)],
-                "Installing Layan KDE theme...",
-            ),
-            Command::normal(
-                "rm",
-                &["-rf", &format!("{}/Layan-kde", home)],
-                "Cleaning up KDE theme files...",
-            ),
-        ];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("git")
+                    .args(&[
+                        "clone",
+                        "--depth",
+                        "1",
+                        "https://github.com/vinceliuice/Layan-gtk-theme.git",
+                        &format!("{}/Layan-gtk-theme", home),
+                    ])
+                    .description("Downloading Layan GTK theme...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("sh")
+                    .args(&[
+                        "-c",
+                        &format!(
+                            "cd {}/Layan-gtk-theme && sh install.sh -l -c dark -d {}/.themes",
+                            home, home
+                        ),
+                    ])
+                    .description("Installing Layan GTK theme...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("rm")
+                    .args(&["-rf", &format!("{}/Layan-gtk-theme", home)])
+                    .description("Cleaning up GTK theme files...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("git")
+                    .args(&[
+                        "clone",
+                        "--depth",
+                        "1",
+                        "https://github.com/vinceliuice/Layan-kde.git",
+                        &format!("{}/Layan-kde", home),
+                    ])
+                    .description("Downloading Layan KDE theme...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("sh")
+                    .args(&["-c", &format!("cd {}/Layan-kde && sh install.sh", home)])
+                    .description("Installing Layan KDE theme...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("rm")
+                    .args(&["-rf", &format!("{}/Layan-kde", home)])
+                    .description("Cleaning up KDE theme files...")
+                    .build(),
+            )
+            .build();
 
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Layan GTK4 Patch & Update",
-        );
+        task_runner::run(window.upcast_ref(), commands, "Layan GTK4 Patch & Update");
     });
 }
 

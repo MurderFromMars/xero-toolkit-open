@@ -276,6 +276,9 @@ fn start_download(parent: &Window, iso_name: String, download_url: String, save_
     let pause_button_clone = pause_button.clone();
     let cancel_button_clone = cancel_button.clone();
     let parent_clone = parent.clone();
+    let progress_bar_clone = progress_bar.clone();
+    let speed_label_clone = speed_label.clone();
+    let time_remaining_label_clone = time_remaining_label.clone();
 
     // Set up a timer to check for messages
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
@@ -302,19 +305,39 @@ fn start_download(parent: &Window, iso_name: String, download_url: String, save_
                         format_bytes(state.total)
                     ));
 
-                    // Update time remaining
-                    let time_remaining = if state.speed > 0.0 {
-                        let remaining_bytes = state.total.saturating_sub(state.downloaded);
-                        (remaining_bytes as f64 / state.speed) as u64
+                    // Update time remaining - only show if download is not complete
+                    if state.downloaded >= state.total && state.total > 0 {
+                        // Download is complete, show completion status
+                        time_remaining_label.set_text("Completed");
+                        time_remaining_label.add_css_class("success");
                     } else {
-                        0
-                    };
-                    time_remaining_label.set_text(&format_time_remaining(time_remaining));
+                        let time_remaining = if state.speed > 0.0 {
+                            let remaining_bytes = state.total.saturating_sub(state.downloaded);
+                            (remaining_bytes as f64 / state.speed) as u64
+                        } else {
+                            0
+                        };
+                        time_remaining_label.set_text(&format_time_remaining(time_remaining));
+                        time_remaining_label.remove_css_class("success");
+                    }
                 }
                 DownloadMessage::Completed => {
                     info!("Download completed successfully");
+
+                    // Update UI to show completion
+                    progress_bar_clone.set_fraction(1.0);
+                    progress_bar_clone.set_text(Some("100%"));
+
+                    speed_label_clone.set_text("-");
+                    speed_label_clone.remove_css_class("success");
+
+                    time_remaining_label_clone.set_text("Completed");
+                    time_remaining_label_clone.add_css_class("success");
+
                     pause_button_clone.set_sensitive(false);
                     cancel_button_clone.set_label("Close");
+                    cancel_button_clone.add_css_class("suggested-action");
+
                     return glib::ControlFlow::Break;
                 }
                 DownloadMessage::Error(e) => {
@@ -379,4 +402,3 @@ fn show_error_dialog(parent: &Window, title: &str, message: &str) {
     dialog.set_default_response(Some("ok"));
     dialog.present(Some(parent));
 }
-

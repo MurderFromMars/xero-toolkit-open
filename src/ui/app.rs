@@ -134,7 +134,11 @@ fn setup_autostart_toggle(builder: &Builder) {
             };
 
             if let Err(e) = result {
-                warn!("Failed to {} autostart: {}", if state { "enable" } else { "disable" }, e);
+                warn!(
+                    "Failed to {} autostart: {}",
+                    if state { "enable" } else { "disable" },
+                    e
+                );
             }
 
             // Return Propagation::Proceed to allow the switch to update its state
@@ -142,4 +146,3 @@ fn setup_autostart_toggle(builder: &Builder) {
         });
     }
 }
-

@@ -12,7 +12,7 @@ use crate::ui::dialogs::download::show_download_dialog;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
-use crate::ui::task_runner::{self, Command};
+use crate::ui::task_runner::{self, Command, CommandSequence};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder, Button};
 use log::info;
@@ -38,11 +38,16 @@ fn setup_update_system(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::privileged(
-            "/usr/local/bin/upd",
-            &[],
-            "Updating system packages...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("/usr/local/bin/upd")
+                    .args(&[])
+                    .description("Updating system packages...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "System Update");
     });
@@ -110,59 +115,81 @@ fn setup_pkg_manager(builder: &Builder) {
             let commands = build_pkg_manager_commands(&selected);
 
             if !commands.is_empty() {
-                task_runner::run(window_clone.upcast_ref(), commands, "Package Manager GUI Installation");
-             }
-         });
-     });
+                task_runner::run(
+                    window_clone.upcast_ref(),
+                    commands.build(),
+                    "Package Manager GUI Installation",
+                );
+            }
+        });
+    });
 }
 
 /// Build commands for selected package managers.
-fn build_pkg_manager_commands(selected: &[String]) -> Vec<Command> {
-    let mut commands = Vec::new();
+fn build_pkg_manager_commands(selected: &[String]) -> CommandSequence {
+    let mut commands = CommandSequence::new();
 
     if selected.contains(&"octopi".to_string()) {
-        commands.push(Command::aur(
-            &["-S", "--noconfirm", "--needed", "octopi"],
-            "Installing Octopi package manager...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .aur()
+                .args(&["-S", "--noconfirm", "--needed", "octopi"])
+                .description("Installing Octopi package manager...")
+                .build(),
+        );
     }
 
     if selected.contains(&"pacseek".to_string()) {
-        commands.push(Command::aur(
-            &["-S", "--noconfirm", "--needed", "pacseek", "pacfinder"],
-            "Installing PacSeek package browser...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .aur()
+                .args(&["-S", "--noconfirm", "--needed", "pacseek", "pacfinder"])
+                .description("Installing PacSeek package browser...")
+                .build(),
+        );
     }
 
     if selected.contains(&"bauh".to_string()) {
-        commands.push(Command::aur(
-            &["-S", "--noconfirm", "--needed", "bauh"],
-            "Installing Bauh package manager...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .aur()
+                .args(&["-S", "--noconfirm", "--needed", "bauh"])
+                .description("Installing Bauh package manager...")
+                .build(),
+        );
     }
 
     if selected.contains(&"warehouse".to_string()) {
-        commands.push(Command::normal(
-            "flatpak",
-            &["install", "-y", "io.github.flattool.Warehouse"],
-            "Installing Warehouse from Flathub...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .normal()
+                .program("flatpak")
+                .args(&["install", "-y", "io.github.flattool.Warehouse"])
+                .description("Installing Warehouse from Flathub...")
+                .build(),
+        );
     }
 
     if selected.contains(&"flatseal".to_string()) {
-        commands.push(Command::normal(
-            "flatpak",
-            &["install", "-y", "com.github.tchx84.Flatseal"],
-            "Installing Flatseal from Flathub...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .normal()
+                .program("flatpak")
+                .args(&["install", "-y", "com.github.tchx84.Flatseal"])
+                .description("Installing Flatseal from Flathub...")
+                .build(),
+        );
     }
 
     if selected.contains(&"bazaar".to_string()) {
-        commands.push(Command::normal(
-            "flatpak",
-            &["install", "-y", "io.github.kolunmi.Bazaar"],
-            "Installing Bazaar from Flathub...",
-        ));
+        commands = commands.then(
+            Command::builder()
+                .normal()
+                .program("flatpak")
+                .args(&["install", "-y", "io.github.kolunmi.Bazaar"])
+                .description("Installing Bazaar from Flathub...")
+                .build(),
+        );
     }
 
     commands

@@ -52,4 +52,3 @@ pub fn disable() -> Result<(), std::io::Error> {
     }
     Ok(())
 }
-

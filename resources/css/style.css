@@ -45,3 +45,26 @@
     background: @accent_bg_color;
 }
 
+/* ============================================
+   Task Runner Completion Status
+   ============================================ */
+
+#task_title.success {
+    color: @success_bg_color;
+    font-weight: 600;
+}
+
+#task_title.error {
+    color: @error_bg_color;
+    font-weight: 600;
+}
+
+/* ============================================
+   Download Dialog Completion Status
+   ============================================ */
+
+.success {
+    color: @success_bg_color;
+    font-weight: 600;
+}
+

@@ -4,7 +4,7 @@
 //! - Tailscale VPN
 //! - ASUS ROG laptop tools
 
-use crate::ui::task_runner::{self, Command};
+use crate::ui::task_runner::{self, Command, CommandSequence};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder, Button};
 use log::info;
@@ -27,14 +27,17 @@ fn setup_tailscale(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::privileged(
-            "bash",
-            &[
-                "-c",
-                "curl -fsSL https://raw.githubusercontent.com/xerolinux/xero-fixes/main/conf/install.sh | bash",
-            ],
-            "Installing Tailscale VPN...",
-        )];
+        let commands = CommandSequence::new()
+            .then(Command::builder()
+                .privileged()
+                .program("bash")
+                .args(&[
+                    "-c",
+                    "curl -fsSL https://raw.githubusercontent.com/xerolinux/xero-fixes/main/conf/install.sh | bash",
+                ])
+                .description("Installing Tailscale VPN...")
+                .build())
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "Install Tailscale VPN");
     });
@@ -52,24 +55,30 @@ fn setup_asus_rog(builder: &Builder) {
             return;
         };
 
-        let commands = vec![
-            Command::aur(
-                &[
-                    "-S",
-                    "--noconfirm",
-                    "--needed",
-                    "rog-control-center",
-                    "asusctl",
-                    "supergfxctl",
-                ],
-                "Installing ASUS ROG control tools...",
-            ),
-            Command::privileged(
-                "systemctl",
-                &["enable", "--now", "asusd", "supergfxd"],
-                "Enabling ASUS ROG services...",
-            ),
-        ];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&[
+                        "-S",
+                        "--noconfirm",
+                        "--needed",
+                        "rog-control-center",
+                        "asusctl",
+                        "supergfxctl",
+                    ])
+                    .description("Installing ASUS ROG control tools...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("systemctl")
+                    .args(&["enable", "--now", "asusd", "supergfxd"])
+                    .description("Enabling ASUS ROG services...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "Install ASUS ROG Tools");
     });

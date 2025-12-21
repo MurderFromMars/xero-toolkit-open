@@ -6,7 +6,7 @@
 //! - LACT GPU overclocking
 //! - Game launchers (Lutris, Heroic, Bottles)
 
-use crate::ui::task_runner::{self, Command};
+use crate::ui::task_runner::{self, Command, CommandSequence};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder, Button};
 use log::info;
@@ -33,78 +33,83 @@ fn setup_steam_aio(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::aur(
-            &[
-                "-S",
-                "--noconfirm",
-                "--needed",
-                "steam",
-                "lib32-pipewire-jack",
-                "gamemode",
-                "gamescope",
-                "mangohud",
-                "mangoverlay",
-                "lib32-mangohud",
-                "wine-meta",
-                "wine-nine",
-                "ttf-liberation",
-                "lib32-fontconfig",
-                "wqy-zenhei",
-                "vkd3d",
-                "giflib",
-                "lib32-giflib",
-                "libpng",
-                "lib32-libpng",
-                "libldap",
-                "lib32-libldap",
-                "gnutls",
-                "lib32-gnutls",
-                "mpg123",
-                "lib32-mpg123",
-                "openal",
-                "lib32-openal",
-                "v4l-utils",
-                "lib32-v4l-utils",
-                "libpulse",
-                "lib32-libpulse",
-                "libgpg-error",
-                "lib32-libgpg-error",
-                "alsa-plugins",
-                "lib32-alsa-plugins",
-                "alsa-lib",
-                "lib32-alsa-lib",
-                "libjpeg-turbo",
-                "lib32-libjpeg-turbo",
-                "sqlite",
-                "lib32-sqlite",
-                "libxcomposite",
-                "lib32-libxcomposite",
-                "libxinerama",
-                "lib32-libgcrypt",
-                "libgcrypt",
-                "lib32-libxinerama",
-                "ncurses",
-                "lib32-ncurses",
-                "ocl-icd",
-                "lib32-ocl-icd",
-                "libxslt",
-                "lib32-libxslt",
-                "libva",
-                "lib32-libva",
-                "gtk3",
-                "lib32-gtk3",
-                "gst-plugins-base-libs",
-                "lib32-gst-plugins-base-libs",
-                "vulkan-icd-loader",
-                "lib32-vulkan-icd-loader",
-                "cups",
-                "dosbox",
-                "lib32-opencl-icd-loader",
-                "lib32-vkd3d",
-                "opencl-icd-loader",
-            ],
-            "Installing Steam and gaming dependencies...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&[
+                        "-S",
+                        "--noconfirm",
+                        "--needed",
+                        "steam",
+                        "lib32-pipewire-jack",
+                        "gamemode",
+                        "gamescope",
+                        "mangohud",
+                        "mangoverlay",
+                        "lib32-mangohud",
+                        "wine-meta",
+                        "wine-nine",
+                        "ttf-liberation",
+                        "lib32-fontconfig",
+                        "wqy-zenhei",
+                        "vkd3d",
+                        "giflib",
+                        "lib32-giflib",
+                        "libpng",
+                        "lib32-libpng",
+                        "libldap",
+                        "lib32-libldap",
+                        "gnutls",
+                        "lib32-gnutls",
+                        "mpg123",
+                        "lib32-mpg123",
+                        "openal",
+                        "lib32-openal",
+                        "v4l-utils",
+                        "lib32-v4l-utils",
+                        "libpulse",
+                        "lib32-libpulse",
+                        "libgpg-error",
+                        "lib32-libgpg-error",
+                        "alsa-plugins",
+                        "lib32-alsa-plugins",
+                        "alsa-lib",
+                        "lib32-alsa-lib",
+                        "libjpeg-turbo",
+                        "lib32-libjpeg-turbo",
+                        "sqlite",
+                        "lib32-sqlite",
+                        "libxcomposite",
+                        "lib32-libxcomposite",
+                        "libxinerama",
+                        "lib32-libgcrypt",
+                        "libgcrypt",
+                        "lib32-libxinerama",
+                        "ncurses",
+                        "lib32-ncurses",
+                        "ocl-icd",
+                        "lib32-ocl-icd",
+                        "libxslt",
+                        "lib32-libxslt",
+                        "libva",
+                        "lib32-libva",
+                        "gtk3",
+                        "lib32-gtk3",
+                        "gst-plugins-base-libs",
+                        "lib32-gst-plugins-base-libs",
+                        "vulkan-icd-loader",
+                        "lib32-vulkan-icd-loader",
+                        "cups",
+                        "dosbox",
+                        "lib32-opencl-icd-loader",
+                        "lib32-vkd3d",
+                        "opencl-icd-loader",
+                    ])
+                    .description("Installing Steam and gaming dependencies...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "Steam AiO Installation");
     });
@@ -135,17 +140,23 @@ fn setup_lact_oc(builder: &Builder) {
             return;
         };
 
-        let commands = vec![
-            Command::aur(
-                &["-S", "--noconfirm", "--needed", "lact"],
-                "Installing LACT GPU control utility...",
-            ),
-            Command::privileged(
-                "systemctl",
-                &["enable", "--now", "lactd"],
-                "Enabling LACT background service...",
-            ),
-        ];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&["-S", "--noconfirm", "--needed", "lact"])
+                    .description("Installing LACT GPU control utility...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("systemctl")
+                    .args(&["enable", "--now", "lactd"])
+                    .description("Enabling LACT background service...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "LACT GPU Tools");
     });
@@ -163,17 +174,22 @@ fn setup_lutris(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::normal(
-            "flatpak",
-            &[
-                "install",
-                "-y",
-                "net.lutris.Lutris",
-                "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
-                "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
-            ],
-            "Installing Lutris and Vulkan layers...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("flatpak")
+                    .args(&[
+                        "install",
+                        "-y",
+                        "net.lutris.Lutris",
+                        "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
+                        "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
+                    ])
+                    .description("Installing Lutris and Vulkan layers...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "Lutris Installation");
     });
@@ -191,19 +207,28 @@ fn setup_heroic(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::normal(
-            "flatpak",
-            &[
-                "install",
-                "-y",
-                "com.heroicgameslauncher.hgl",
-                "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
-                "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
-            ],
-            "Installing Heroic Games Launcher...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("flatpak")
+                    .args(&[
+                        "install",
+                        "-y",
+                        "com.heroicgameslauncher.hgl",
+                        "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
+                        "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
+                    ])
+                    .description("Installing Heroic Games Launcher...")
+                    .build(),
+            )
+            .build();
 
-        task_runner::run(window.upcast_ref(), commands, "Heroic Launcher Installation");
+        task_runner::run(
+            window.upcast_ref(),
+            commands,
+            "Heroic Launcher Installation",
+        );
     });
 }
 
@@ -219,17 +244,22 @@ fn setup_bottles(builder: &Builder) {
             return;
         };
 
-        let commands = vec![Command::normal(
-            "flatpak",
-            &[
-                "install",
-                "-y",
-                "com.usebottles.bottles",
-                "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
-                "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
-            ],
-            "Installing Bottles and Vulkan layers...",
-        )];
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("flatpak")
+                    .args(&[
+                        "install",
+                        "-y",
+                        "com.usebottles.bottles",
+                        "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
+                        "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
+                    ])
+                    .description("Installing Bottles and Vulkan layers...")
+                    .build(),
+            )
+            .build();
 
         task_runner::run(window.upcast_ref(), commands, "Bottles Installation");
     });

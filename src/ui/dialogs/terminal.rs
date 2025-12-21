@@ -1,14 +1,14 @@
 //! Interactive terminal dialog for running shell commands.
 
+use gtk4::gdk::RGBA;
 use gtk4::prelude::*;
+use gtk4::{Button, Window};
+use log::{error, info};
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::str::FromStr;
 use vte4::prelude::*;
 use vte4::Terminal;
-use gtk4::{Button, Window};
-use gtk4::gdk::RGBA;
-use std::str::FromStr;
-use std::rc::Rc;
-use std::cell::RefCell;
-use log::{info, error};
 
 fn update_terminal_style(terminal: &Terminal) {
     let style_manager = adw::StyleManager::default();
@@ -28,8 +28,10 @@ fn update_terminal_style(terminal: &Terminal) {
 
     // Gnome Console / Adwaita Palette
     let palette_strs = [
-        "#241f31", "#c01c28", "#2ec27e", "#f5c211", "#1e78e4", "#9841bb", "#00c0a0", "#9a9996", // Normal
-        "#5e5c64", "#ed333b", "#57e389", "#f8e45c", "#3584e4", "#9141ac", "#26a269", "#ffffff"  // Bright
+        "#241f31", "#c01c28", "#2ec27e", "#f5c211", "#1e78e4", "#9841bb", "#00c0a0",
+        "#9a9996", // Normal
+        "#5e5c64", "#ed333b", "#57e389", "#f8e45c", "#3584e4", "#9141ac", "#26a269",
+        "#ffffff", // Bright
     ];
 
     let palette: Vec<RGBA> = palette_strs
@@ -44,23 +46,20 @@ fn update_terminal_style(terminal: &Terminal) {
 /// Shows an interactive terminal window for the given command.
 pub fn show_terminal_dialog(parent: &Window, title: &str, command: &str, args: &[&str]) {
     // Load the UI
-    let builder = gtk4::Builder::from_resource(
-        "/xyz/xerolinux/xero-toolkit/ui/dialogs/terminal_dialog.ui",
-    );
+    let builder =
+        gtk4::Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/terminal_dialog.ui");
 
     let window: adw::Window = builder
         .object("terminal_window")
         .expect("Failed to get terminal_window");
-    let terminal: Terminal = builder
-        .object("terminal")
-        .expect("Failed to get terminal");
+    let terminal: Terminal = builder.object("terminal").expect("Failed to get terminal");
     let close_button: Button = builder
         .object("close_button")
         .expect("Failed to get close_button");
 
     window.set_transient_for(Some(parent));
     window.set_title(Some(title));
-    
+
     // Set a nice monospace font
     let font_desc = gtk4::pango::FontDescription::from_string("Monospace 11");
     terminal.set_font(Some(&font_desc));
@@ -112,7 +111,7 @@ pub fn show_terminal_dialog(parent: &Window, title: &str, command: &str, args: &
             if let Err(e) = result {
                 error!("Failed to spawn terminal command: {}", e);
             }
-        }
+        },
     );
 
     // Enable close button when child exits

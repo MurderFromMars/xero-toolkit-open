@@ -1,4 +1,7 @@
 //! UI widgets for task runner dialog.
+//!
+//! This module provides the UI components for displaying command execution progress,
+//! including task items, status icons, and scroll management.
 
 use super::command::TaskStatus;
 use gtk4::prelude::*;
@@ -92,32 +95,39 @@ impl TaskItem {
 
 impl TaskRunnerWidgets {
     /// Scroll to a specific task in the list (only if outside visible area).
+    ///
+    /// This ensures the task at the given index is visible in the scrolled window
+    /// by scrolling if necessary, but avoids scrolling if the task is already visible.
     fn scroll_to_task(&self, index: usize) {
         if self.task_items.get(index).is_none() {
             return;
         }
 
         let vadjustment = self.scrolled_window.vadjustment();
-        let current_scroll = vadjustment.value();
-        let page_size = vadjustment.page_size();
-        let upper = vadjustment.upper();
+        let viewport_top = vadjustment.value();
+        let viewport_bottom = viewport_top + vadjustment.page_size();
 
+        // Estimate task position (assuming roughly equal height per task)
         let total_tasks = self.task_items.len() as f64;
-        let content_height = upper;
-        let task_height = content_height / total_tasks;
+        if total_tasks == 0.0 {
+            return;
+        }
 
-        let task_top = (index as f64) * task_height;
-        let task_bottom = task_top + task_height;
+        let content_height = vadjustment.upper();
+        let estimated_task_height = content_height / total_tasks;
+        let task_top = (index as f64) * estimated_task_height;
+        let task_bottom = task_top + estimated_task_height;
 
-        let viewport_top = current_scroll;
-        let viewport_bottom = current_scroll + page_size;
-
+        // Only scroll if task is outside visible viewport
         if task_bottom > viewport_bottom {
-            let target_value = (task_bottom - page_size).max(0.0).min(upper - page_size);
-            vadjustment.set_value(target_value);
+            // Task is below viewport - scroll down to show it
+            let target = (task_bottom - vadjustment.page_size())
+                .max(0.0)
+                .min(vadjustment.upper() - vadjustment.page_size());
+            vadjustment.set_value(target);
         } else if task_top < viewport_top {
-            let target_value = task_top.max(0.0);
-            vadjustment.set_value(target_value);
+            // Task is above viewport - scroll up to show it
+            vadjustment.set_value(task_top.max(0.0));
         }
     }
 
@@ -146,10 +156,28 @@ impl TaskRunnerWidgets {
         self.close_button.set_sensitive(true);
     }
 
-    /// Show completion state.
-    #[allow(unused_variables)]
+    /// Show completion state with a final message.
+    ///
+    /// Updates the dialog title with the completion message and enables
+    /// the close button while hiding the cancel button.
+    /// Applies visual styling based on success or failure.
     pub fn show_completion(&self, success: bool, message: &str) {
         self.set_title(message);
+
+        // Add CSS classes to provide visual feedback
+        if success {
+            // Success styling: make close button prominent
+            self.close_button.add_css_class("suggested-action");
+            // Remove any error styling from title if present
+            self.title_label.remove_css_class("error");
+            self.title_label.add_css_class("success");
+        } else {
+            // Failure styling: remove success styling, add error styling
+            self.close_button.remove_css_class("suggested-action");
+            self.title_label.remove_css_class("success");
+            self.title_label.add_css_class("error");
+        }
+
         self.enable_close();
     }
 }

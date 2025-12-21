@@ -29,7 +29,7 @@ pub async fn fetch_arch_iso_info() -> Result<(String, String)> {
         .context("Failed to build HTTP client")?;
 
     // Use LeaseWeb mirror (same as bash script)
-    let base_url = "https://mirror.fra10.de.leaseweb.net/archlinux/iso/latest/";
+    let base_url = "https://ftp.energotel.sk/pub/linux/arch/iso/latest/";
     let html = client
         .get(base_url)
         .send()
@@ -207,8 +207,9 @@ pub fn format_speed(bytes_per_sec: f64) -> String {
 
 /// Format time remaining
 pub fn format_time_remaining(seconds: u64) -> String {
+    // Don't show "Calculating..." - show "Less than 1s" for very short times
     if seconds == 0 {
-        return "Calculating...".to_string();
+        return "Less than 1s".to_string();
     }
 
     let hours = seconds / 3600;

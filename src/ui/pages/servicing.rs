@@ -16,7 +16,7 @@ use crate::ui::dialogs::error::show_error;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
-use crate::ui::task_runner::{self, Command};
+use crate::ui::task_runner::{self, Command, CommandSequence};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder};
 use log::info;
@@ -38,11 +38,16 @@ fn setup_clr_pacman(page_builder: &Builder) {
     if let Some(btn_clr_pacman) = page_builder.object::<gtk4::Button>("btn_clr_pacman") {
         btn_clr_pacman.connect_clicked(move |button| {
             info!("Servicing: Clear Pacman Cache button clicked");
-            let commands = vec![Command::privileged(
-                "sh",
-                &["-c", "yes | pacman -Scc"],
-                "Clearing Pacman cache (full clean)...",
-            )];
+            let commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&["-c", "yes | pacman -Scc"])
+                        .description("Clearing Pacman cache (full clean)...")
+                        .build(),
+                )
+                .build();
             let widget = button.clone().upcast::<gtk4::Widget>();
             if let Some(window) = widget
                 .root()
@@ -59,11 +64,16 @@ fn setup_unlock_pacman(page_builder: &Builder) {
     if let Some(btn_unlock_pacman) = page_builder.object::<gtk4::Button>("btn_unlock_pacman") {
         btn_unlock_pacman.connect_clicked(move |button| {
             info!("Servicing: Unlock Pacman DB button clicked");
-            let commands = vec![Command::privileged(
-                "rm",
-                &["-f", "/var/lib/pacman/db.lck"],
-                "Removing Pacman lock file...",
-            )];
+            let commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("rm")
+                        .args(&["-f", "/var/lib/pacman/db.lck"])
+                        .description("Removing Pacman lock file...")
+                        .build(),
+                )
+                .build();
             let widget = button.clone().upcast::<gtk4::Widget>();
             if let Some(window) = widget
                 .root()
@@ -80,10 +90,15 @@ fn setup_plasma_x11(page_builder: &Builder) {
     if let Some(btn_plasma_x11) = page_builder.object::<gtk4::Button>("btn_plasma_x11") {
         btn_plasma_x11.connect_clicked(move |button| {
             info!("Servicing: Plasma X11 Session button clicked");
-            let commands = vec![Command::aur(
-                &["-S", "--noconfirm", "kwin-x11", "plasma-x11-session"],
-                "Installing KDE Plasma X11 session components...",
-            )];
+            let commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .aur()
+                        .args(&["-S", "--noconfirm", "kwin-x11", "plasma-x11-session"])
+                        .description("Installing KDE Plasma X11 session components...")
+                        .build(),
+                )
+                .build();
             let widget = button.clone().upcast::<gtk4::Widget>();
             if let Some(window) = widget
                 .root()
@@ -101,25 +116,40 @@ fn setup_vm_guest_utils(page_builder: &Builder) {
         btn_vm_guest_utils.connect_clicked(move |button| {
             info!("Servicing: VM Guest Utils button clicked");
             let output = std::process::Command::new("systemd-detect-virt").output();
-            let mut commands: Vec<Command> = vec![];
+            let mut commands = CommandSequence::new();
             match output {
                 Ok(result) if result.status.success() => {
                     let virt = String::from_utf8_lossy(&result.stdout).trim().to_string();
                     match virt.as_str() {
-                        "oracle" => commands.push(Command::aur(
-                            &["-S", "--needed", "--noconfirm", "virtualbox-guest-utils"],
-                            "Installing VirtualBox guest utilities...",
-                        )),
-                        "kvm" => commands.push(Command::aur(
-                            &[
-                                "-S",
-                                "--needed",
-                                "--noconfirm",
-                                "qemu-guest-agent",
-                                "spice-vdagent",
-                            ],
-                            "Installing KVM/QEMU guest agents...",
-                        )),
+                        "oracle" => {
+                            commands = commands.then(
+                                Command::builder()
+                                    .aur()
+                                    .args(&[
+                                        "-S",
+                                        "--needed",
+                                        "--noconfirm",
+                                        "virtualbox-guest-utils",
+                                    ])
+                                    .description("Installing VirtualBox guest utilities...")
+                                    .build(),
+                            )
+                        }
+                        "kvm" => {
+                            commands = commands.then(
+                                Command::builder()
+                                    .aur()
+                                    .args(&[
+                                        "-S",
+                                        "--needed",
+                                        "--noconfirm",
+                                        "qemu-guest-agent",
+                                        "spice-vdagent",
+                                    ])
+                                    .description("Installing KVM/QEMU guest agents...")
+                                    .build(),
+                            )
+                        }
                         _ => {
                             let widget = button.clone().upcast::<gtk4::Widget>();
                             if let Some(window) = widget
@@ -151,7 +181,7 @@ fn setup_vm_guest_utils(page_builder: &Builder) {
                     .and_then(|r| r.downcast::<ApplicationWindow>().ok())
                 {
                     let window_ref = window.upcast_ref::<gtk4::Window>();
-                    task_runner::run(window_ref, commands, "Install VM Guest Utilities");
+                    task_runner::run(window_ref, commands.build(), "Install VM Guest Utilities");
                 }
             }
         });
@@ -173,14 +203,24 @@ fn setup_fix_gpgme(page_builder: &Builder) {
     if let Some(btn_fix_gpgme) = page_builder.object::<gtk4::Button>("btn_fix_gpgme") {
         btn_fix_gpgme.connect_clicked(move |button| {
             info!("Servicing: Fix GPGME Database button clicked");
-            let commands = vec![
-                Command::privileged(
-                    "rm",
-                    &["-rf", "/var/lib/pacman/sync"],
-                    "Removing sync database...",
-                ),
-                Command::privileged("pacman", &["-Syy"], "Refreshing package databases..."),
-            ];
+            let commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("rm")
+                        .args(&["-rf", "/var/lib/pacman/sync"])
+                        .description("Removing sync database...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("pacman")
+                        .args(&["-Syy"])
+                        .description("Refreshing package databases...")
+                        .build(),
+                )
+                .build();
             let widget = button.clone().upcast::<gtk4::Widget>();
             if let Some(window) = widget
                 .root()
@@ -197,33 +237,39 @@ fn setup_fix_arch_keyring(page_builder: &Builder) {
     if let Some(btn_fix_arch_keyring) = page_builder.object::<gtk4::Button>("btn_fix_arch_keyring")
     {
         btn_fix_arch_keyring.connect_clicked(move |button| {
-            info!("Servicing: Fix Arch Keyring button clicked");            let commands = vec![
-                Command::privileged(
-                    "rm",
-                    &["-rf", "/etc/pacman.d/gnupg"],
-                    "Removing existing GnuPG keyring...",
-                ),
-                Command::privileged(
-                    "pacman-key",
-                    &["--init"],
-                    "Initializing new keyring...",
-                ),
-                Command::privileged(
-                    "pacman-key",
-                    &["--populate"],
-                    "Populating keyring...",
-                ),
-                Command::privileged(
-                    "sh",
-                    &["-c", "echo 'keyserver hkp://keyserver.ubuntu.com:80' >> /etc/pacman.d/gnupg/gpg.conf"],
-                    "Setting keyserver...",
-                ),
-                Command::privileged(
-                    "pacman",
-                    &["-Syy", "--noconfirm", "archlinux-keyring"],
-                    "Reinstalling Arch Linux keyring...",
-                ),
-            ];
+            info!("Servicing: Fix Arch Keyring button clicked");
+            let commands = CommandSequence::new()
+                .then(Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-rf", "/etc/pacman.d/gnupg"])
+                    .description("Removing existing GnuPG keyring...")
+                    .build())
+                .then(Command::builder()
+                    .privileged()
+                    .program("pacman-key")
+                    .args(&["--init"])
+                    .description("Initializing new keyring...")
+                    .build())
+                .then(Command::builder()
+                    .privileged()
+                    .program("pacman-key")
+                    .args(&["--populate"])
+                    .description("Populating keyring...")
+                    .build())
+                .then(Command::builder()
+                    .privileged()
+                    .program("sh")
+                    .args(&["-c", "echo 'keyserver hkp://keyserver.ubuntu.com:80' >> /etc/pacman.d/gnupg/gpg.conf"])
+                    .description("Setting keyserver...")
+                    .build())
+                .then(Command::builder()
+                    .privileged()
+                    .program("pacman")
+                    .args(&["-Syy", "--noconfirm", "archlinux-keyring"])
+                    .description("Reinstalling Arch Linux keyring...")
+                    .build())
+                .build();
             let widget = button.clone().upcast::<gtk4::Widget>();
             if let Some(window) = widget
                 .root()
@@ -261,38 +307,42 @@ fn setup_update_mirrorlist(page_builder: &Builder) {
                 .confirm_label("Update");
 
                 show_selection_dialog(window_ref, config, move |selected_ids| {
-                    let mut commands: Vec<Command> = vec![];
+                    let mut commands = CommandSequence::new();
 
                     if !rate_mirrors_installed {
-                        commands.push(Command::aur(
-                             &["-S", "--needed", "--noconfirm", "rate-mirrors"],
-                             "Installing rate-mirrors utility...",
-                         ));
+                        commands = commands.then(Command::builder()
+                             .aur()
+                             .args(&["-S", "--needed", "--noconfirm", "rate-mirrors"])
+                             .description("Installing rate-mirrors utility...")
+                             .build());
                     }
 
-                    commands.push(Command::privileged(
-                        "sh",
-                        &["-c", "rate-mirrors --allow-root --protocol https arch | tee /etc/pacman.d/mirrorlist"],
-                        "Updating Arch mirrorlist...",
-                    ));
+                    commands = commands.then(Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&["-c", "rate-mirrors --allow-root --protocol https arch | tee /etc/pacman.d/mirrorlist"])
+                        .description("Updating Arch mirrorlist...")
+                        .build());
 
                     if selected_ids.contains(&"chaotic".to_string()) {
-                        commands.push(Command::privileged(
-                            "sh",
-                            &["-c", "rate-mirrors --allow-root --protocol https chaotic-aur | tee /etc/pacman.d/chaotic-mirrorlist"],
-                            "Updating Chaotic-AUR mirrorlist...",
-                        ));
+                        commands = commands.then(Command::builder()
+                            .privileged()
+                            .program("sh")
+                            .args(&["-c", "rate-mirrors --allow-root --protocol https chaotic-aur | tee /etc/pacman.d/chaotic-mirrorlist"])
+                            .description("Updating Chaotic-AUR mirrorlist...")
+                            .build());
                     }
 
-                    commands.push(Command::privileged(
-                        "pacman",
-                        &["-Syy"],
-                        "Refreshing package databases...",
-                    ));
+                    commands = commands.then(Command::builder()
+                        .privileged()
+                        .program("pacman")
+                        .args(&["-Syy"])
+                        .description("Refreshing package databases...")
+                        .build());
 
                     if !commands.is_empty() {
                         let window_ref2 = window_clone.upcast_ref::<gtk4::Window>();
-                        task_runner::run(window_ref2, commands, "Update System Mirrorlist");
+                        task_runner::run(window_ref2, commands.build(), "Update System Mirrorlist");
                     }
                 });
             }
@@ -306,11 +356,16 @@ fn setup_parallel_downloads(page_builder: &Builder) {
     {
         btn_parallel_downloads.connect_clicked(move |button| {
             info!("Servicing: Change Parallel Downloads button clicked");
-            let commands = vec![Command::privileged(
-                "pmpd",
-                &[],
-                "Adjusting parallel downloads setting...",
-            )];
+            let commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("pmpd")
+                        .args(&[])
+                        .description("Adjusting parallel downloads setting...")
+                        .build(),
+                )
+                .build();
             let widget = button.clone().upcast::<gtk4::Widget>();
             if let Some(window) = widget
                 .root()
@@ -322,4 +377,3 @@ fn setup_parallel_downloads(page_builder: &Builder) {
         });
     }
 }
-

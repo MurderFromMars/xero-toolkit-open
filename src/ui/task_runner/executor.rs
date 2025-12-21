@@ -1,4 +1,10 @@
 //! Command execution logic and running context management.
+//!
+//! This module handles the actual execution of commands, including:
+//! - Process spawning and management
+//! - Output capture (stdout/stderr)
+//! - Error handling and result processing
+//! - Command resolution (privilege escalation, AUR helpers)
 
 use super::command::{Command, CommandResult, CommandType, TaskStatus};
 use super::widgets::TaskRunnerWidgets;
@@ -63,7 +69,7 @@ impl RunningContext {
             // Mark the current task as cancelled
             self.widgets
                 .update_task_status(self.index, TaskStatus::Cancelled);
-            finalize_execution(&self.widgets, false, "Operation cancelled by user");
+            finalize_execution(&self.widgets, false, super::CANCELLED_MESSAGE);
             return;
         }
 
@@ -83,15 +89,31 @@ impl RunningContext {
             CommandResult::Failure { .. } => {
                 self.widgets
                     .update_task_status(self.index, TaskStatus::Failed);
-                finalize_execution(
-                    &self.widgets,
-                    false,
-                    &format!(
+
+                let error_msg = result.error_message();
+                let final_message = if error_msg.is_empty() || error_msg == "No output captured" {
+                    format!(
                         "Operation failed at step {} of {}",
                         self.index + 1,
                         self.commands.len()
-                    ),
-                );
+                    )
+                } else {
+                    // Truncate very long error messages for display
+                    let max_length = 500;
+                    let truncated = if error_msg.len() > max_length {
+                        format!("{}...", &error_msg[..max_length])
+                    } else {
+                        error_msg.clone()
+                    };
+                    format!(
+                        "Operation failed at step {} of {}:\n{}",
+                        self.index + 1,
+                        self.commands.len(),
+                        truncated
+                    )
+                };
+
+                finalize_execution(&self.widgets, false, &final_message);
             }
         }
     }
@@ -110,12 +132,12 @@ pub fn execute_commands(
         if index < commands.len() {
             widgets.update_task_status(index, TaskStatus::Cancelled);
         }
-        finalize_execution(&widgets, false, "Operation cancelled by user");
+        finalize_execution(&widgets, false, super::CANCELLED_MESSAGE);
         return;
     }
 
     if index >= commands.len() {
-        finalize_execution(&widgets, true, "All operations completed successfully!");
+        finalize_execution(&widgets, true, super::SUCCESS_MESSAGE);
         return;
     }
 
@@ -148,7 +170,8 @@ pub fn execute_commands(
     }
     let argv_refs: Vec<&std::ffi::OsStr> = argv.iter().map(|s| s.as_os_str()).collect();
 
-    let flags = gio::SubprocessFlags::empty();
+    // Capture stdout and stderr for better error reporting
+    let flags = gio::SubprocessFlags::STDOUT_PIPE | gio::SubprocessFlags::STDERR_PIPE;
     let subprocess = match gio::Subprocess::newv(&argv_refs, flags) {
         Ok(proc) => proc,
         Err(err) => {
@@ -173,28 +196,50 @@ pub fn execute_commands(
         current_process.clone(),
     );
 
+    // Capture output and check exit status
+    // communicate_utf8_async waits for the process to complete, so we can check exit status after
     let wait_context = context.clone();
-    let wait_subprocess = subprocess.clone();
-    wait_subprocess
-        .clone()
-        .wait_async(None::<&gio::Cancellable>, move |result| match result {
-            Ok(_) => {
-                if wait_subprocess.is_successful() {
-                    wait_context.set_exit_result(CommandResult::Success);
-                } else {
-                    wait_context.set_exit_result(CommandResult::Failure {
-                        exit_code: Some(wait_subprocess.exit_status()),
-                    });
-                }
-            }
+    let wait_subprocess_clone = subprocess.clone();
+    subprocess.communicate_utf8_async(None, None::<&gio::Cancellable>, move |result| {
+        let (stdout, stderr) = match result {
+            Ok((stdout_opt, stderr_opt)) => (
+                stdout_opt.map(|s| s.to_string()),
+                stderr_opt.map(|s| s.to_string()),
+            ),
             Err(err) => {
-                error!("Failed to wait for command: {}", err);
-                wait_context.set_exit_result(CommandResult::Failure { exit_code: None });
+                error!("Failed to communicate with process: {}", err);
+                (None, None)
             }
-        });
+        };
+
+        // Check if process was successful using the cloned reference
+        // communicate_utf8_async waits for completion, so exit status is available
+        if wait_subprocess_clone.is_successful() {
+            wait_context.set_exit_result(CommandResult::Success);
+        } else {
+            let exit_code = wait_subprocess_clone.exit_status();
+            wait_context.set_exit_result(CommandResult::Failure {
+                exit_code: Some(exit_code),
+                stdout,
+                stderr,
+            });
+        }
+    });
 }
 
 /// Resolve command with proper privilege escalation and AUR helpers.
+///
+/// Converts a `Command` into the actual program and arguments that should be executed,
+/// handling privilege escalation (pkexec) and AUR helper detection.
+///
+/// # Returns
+///
+/// A tuple of `(program, args)` where `program` is the executable to run
+/// and `args` are the arguments to pass to it.
+///
+/// # Errors
+///
+/// Returns an error if the AUR helper is required but not available.
 fn resolve_command(command: &Command) -> Result<(String, Vec<String>), String> {
     match command.command_type {
         CommandType::Normal => Ok((command.program.clone(), command.args.clone())),
@@ -208,13 +253,8 @@ fn resolve_command(command: &Command) -> Result<(String, Vec<String>), String> {
             let helper = core::aur_helper()
                 .ok_or_else(|| "AUR helper not available (paru or yay required)".to_string())?;
             let mut args = Vec::with_capacity(command.args.len() + 2);
-            
-            if helper == "yay" {
-                args.push("--sudobin".to_string());
-            } else {
-                args.push("--sudo".to_string());
-            }
-            
+
+            args.push("--sudo".to_string());
             args.push("pkexec".to_string());
             args.extend(command.args.clone());
             Ok((helper.to_string(), args))
