@@ -37,10 +37,13 @@ pub enum CommandResult {
     /// Command failed with optional exit code and captured output
     Failure {
         /// Exit code of the command, if available
+        #[allow(dead_code)] // Part of data structure, may be accessed in future
         exit_code: Option<i32>,
         /// Captured stdout output, if available
+        #[allow(dead_code)] // Part of data structure, may be accessed in future
         stdout: Option<String>,
         /// Captured stderr output, if available
+        #[allow(dead_code)] // Part of data structure, may be accessed in future
         stderr: Option<String>,
     },
 }
@@ -111,6 +114,7 @@ impl CommandBuilder {
     /// Add command-line arguments.
     ///
     /// Can be called multiple times to add more arguments, or use `args()` to set all at once.
+    #[allow(dead_code)] // Part of public API, may be used in future
     pub fn arg(mut self, arg: &str) -> Self {
         self.args.push(arg.to_string());
         self
@@ -156,6 +160,7 @@ impl Command {
     /// Create a new command with an explicit command type.
     ///
     /// This is a low-level constructor. Prefer using the builder API or convenience methods.
+    #[allow(dead_code)] // Part of public API, may be used in future
     pub fn new(command_type: CommandType, program: &str, args: &[&str], description: &str) -> Self {
         Self {
             command_type,
@@ -255,16 +260,19 @@ impl CommandBuilderType {
 
 impl CommandResult {
     /// Check if the result indicates success.
+    #[allow(dead_code)] // Part of public API, may be used in future
     pub fn is_success(&self) -> bool {
         matches!(self, CommandResult::Success)
     }
 
     /// Check if the result indicates failure.
+    #[allow(dead_code)] // Part of public API, may be used in future
     pub fn is_failure(&self) -> bool {
         !self.is_success()
     }
 
     /// Get the exit code if this is a failure.
+    #[allow(dead_code)] // Part of public API, may be used in future
     pub fn exit_code(&self) -> Option<i32> {
         match self {
             CommandResult::Failure { exit_code, .. } => *exit_code,
@@ -276,6 +284,7 @@ impl CommandResult {
     ///
     /// Returns a string containing stderr (preferred) or stdout, if available.
     /// Falls back to a generic message if no output is captured.
+    #[allow(dead_code)] // Part of public API, may be used in future
     pub fn error_message(&self) -> String {
         match self {
             CommandResult::Failure {

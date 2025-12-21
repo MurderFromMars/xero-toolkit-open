@@ -103,14 +103,15 @@ pub fn extract_widget<T: IsA<glib::Object>>(builder: &Builder, name: &str) -> T 
 /// Set up UI components and return application context.
 fn setup_ui_components(builder: &Builder, stack: Stack) -> AppContext {
     let tabs_container = extract_widget(builder, "tabs_container");
-    let main_paned = extract_widget(builder, "main_paned");
+    let main_split_view = extract_widget(builder, "main_split_view");
+    let sidebar_toggle = extract_widget(builder, "sidebar_toggle_button");
 
     // Set up autostart toggle in sidebar
     setup_autostart_toggle(builder);
 
     info!("All UI components successfully initialized from UI builder");
 
-    let ui = UiComponents::new(stack, tabs_container, main_paned);
+    let ui = UiComponents::new(stack, tabs_container, main_split_view, sidebar_toggle);
 
     // Configure sidebar with size constraints from config
     ui.configure_sidebar(config::sidebar::MIN_WIDTH, config::sidebar::MAX_WIDTH);

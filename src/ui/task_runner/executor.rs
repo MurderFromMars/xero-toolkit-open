@@ -10,9 +10,9 @@ use super::command::{Command, CommandResult, CommandType, TaskStatus};
 use super::widgets::TaskRunnerWidgets;
 use crate::core;
 use gtk4::gio;
+use gtk4::glib;
 use log::{error, info};
 use std::cell::RefCell;
-use std::ffi::OsString;
 use std::rc::Rc;
 
 /// Context for a running command execution.
@@ -147,17 +147,31 @@ pub fn execute_commands(
 
     info!("Executing: {} {:?}", program, args);
 
-    let mut argv: Vec<OsString> = Vec::with_capacity(1 + args.len());
-    argv.push(OsString::from(program.clone()));
-    for arg in &args {
-        argv.push(OsString::from(arg));
-    }
-    let argv_refs: Vec<&std::ffi::OsStr> = argv.iter().map(|s| s.as_os_str()).collect();
+    // Use std::process for real-time output streaming
+    use std::io::{BufRead, BufReader};
+    use std::process::{Command, Stdio};
+    use std::sync::Arc;
+    use std::thread;
 
-    // Capture stdout and stderr for better error reporting
-    let flags = gio::SubprocessFlags::STDOUT_PIPE | gio::SubprocessFlags::STDERR_PIPE;
-    let subprocess = match gio::Subprocess::newv(&argv_refs, flags) {
-        Ok(proc) => proc,
+    // Create context for this command
+    let context = RunningContext::new(
+        widgets.clone(),
+        commands.clone(),
+        index,
+        cancelled.clone(),
+        current_process.clone(),
+    );
+
+    // Display command header
+    widgets.append_command_header(&cmd.description);
+
+    let mut process = Command::new(&program);
+    process.args(&args);
+    process.stdout(Stdio::piped());
+    process.stderr(Stdio::piped());
+
+    let child = match process.spawn() {
+        Ok(child) => child,
         Err(err) => {
             error!("Failed to start command: {}", err);
             widgets.update_task_status(index, TaskStatus::Failed);
@@ -170,66 +184,139 @@ pub fn execute_commands(
         }
     };
 
-    *current_process.borrow_mut() = Some(subprocess.clone());
+    // Store child process for cancellation
+    let child_arc = Arc::new(std::sync::Mutex::new(Some(child)));
+    *current_process.borrow_mut() = None; // Clear gio subprocess reference
 
-    let context = RunningContext::new(
-        widgets.clone(),
-        commands.clone(),
-        index,
-        cancelled.clone(),
-        current_process.clone(),
-    );
+    // Set up result storage
+    use std::sync::Mutex;
+    let result_arc: Arc<Mutex<Option<CommandResult>>> = Arc::new(Mutex::new(None));
 
-    // Capture output and check exit status
-    // communicate_utf8_async waits for the process to complete, so we can check exit status after
-    let wait_context = context.clone();
-    let wait_subprocess_clone = subprocess.clone();
-    let widgets_clone = widgets.clone();
-    let cmd_description = cmd.description.clone();
-    subprocess.communicate_utf8_async(None, None::<&gio::Cancellable>, move |result| {
-        let (stdout, stderr) = match result {
-            Ok((stdout_opt, stderr_opt)) => (
-                stdout_opt.map(|s| s.to_string()),
-                stderr_opt.map(|s| s.to_string()),
-            ),
-            Err(err) => {
-                error!("Failed to communicate with process: {}", err);
-                (None, None)
+    // Set up real-time output streaming using channels
+    use std::sync::mpsc;
+    let (stdout_tx, stdout_rx) = mpsc::channel();
+    let (stderr_tx, stderr_rx) = mpsc::channel();
+
+    // Spawn thread to read stdout
+    let stdout_handle = if let Some(stdout) = child_arc
+        .lock()
+        .unwrap()
+        .as_mut()
+        .and_then(|c| c.stdout.take())
+    {
+        Some(thread::spawn(move || {
+            let reader = BufReader::new(stdout);
+            for line in reader.lines() {
+                match line {
+                    Ok(text) => {
+                        let _ = stdout_tx.send(text);
+                    }
+                    Err(_) => {
+                        // End of stream or error
+                        break;
+                    }
+                }
             }
-        };
+        }))
+    } else {
+        None
+    };
 
-        // Format and display output in sidebar
-        let mut output_text = format!("=== {} ===\n", cmd_description);
-        if let Some(ref stdout_str) = stdout {
-            if !stdout_str.trim().is_empty() {
-                output_text.push_str("STDOUT:\n");
-                output_text.push_str(stdout_str);
-                output_text.push_str("\n\n");
+    // Spawn thread to read stderr
+    let stderr_handle = if let Some(stderr) = child_arc
+        .lock()
+        .unwrap()
+        .as_mut()
+        .and_then(|c| c.stderr.take())
+    {
+        Some(thread::spawn(move || {
+            let reader = BufReader::new(stderr);
+            for line in reader.lines() {
+                match line {
+                    Ok(text) => {
+                        let _ = stderr_tx.send(text);
+                    }
+                    Err(_) => {
+                        // End of stream or error
+                        break;
+                    }
+                }
             }
-        }
-        if let Some(ref stderr_str) = stderr {
-            if !stderr_str.trim().is_empty() {
-                output_text.push_str("STDERR:\n");
-                output_text.push_str(stderr_str);
-                output_text.push_str("\n\n");
-            }
-        }
-        if output_text.trim() == format!("=== {} ===", cmd_description) {
-            output_text.push_str("(No output captured)\n\n");
-        }
-        widgets_clone.append_output(&output_text);
+        }))
+    } else {
+        None
+    };
 
-        // Check if process was successful using the cloned reference
-        // communicate_utf8_async waits for completion, so exit status is available
-        if wait_subprocess_clone.is_successful() {
-            wait_context.set_exit_result(CommandResult::Success);
+    // Process output in main thread
+    let widgets_stdout = widgets.clone();
+    let widgets_stderr = widgets.clone();
+    let result_arc_for_output = result_arc.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+        // Process stdout
+        while let Ok(text) = stdout_rx.try_recv() {
+            widgets_stdout.append_timestamped(&format!("{}\n", text), "stdout");
+        }
+        // Process stderr
+        while let Ok(text) = stderr_rx.try_recv() {
+            widgets_stderr.append_timestamped(&format!("{}\n", text), "stderr");
+        }
+        // Stop if result is ready
+        if result_arc_for_output.lock().unwrap().is_some() {
+            glib::ControlFlow::Break
         } else {
-            let exit_code = wait_subprocess_clone.exit_status();
-            wait_context.set_exit_result(CommandResult::Failure {
-                exit_code: Some(exit_code),
-                stdout,
-                stderr,
-            });
+            glib::ControlFlow::Continue
+        }
+    });
+
+    // Wait for process to complete in a separate thread
+    let result_arc_clone = result_arc.clone();
+
+    thread::spawn(move || {
+        // Wait for output threads to finish
+        if let Some(handle) = stdout_handle {
+            let _ = handle.join();
+        }
+        if let Some(handle) = stderr_handle {
+            let _ = handle.join();
+        }
+
+        // Wait for process
+        let mut child_guard = child_arc.lock().unwrap();
+        if let Some(mut child) = child_guard.take() {
+            let result = match child.wait() {
+                Ok(status) => {
+                    if status.success() {
+                        CommandResult::Success
+                    } else {
+                        CommandResult::Failure {
+                            exit_code: status.code(),
+                            stdout: None, // Already streamed
+                            stderr: None, // Already streamed
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("Error waiting for process: {}", e);
+                    CommandResult::Failure {
+                        exit_code: None,
+                        stdout: None,
+                        stderr: None,
+                    }
+                }
+            };
+            *result_arc_clone.lock().unwrap() = Some(result);
+        }
+    });
+
+    // Check for result in main thread
+    let context_clone = context.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+        let mut result_guard = result_arc.lock().unwrap();
+        if let Some(result) = result_guard.take() {
+            context_clone.set_exit_result(result);
+            glib::ControlFlow::Break
+        } else {
+            glib::ControlFlow::Continue
         }
     });
 }

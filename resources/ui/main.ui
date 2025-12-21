@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <interface>
     <requires lib="gtk" version="4.0"/>
-    <requires lib="adw" version="1.0"/>
+    <requires lib="adw" version="1.4"/>
 
     <object class="AdwApplicationWindow" id="app_window">
         <property name="title">Xero Toolkit</property>
@@ -16,27 +16,31 @@
                         <style>
                             <class name="flat"/>
                         </style>
+
+                        <!-- Sidebar toggle button -->
+                        <child type="start">
+                            <object class="GtkToggleButton" id="sidebar_toggle_button">
+                                <property name="icon-name">open-menu-symbolic</property>
+                                <property name="tooltip-text">Toggle sidebar</property>
+                                <property name="active">true</property>
+                            </object>
+                        </child>
                     </object>
                 </child>
 
                 <property name="content">
-                    <!-- Main Paned Content (sidebar + right split) -->
-                    <object class="GtkPaned" id="main_paned">
-                        <property name="orientation">horizontal</property>
-                        <property name="hexpand">true</property>
-                        <property name="vexpand">true</property>
-                        <property name="position">280</property>
-                        <property name="resize-start-child">true</property>
-                        <property name="shrink-start-child">false</property>
-                        <property name="resize-end-child">true</property>
-                        <property name="shrink-end-child">true</property>
-                        <property name="wide-handle">true</property>
+                    <!-- Main Split View (sidebar + content) -->
+                    <object class="AdwOverlaySplitView" id="main_split_view">
+                        <property name="show-sidebar">true</property>
+                        <property name="sidebar-position">start</property>
+                        <property name="collapsed">false</property>
+                        <property name="max-sidebar-width">400</property>
+                        <property name="min-sidebar-width">200</property>
 
-                        <!-- Left Sidebar with Tabs -->
-                        <child>
+                        <!-- Sidebar Content -->
+                        <property name="sidebar">
                             <object class="GtkBox" id="sidebar">
                                 <property name="orientation">vertical</property>
-                                <property name="width-request">200</property>
                                 <property name="hexpand">false</property>
                                 <property name="vexpand">true</property>
                                 <property name="css-classes">sidebar</property>
@@ -111,10 +115,10 @@
                                     </object>
                                 </child>
                             </object>
-                        </child>
+                        </property>
 
-                        <!-- Right Content Area: page stack -->
-                        <child>
+                        <!-- Main Content Area: page stack -->
+                        <property name="content">
                             <object class="GtkScrolledWindow" id="page_scroll">
                                 <property name="hexpand">true</property>
                                 <property name="vexpand">true</property>
@@ -129,7 +133,7 @@
                                     </object>
                                 </child>
                             </object>
-                        </child>
+                        </property>
                     </object>
                 </property>
             </object>

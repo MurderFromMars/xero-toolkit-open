@@ -5,7 +5,9 @@
 
 use super::command::TaskStatus;
 use adw::prelude::*;
-use gtk4::{Box as GtkBox, Button, Image, Label, ScrolledWindow, TextBuffer, TextView, ToggleButton, Window};
+use gtk4::{
+    Box as GtkBox, Button, Image, Label, ScrolledWindow, TextBuffer, TextView, ToggleButton, Window,
+};
 
 /// Container for all task runner dialog widgets.
 pub struct TaskRunnerWidgets {
@@ -39,7 +41,7 @@ impl TaskRunnerWidgets {
         output_text_view: TextView,
         output_text_buffer: TextBuffer,
     ) -> Self {
-        Self {
+        let widgets = Self {
             window,
             title_label,
             task_list_container,
@@ -51,7 +53,46 @@ impl TaskRunnerWidgets {
             split_view,
             output_text_view,
             output_text_buffer,
-        }
+        };
+
+        // Set up color tags for output
+        widgets.setup_color_tags();
+
+        widgets
+    }
+
+    /// Set up color tags for styled output.
+    fn setup_color_tags(&self) {
+        use gtk4::TextTag;
+
+        let tag_table = self.output_text_buffer.tag_table();
+
+        // Header tag (blue)
+        let header_tag = TextTag::new(Some("header"));
+        header_tag.set_property("foreground", "rgb(100, 149, 237)");
+        header_tag.set_property("weight", 700); // Bold
+        tag_table.add(&header_tag);
+
+        // Timestamp tag (gray)
+        let timestamp_tag = TextTag::new(Some("timestamp"));
+        timestamp_tag.set_property("foreground", "rgb(128, 128, 128)");
+        tag_table.add(&timestamp_tag);
+
+        // Stdout tag (green)
+        let stdout_tag = TextTag::new(Some("stdout"));
+        stdout_tag.set_property("foreground", "rgb(46, 204, 113)");
+        tag_table.add(&stdout_tag);
+
+        // Stderr tag (orange/red)
+        let stderr_tag = TextTag::new(Some("stderr"));
+        stderr_tag.set_property("foreground", "rgb(255, 140, 0)");
+        tag_table.add(&stderr_tag);
+
+        // Error tag (red)
+        let error_tag = TextTag::new(Some("error"));
+        error_tag.set_property("foreground", "rgb(231, 76, 60)");
+        error_tag.set_property("weight", 700);
+        tag_table.add(&error_tag);
     }
 
     /// Bind the sidebar toggle button to the split view.
@@ -65,14 +106,15 @@ impl TaskRunnerWidgets {
 
         // Update tooltip based on state
         let toggle = self.sidebar_toggle.clone();
-        self.split_view.connect_show_sidebar_notify(move |split_view| {
-            let tooltip = if split_view.shows_sidebar() {
-                "Hide command output"
-            } else {
-                "Show command output"
-            };
-            toggle.set_tooltip_text(Some(tooltip));
-        });
+        self.split_view
+            .connect_show_sidebar_notify(move |split_view| {
+                let tooltip = if split_view.shows_sidebar() {
+                    "Hide command output"
+                } else {
+                    "Show command output"
+                };
+                toggle.set_tooltip_text(Some(tooltip));
+            });
     }
 }
 
@@ -223,24 +265,98 @@ impl TaskRunnerWidgets {
         self.enable_close();
     }
 
-    /// Update the output text view with command output.
-    pub fn set_output(&self, output: &str) {
-        self.output_text_buffer.set_text(output);
-        let mut end = self.output_text_buffer.end_iter();
-        let _ = self.output_text_view.scroll_to_iter(&mut end, 0.0, false, 0.0, 0.0);
+    /// Clear the output buffer.
+    #[allow(dead_code)] // Useful API method for future use
+    pub fn clear_output(&self) {
+        self.output_text_buffer.set_text("");
     }
 
-    /// Append text to the output text view.
-    pub fn append_output(&self, text: &str) {
+    /// Append text with a specific color tag.
+    pub fn append_colored(&self, text: &str, tag_name: &str) {
+        // Get start position before insertion
+        let start_offset = self.output_text_buffer.end_iter().offset();
+
+        // Insert text
         let mut end = self.output_text_buffer.end_iter();
         self.output_text_buffer.insert(&mut end, text);
-        let mut new_end = self.output_text_buffer.end_iter();
-        let _ = self.output_text_view.scroll_to_iter(&mut new_end, 0.0, false, 0.0, 0.0);
+
+        // Get fresh iterators after insertion
+        let start = self.output_text_buffer.iter_at_offset(start_offset);
+        let end_fresh = self.output_text_buffer.end_iter();
+
+        // Apply tag
+        if let Some(tag) = self.output_text_buffer.tag_table().lookup(tag_name) {
+            self.output_text_buffer.apply_tag(&tag, &start, &end_fresh);
+        }
+        self.scroll_to_bottom();
+    }
+
+    /// Append text with timestamp and color tag.
+    pub fn append_timestamped(&self, text: &str, tag_name: &str) {
+        use std::time::SystemTime;
+
+        let timestamp = SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| {
+                let secs = d.as_secs();
+                let hours = (secs / 3600) % 24;
+                let minutes = (secs / 60) % 60;
+                let seconds = secs % 60;
+                format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
+            })
+            .unwrap_or_else(|_| "??:??:??".to_string());
+
+        // Get start position (character offset) before insertion
+        let start_offset = self.output_text_buffer.end_iter().offset();
+
+        // Insert timestamp and text together
+        let timestamp_text = format!("[{}] ", timestamp);
+        let full_text = format!("{}{}", timestamp_text, text);
+        let mut end = self.output_text_buffer.end_iter();
+        self.output_text_buffer.insert(&mut end, &full_text);
+
+        // Get fresh iterators after insertion
+        let timestamp_start = self.output_text_buffer.iter_at_offset(start_offset);
+        let timestamp_end = self
+            .output_text_buffer
+            .iter_at_offset(start_offset + timestamp_text.len() as i32);
+        let text_start = timestamp_end.clone();
+        let text_end = self.output_text_buffer.end_iter();
+
+        // Apply timestamp tag
+        if let Some(tag) = self.output_text_buffer.tag_table().lookup("timestamp") {
+            self.output_text_buffer
+                .apply_tag(&tag, &timestamp_start, &timestamp_end);
+        }
+
+        // Apply color tag
+        if let Some(tag) = self.output_text_buffer.tag_table().lookup(tag_name) {
+            self.output_text_buffer
+                .apply_tag(&tag, &text_start, &text_end);
+        }
+
+        self.scroll_to_bottom();
+    }
+
+    /// Append a command header.
+    pub fn append_command_header(&self, description: &str) {
+        let header = format!("\n=== {} ===\n", description);
+        self.append_colored(&header, "header");
+    }
+
+    /// Scroll output view to bottom.
+    fn scroll_to_bottom(&self) {
+        let mut end = self.output_text_buffer.end_iter();
+        let _ = self
+            .output_text_view
+            .scroll_to_iter(&mut end, 0.0, false, 0.0, 0.0);
     }
 
     /// Toggle the sidebar visibility.
+    #[allow(dead_code)] // Useful API method for future use
     pub fn toggle_sidebar(&self) {
-        self.sidebar_toggle.set_active(!self.sidebar_toggle.is_active());
+        self.sidebar_toggle
+            .set_active(!self.sidebar_toggle.is_active());
     }
 
     /// Initialize sidebar to collapsed state.

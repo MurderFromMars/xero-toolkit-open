@@ -3,8 +3,8 @@
 //! This module contains the application-wide context and UI component
 //! references used for navigation and state management.
 
-use gtk4::prelude::*;
-use gtk4::{Box as GtkBox, Paned, Stack};
+use adw::prelude::*;
+use gtk4::{Box as GtkBox, Stack, ToggleButton};
 
 /// Main application context with UI elements.
 #[derive(Clone)]
@@ -29,42 +29,49 @@ impl AppContext {
 pub struct UiComponents {
     pub stack: Stack,
     pub tabs_container: GtkBox,
-    pub main_paned: Paned,
+    pub main_split_view: adw::OverlaySplitView,
+    pub sidebar_toggle: ToggleButton,
 }
 
 impl UiComponents {
     /// Create UI components from individual widgets.
-    pub fn new(stack: Stack, tabs_container: GtkBox, main_paned: Paned) -> Self {
+    pub fn new(
+        stack: Stack,
+        tabs_container: GtkBox,
+        main_split_view: adw::OverlaySplitView,
+        sidebar_toggle: ToggleButton,
+    ) -> Self {
         Self {
             stack,
             tabs_container,
-            main_paned,
+            main_split_view,
+            sidebar_toggle,
         }
     }
 
-    /// Configure the sidebar paned widget with size constraints.
+    /// Configure the sidebar split view with size constraints and toggle binding.
     pub fn configure_sidebar(&self, min_width: i32, max_width: i32) {
-        self.main_paned.set_wide_handle(true);
-        self.main_paned.set_shrink_start_child(false);
-        self.main_paned.set_resize_start_child(false);
+        // Set min/max widths (convert i32 to f64)
+        self.main_split_view.set_min_sidebar_width(min_width as f64);
+        self.main_split_view.set_max_sidebar_width(max_width as f64);
 
-        self.tabs_container.set_size_request(min_width, -1);
+        // Bind toggle button to split view's show-sidebar property
+        self.sidebar_toggle
+            .bind_property("active", &self.main_split_view, "show-sidebar")
+            .sync_create()
+            .bidirectional()
+            .build();
 
-        let position = self.main_paned.position();
-        if position < min_width {
-            self.main_paned.set_position(min_width);
-        } else if position > max_width {
-            self.main_paned.set_position(max_width);
-        }
-
-        self.main_paned
-            .connect_notify_local(Some("position"), move |paned, _| {
-                let pos = paned.position();
-                if pos < min_width {
-                    paned.set_position(min_width);
-                } else if pos > max_width {
-                    paned.set_position(max_width);
-                }
+        // Update tooltip based on state
+        let toggle = self.sidebar_toggle.clone();
+        self.main_split_view
+            .connect_show_sidebar_notify(move |split_view| {
+                let tooltip = if split_view.shows_sidebar() {
+                    "Hide sidebar"
+                } else {
+                    "Show sidebar"
+                };
+                toggle.set_tooltip_text(Some(tooltip));
             });
     }
 
