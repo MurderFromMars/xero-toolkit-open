@@ -5,6 +5,7 @@ use crate::core;
 use crate::ui::context::AppContext;
 use crate::ui::context::UiComponents;
 use crate::ui::navigation;
+use crate::ui::utils::extract_widget;
 use adw::prelude::*;
 use adw::Application;
 use gtk4::glib;
@@ -17,7 +18,7 @@ pub fn setup_application_ui(app: &Application) {
 
     setup_resources_and_theme();
 
-    let builder = Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/main.ui");
+    let builder = Builder::from_resource(crate::config::resources::MAIN_UI);
     let window = create_main_window(app, &builder);
 
     window.present();
@@ -63,11 +64,11 @@ fn setup_resources_and_theme() {
         let theme = gtk4::IconTheme::for_display(&display);
         // Don't inherit system icon themes
         theme.set_search_path(&[]);
-        theme.add_resource_path("/xyz/xerolinux/xero-toolkit/icons");
+        theme.add_resource_path(crate::config::resources::ICONS);
         info!("Icon theme paths configured");
 
         let css_provider = CssProvider::new();
-        css_provider.load_from_resource("/xyz/xerolinux/xero-toolkit/css/style.css");
+        css_provider.load_from_resource(crate::config::resources::CSS);
         gtk4::style_context_add_provider_for_display(
             &display,
             &css_provider,
@@ -89,13 +90,6 @@ fn create_main_window(app: &Application, builder: &Builder) -> ApplicationWindow
     info!("Main application window created from UI resource");
 
     window
-}
-
-/// Helper to extract widgets from builder with consistent error handling.
-pub fn extract_widget<T: IsA<glib::Object>>(builder: &Builder, name: &str) -> T {
-    builder
-        .object(name)
-        .unwrap_or_else(|| panic!("Failed to get widget with id '{}'", name))
 }
 
 /// Set up UI components and return application context.

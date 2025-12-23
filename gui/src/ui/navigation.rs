@@ -29,42 +29,42 @@ pub const PAGES: &[PageConfig] = &[
         id: "main_page",
         title: "Main Page",
         icon: "house-symbolic",
-        ui_resource: "/xyz/xerolinux/xero-toolkit/ui/tabs/main_page.ui",
+        ui_resource: crate::config::resources::tabs::MAIN_PAGE,
         setup_handler: Some(pages::main_page::setup_handlers),
     },
     PageConfig {
         id: "drivers",
         title: "Drivers",
         icon: "gear-symbolic",
-        ui_resource: "/xyz/xerolinux/xero-toolkit/ui/tabs/drivers.ui",
+        ui_resource: crate::config::resources::tabs::DRIVERS,
         setup_handler: Some(pages::drivers::setup_handlers),
     },
     PageConfig {
         id: "customization",
         title: "Customization",
         icon: "brush-symbolic",
-        ui_resource: "/xyz/xerolinux/xero-toolkit/ui/tabs/customization.ui",
+        ui_resource: crate::config::resources::tabs::CUSTOMIZATION,
         setup_handler: Some(pages::customization::setup_handlers),
     },
     PageConfig {
         id: "gaming_tools",
         title: "Gaming Tools",
         icon: "gamepad-symbolic",
-        ui_resource: "/xyz/xerolinux/xero-toolkit/ui/tabs/gaming_tools.ui",
+        ui_resource: crate::config::resources::tabs::GAMING_TOOLS,
         setup_handler: Some(pages::gaming_tools::setup_handlers),
     },
     PageConfig {
         id: "containers_vms",
         title: "Containers/VMs",
         icon: "box-symbolic",
-        ui_resource: "/xyz/xerolinux/xero-toolkit/ui/tabs/containers_vms.ui",
+        ui_resource: crate::config::resources::tabs::CONTAINERS_VMS,
         setup_handler: Some(pages::containers_vms::setup_handlers),
     },
     PageConfig {
         id: "multimedia_tools",
         title: "Multimedia Tools",
         icon: "play-symbolic",
-        ui_resource: "/xyz/xerolinux/xero-toolkit/ui/tabs/multimedia_tools.ui",
+        ui_resource: crate::config::resources::tabs::MULTIMEDIA_TOOLS,
         setup_handler: Some(pages::multimedia_tools::setup_handlers),
     },
     // PageConfig {
@@ -78,7 +78,7 @@ pub const PAGES: &[PageConfig] = &[
         id: "servicing_system_tweaks",
         title: "Servicing/System tweaks",
         icon: "toolbox-symbolic",
-        ui_resource: "/xyz/xerolinux/xero-toolkit/ui/tabs/servicing_system_tweaks.ui",
+        ui_resource: crate::config::resources::tabs::SERVICING_SYSTEM_TWEAKS,
         setup_handler: Some(pages::servicing::setup_handlers),
     },
 ];
@@ -197,7 +197,8 @@ fn create_dynamic_stack(main_builder: &Builder) -> Stack {
     }
 
     // Add the dynamic stack to the right container
-    let right_container = crate::ui::app::extract_widget::<GtkBox>(main_builder, "right_container");
+    let right_container =
+        crate::ui::utils::extract_widget::<GtkBox>(main_builder, "right_container");
     right_container.append(&stack);
     info!("Dynamic stack added to right container");
 

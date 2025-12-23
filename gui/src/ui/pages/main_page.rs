@@ -8,15 +8,15 @@
 
 use crate::config;
 use crate::core;
-use crate::ui::app::extract_widget;
 use crate::ui::dialogs::download::show_download_dialog;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
 use crate::ui::dialogs::terminal;
 use crate::ui::task_runner::{self, Command, CommandSequence};
+use crate::ui::utils::{extract_widget, get_window_from_button};
 use gtk4::prelude::*;
-use gtk4::{ApplicationWindow, Builder, Button};
+use gtk4::{Builder, Button};
 use log::info;
 
 /// Set up all button handlers for the main page.
@@ -35,7 +35,7 @@ fn setup_update_system(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Update System button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -56,7 +56,7 @@ fn setup_pkg_manager(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("PKG Manager GUI button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -196,7 +196,7 @@ fn setup_download_arch_iso(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Download Arch ISO button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -211,7 +211,7 @@ fn setup_install_nix(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Install Nix button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -376,11 +376,4 @@ fn setup_external_links(builder: &Builder) {
         info!("Donate link clicked");
         let _ = core::package::open_url(config::links::DONATE);
     });
-}
-
-/// Helper to get the parent window from a button.
-fn get_window(button: &Button) -> Option<ApplicationWindow> {
-    button
-        .root()
-        .and_then(|root| root.downcast::<ApplicationWindow>().ok())
 }

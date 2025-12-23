@@ -21,13 +21,13 @@ struct Args {
     /// If not provided, the daemon will use the current user's UID.
     #[arg(short, long)]
     uid: Option<u32>,
-    
+
     /// Parent process ID to monitor
     ///
     /// The daemon will shut down if this process is no longer running.
     #[arg(short = 'p', long)]
     parent_pid: Option<u32>,
-    
+
     /// Enable debug logging
     #[arg(short, long)]
     debug: bool,
@@ -42,15 +42,11 @@ async fn main() {
     } else {
         log::LevelFilter::Info
     };
-    
-    SimpleLogger::new()
-        .with_level(log_level)
-        .init()
-        .unwrap();
+
+    SimpleLogger::new().with_level(log_level).init().unwrap();
 
     if let Err(e) = run_daemon(args.uid, args.parent_pid).await {
         eprintln!("Daemon error: {}", e);
         std::process::exit(1);
     }
 }
-

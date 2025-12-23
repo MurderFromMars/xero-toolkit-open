@@ -3,7 +3,7 @@
 //! This module provides a reusable dialog window for presenting users with
 //! multiple options to select from, with customizable title, description, and actions.
 
-use crate::ui::app::extract_widget;
+use crate::ui::utils::extract_widget;
 use gtk4::prelude::*;
 use gtk4::{Box as GtkBox, Builder, Button, CheckButton, Label, Separator, Window};
 use log::info;
@@ -71,8 +71,7 @@ where
     info!("Opening selection dialog: {}", config.title);
 
     // Load the UI from resource
-    let builder =
-        Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/selection_dialog.ui");
+    let builder = Builder::from_resource(crate::config::resources::dialogs::SELECTION);
 
     // Get the dialog window
     let dialog: Window = extract_widget(&builder, "selection_dialog");

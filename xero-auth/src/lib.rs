@@ -9,4 +9,3 @@ pub mod shared;
 
 pub use daemon::run_daemon;
 pub use shared::{get_socket_path, is_daemon_running, wait_for_socket};
-

@@ -1,7 +1,7 @@
 //! About dialog showing creator information and credits.
 
 use crate::core::package;
-use crate::ui::app::extract_widget;
+use crate::ui::utils::extract_widget;
 use gtk4::glib;
 use gtk4::prelude::*;
 use gtk4::{Builder, Button, Label, Window};
@@ -9,7 +9,7 @@ use gtk4::{Builder, Button, Label, Window};
 /// Show the about dialog.
 pub fn show_about_dialog(parent: &Window) {
     // Load the UI from resource
-    let builder = Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/about_dialog.ui");
+    let builder = Builder::from_resource(crate::config::resources::dialogs::ABOUT);
 
     // Get the dialog window
     let dialog: Window = extract_widget(&builder, "about_window");

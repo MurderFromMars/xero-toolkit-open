@@ -4,10 +4,10 @@
 //! - Tailscale VPN
 //! - ASUS ROG laptop tools
 
-use crate::ui::app::extract_widget;
 use crate::ui::task_runner::{self, Command, CommandSequence};
+use crate::ui::utils::{extract_widget, get_window_from_button};
 use gtk4::prelude::*;
-use gtk4::{ApplicationWindow, Builder, Button};
+use gtk4::{Builder, Button};
 use log::info;
 
 /// Set up all button handlers for the drivers page.
@@ -22,7 +22,7 @@ fn setup_tailscale(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Tailscale VPN button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -48,7 +48,7 @@ fn setup_asus_rog(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("ASUS ROG Tools button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -79,11 +79,4 @@ fn setup_asus_rog(builder: &Builder) {
 
         task_runner::run(window.upcast_ref(), commands, "Install ASUS ROG Tools");
     });
-}
-
-/// Helper to get the parent window from a button.
-fn get_window(button: &Button) -> Option<ApplicationWindow> {
-    button
-        .root()
-        .and_then(|root| root.downcast::<ApplicationWindow>().ok())
 }

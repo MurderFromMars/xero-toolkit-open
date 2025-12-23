@@ -5,23 +5,22 @@ use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
 /// Get the socket path for the daemon.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `effective_uid` - Optional user ID to use for the socket path. If None, uses the current user's UID.
 ///   This is used when the daemon runs as root but needs to create the socket in the
 ///   original user's runtime directory.
 pub fn get_socket_path(effective_uid: Option<u32>) -> Result<PathBuf> {
     let uid = unsafe { libc::getuid() };
     let target_uid = effective_uid.unwrap_or(uid);
-    
+
     let runtime_dir = if target_uid != 0 {
         format!("/run/user/{}", target_uid)
     } else {
-        std::env::var("XDG_RUNTIME_DIR")
-            .unwrap_or_else(|_| format!("/run/user/{}", uid))
+        std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| format!("/run/user/{}", uid))
     };
-    
+
     Ok(PathBuf::from(runtime_dir).join("xero-authd.sock"))
 }
 
@@ -41,28 +40,28 @@ pub fn is_daemon_running() -> bool {
 }
 
 /// Wait for the daemon socket to become available.
-/// 
+///
 /// Polls the socket path at regular intervals until it appears or the timeout is reached.
 /// This is used when starting the daemon to wait for it to be ready to accept connections.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `timeout` - Maximum time to wait for the socket to appear
 /// * `poll_interval` - How often to check for the socket (default: 50ms)
-/// 
+///
 /// # Returns
-/// 
+///
 /// * `Ok(())` if the socket appeared within the timeout
 /// * `Err` if the timeout was reached or an error occurred
 pub fn wait_for_socket(timeout: Duration, poll_interval: Duration) -> Result<()> {
     let socket_path = get_socket_path(None)?;
     let start = Instant::now();
-    
+
     loop {
         if socket_path.exists() {
             return Ok(());
         }
-        
+
         if start.elapsed() >= timeout {
             anyhow::bail!(
                 "Socket did not appear within {:?} at {:?}",
@@ -70,8 +69,7 @@ pub fn wait_for_socket(timeout: Duration, poll_interval: Duration) -> Result<()>
                 socket_path
             );
         }
-        
+
         std::thread::sleep(poll_interval);
     }
 }
-

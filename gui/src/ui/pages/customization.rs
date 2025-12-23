@@ -7,10 +7,10 @@
 //! - Plasma wallpapers
 //! - Layan GTK4 patch
 
-use crate::ui::app::extract_widget;
 use crate::ui::task_runner::{self, Command, CommandSequence};
+use crate::ui::utils::{extract_widget, get_window_from_button};
 use gtk4::prelude::*;
-use gtk4::{ApplicationWindow, Builder, Button};
+use gtk4::{Builder, Button};
 use log::info;
 
 /// Set up all button handlers for the customization page.
@@ -28,7 +28,7 @@ fn setup_zsh_aio(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("ZSH AiO button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -153,7 +153,7 @@ fn setup_save_desktop(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Save Desktop Tool button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -182,7 +182,7 @@ fn setup_grub_theme(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("GRUB Theme button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -235,7 +235,7 @@ fn setup_wallpapers(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Plasma Wallpapers button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -263,7 +263,7 @@ fn setup_layan_patch(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Layan GTK4 Patch button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -340,11 +340,4 @@ fn setup_layan_patch(builder: &Builder) {
 
         task_runner::run(window.upcast_ref(), commands, "Layan GTK4 Patch & Update");
     });
-}
-
-/// Helper to get the parent window from a button.
-fn get_window(button: &Button) -> Option<ApplicationWindow> {
-    button
-        .root()
-        .and_then(|root| root.downcast::<ApplicationWindow>().ok())
 }

@@ -4,7 +4,7 @@ use crate::core::download::{
     download_file, fetch_arch_iso_info, format_bytes, format_speed, format_time_remaining,
     DownloadState,
 };
-use crate::ui::app::extract_widget;
+use crate::ui::utils::extract_widget;
 use gtk4::glib;
 use gtk4::prelude::*;
 use gtk4::{Button, Entry, Image, Label, ProgressBar, Window};
@@ -17,9 +17,7 @@ pub fn show_download_dialog(parent: &Window) {
     info!("Opening Arch ISO download setup dialog");
 
     // Load the setup UI
-    let builder = gtk4::Builder::from_resource(
-        "/xyz/xerolinux/xero-toolkit/ui/dialogs/download_setup_dialog.ui",
-    );
+    let builder = gtk4::Builder::from_resource(crate::config::resources::dialogs::DOWNLOAD_SETUP);
 
     let window: adw::Window = extract_widget(&builder, "download_setup_window");
     let version_label: Label = extract_widget(&builder, "version_label");
@@ -196,8 +194,7 @@ pub fn show_download_dialog(parent: &Window) {
 /// Start the actual download with progress dialog
 fn start_download(parent: &Window, iso_name: String, download_url: String, save_path: String) {
     // Load the UI
-    let builder =
-        gtk4::Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/download_dialog.ui");
+    let builder = gtk4::Builder::from_resource(crate::config::resources::dialogs::DOWNLOAD);
 
     let window: adw::Window = extract_widget(&builder, "download_window");
     let filename_label: Label = extract_widget(&builder, "filename_label");

@@ -5,11 +5,11 @@
 //! - Jellyfin server installation
 
 use crate::core;
-use crate::ui::app::extract_widget;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
 use crate::ui::task_runner::{self, Command, CommandSequence};
+use crate::ui::utils::{extract_widget, get_window_from_button};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder};
 use log::info;
@@ -23,8 +23,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder) {
 fn setup_obs_studio_aio(page_builder: &Builder) {
     let btn_obs_studio_aio = extract_widget::<gtk4::Button>(page_builder, "btn_obs_studio_aio");
     btn_obs_studio_aio.connect_clicked(move |button| {
-            info!("Multimedia tools: OBS-Studio AiO button clicked");            let widget = button.clone().upcast::<gtk4::Widget>();
-            let window = widget.root().and_then(|r| r.downcast::<ApplicationWindow>().ok());
+            info!("Multimedia tools: OBS-Studio AiO button clicked");            let window = get_window_from_button(button);
 
             if let Some(window) = window {
                 let window_clone = window.clone();
@@ -214,39 +213,39 @@ fn setup_obs_studio_aio(page_builder: &Builder) {
 fn setup_jellyfin(page_builder: &Builder) {
     let btn_jellyfin = extract_widget::<gtk4::Button>(page_builder, "btn_jellyfin");
     btn_jellyfin.connect_clicked(move |button| {
-            info!("Multimedia tools: Jellyfin button clicked");
-            let commands = CommandSequence::new()
-                .then(
-                    Command::builder()
-                        .aur()
-                        .args(&[
-                            "-S",
-                            "--noconfirm",
-                            "--needed",
-                            "jellyfin-server",
-                            "jellyfin-web",
-                            "jellyfin-ffmpeg",
-                        ])
-                        .description("Installing Jellyfin server and components...")
-                        .build(),
-                )
-                .then(
-                    Command::builder()
-                        .privileged()
-                        .program("systemctl")
-                        .args(&["enable", "--now", "jellyfin.service"])
-                        .description("Starting Jellyfin service...")
-                        .build(),
-                )
-                .build();
+        info!("Multimedia tools: Jellyfin button clicked");
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&[
+                        "-S",
+                        "--noconfirm",
+                        "--needed",
+                        "jellyfin-server",
+                        "jellyfin-web",
+                        "jellyfin-ffmpeg",
+                    ])
+                    .description("Installing Jellyfin server and components...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("systemctl")
+                    .args(&["enable", "--now", "jellyfin.service"])
+                    .description("Starting Jellyfin service...")
+                    .build(),
+            )
+            .build();
 
-            let widget = button.clone().upcast::<gtk4::Widget>();
-            let window = widget
-                .root()
-                .and_then(|r| r.downcast::<ApplicationWindow>().ok());
-            if let Some(window) = window {
-                let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Jellyfin Server Setup");
-            }
-        });
+        let widget = button.clone().upcast::<gtk4::Widget>();
+        let window = widget
+            .root()
+            .and_then(|r| r.downcast::<ApplicationWindow>().ok());
+        if let Some(window) = window {
+            let window_ref = window.upcast_ref::<gtk4::Window>();
+            task_runner::run(window_ref, commands, "Jellyfin Server Setup");
+        }
+    });
 }

@@ -1,6 +1,6 @@
 //! System dependency checks and validation.
 
-use crate::ui::app::extract_widget;
+use crate::ui::utils::extract_widget;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder, Button, Label};
 use log::{error, info, warn};
@@ -234,8 +234,7 @@ pub fn show_xerolinux_error_dialog(main_window: &ApplicationWindow) {
     let distro_name = get_distribution_name().unwrap_or_else(|| "Unknown".to_string());
 
     // Load error dialog from UI file
-    let builder =
-        Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/xerolinux_check_dialog.ui");
+    let builder = Builder::from_resource(crate::config::resources::dialogs::XEROLINUX_CHECK);
 
     let error_window: gtk4::Window = extract_widget(&builder, "xerolinux_error_window");
 
@@ -265,8 +264,7 @@ pub fn show_dependency_error_dialog(
     error!("Showing dependency error dialog");
 
     // Load error dialog from UI file
-    let builder =
-        Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/dependency_error_dialog.ui");
+    let builder = Builder::from_resource(crate::config::resources::dialogs::DEPENDENCY_ERROR);
 
     let error_window: gtk4::Window = extract_widget(&builder, "dependency_error_window");
 

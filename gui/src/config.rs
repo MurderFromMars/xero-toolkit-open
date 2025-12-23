@@ -20,3 +20,64 @@ pub mod links {
     pub const WEBSITE: &str = "https://xerolinux.xyz/";
     pub const DONATE: &str = "https://ko-fi.com/xerolinux";
 }
+
+/// Binary paths for system executables.
+pub mod paths {
+    use std::path::PathBuf;
+
+    /// Path to the xero-authd daemon binary.
+    pub const DAEMON: &str = "/opt/xero-toolkit/xero-authd";
+
+    /// Path to the xero-auth client binary.
+    pub const CLIENT: &str = "/opt/xero-toolkit/xero-auth";
+
+    /// Get the daemon path as a PathBuf.
+    pub fn daemon() -> PathBuf {
+        PathBuf::from(DAEMON)
+    }
+
+    /// Get the client path as a PathBuf.
+    pub fn client() -> PathBuf {
+        PathBuf::from(CLIENT)
+    }
+}
+
+/// UI resource paths for GResource files.
+pub mod resources {
+    /// Main application window UI.
+    pub const MAIN_UI: &str = "/xyz/xerolinux/xero-toolkit/ui/main.ui";
+
+    /// Icons resource path.
+    pub const ICONS: &str = "/xyz/xerolinux/xero-toolkit/icons";
+
+    /// CSS stylesheet resource path.
+    pub const CSS: &str = "/xyz/xerolinux/xero-toolkit/css/style.css";
+
+    /// Dialog UI resources.
+    pub mod dialogs {
+        pub const ABOUT: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/about_dialog.ui";
+        pub const DEPENDENCY_ERROR: &str =
+            "/xyz/xerolinux/xero-toolkit/ui/dialogs/dependency_error_dialog.ui";
+        pub const DOWNLOAD: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/download_dialog.ui";
+        pub const DOWNLOAD_SETUP: &str =
+            "/xyz/xerolinux/xero-toolkit/ui/dialogs/download_setup_dialog.ui";
+        pub const SELECTION: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/selection_dialog.ui";
+        pub const TASK_LIST: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/task_list_dialog.ui";
+        pub const TERMINAL: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/terminal_dialog.ui";
+        pub const XEROLINUX_CHECK: &str =
+            "/xyz/xerolinux/xero-toolkit/ui/dialogs/xerolinux_check_dialog.ui";
+    }
+
+    /// Page/tab UI resources.
+    pub mod tabs {
+        pub const CONTAINERS_VMS: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/containers_vms.ui";
+        pub const CUSTOMIZATION: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/customization.ui";
+        pub const DRIVERS: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/drivers.ui";
+        pub const GAMING_TOOLS: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/gaming_tools.ui";
+        pub const MAIN_PAGE: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/main_page.ui";
+        pub const MULTIMEDIA_TOOLS: &str =
+            "/xyz/xerolinux/xero-toolkit/ui/tabs/multimedia_tools.ui";
+        pub const SERVICING_SYSTEM_TWEAKS: &str =
+            "/xyz/xerolinux/xero-toolkit/ui/tabs/servicing_system_tweaks.ui";
+    }
+}

@@ -1,6 +1,6 @@
 //! Interactive terminal dialog for running shell commands.
 
-use crate::ui::app::extract_widget;
+use crate::ui::utils::extract_widget;
 use gtk4::gdk::RGBA;
 use gtk4::prelude::*;
 use gtk4::{Builder, Button, Window};
@@ -47,8 +47,7 @@ fn update_terminal_style(terminal: &Terminal) {
 /// Shows an interactive terminal window for the given command.
 pub fn show_terminal_dialog(parent: &Window, title: &str, command: &str, args: &[&str]) {
     // Load the UI
-    let builder =
-        Builder::from_resource("/xyz/xerolinux/xero-toolkit/ui/dialogs/terminal_dialog.ui");
+    let builder = Builder::from_resource(crate::config::resources::dialogs::TERMINAL);
 
     let window: adw::Window = extract_widget(&builder, "terminal_window");
     let terminal: Terminal = extract_widget(&builder, "terminal");

@@ -12,13 +12,13 @@
 //! - Parallel downloads adjustment
 
 use crate::core;
-use crate::ui::app::extract_widget;
 use crate::ui::dialogs::error::show_error;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
 use crate::ui::dialogs::terminal;
 use crate::ui::task_runner::{self, Command, CommandSequence};
+use crate::ui::utils::{extract_widget, get_window_from_button};
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder};
 use log::info;
@@ -39,176 +39,155 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder) {
 fn setup_clr_pacman(page_builder: &Builder) {
     let btn_clr_pacman = extract_widget::<gtk4::Button>(page_builder, "btn_clr_pacman");
     btn_clr_pacman.connect_clicked(move |button| {
-            info!("Servicing: Clear Pacman Cache button clicked");
-            let widget = button.clone().upcast::<gtk4::Widget>();
-            if let Some(window) = widget
-                .root()
-                .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-            {
-                // Use terminal dialog for interactive pacman cache clearing
-                terminal::show_terminal_dialog(
-                    window.upcast_ref(),
-                    "Clear Pacman Cache",
-                    "pkexec",
-                    &["pacman", "-Scc"],
-                );
-            }
-        });
+        info!("Servicing: Clear Pacman Cache button clicked");
+        if let Some(window) = get_window_from_button(button) {
+            // Use terminal dialog for interactive pacman cache clearing
+            terminal::show_terminal_dialog(
+                window.upcast_ref(),
+                "Clear Pacman Cache",
+                "pkexec",
+                &["pacman", "-Scc"],
+            );
+        }
+    });
 }
 
 fn setup_unlock_pacman(page_builder: &Builder) {
     let btn_unlock_pacman = extract_widget::<gtk4::Button>(page_builder, "btn_unlock_pacman");
     btn_unlock_pacman.connect_clicked(move |button| {
-            info!("Servicing: Unlock Pacman DB button clicked");
-            let commands = CommandSequence::new()
-                .then(
-                    Command::builder()
-                        .privileged()
-                        .program("rm")
-                        .args(&["-f", "/var/lib/pacman/db.lck"])
-                        .description("Removing Pacman lock file...")
-                        .build(),
-                )
-                .build();
-            let widget = button.clone().upcast::<gtk4::Widget>();
-            if let Some(window) = widget
-                .root()
-                .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-            {
-                let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Unlock Pacman Database");
-            }
-        });
+        info!("Servicing: Unlock Pacman DB button clicked");
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-f", "/var/lib/pacman/db.lck"])
+                    .description("Removing Pacman lock file...")
+                    .build(),
+            )
+            .build();
+        if let Some(window) = get_window_from_button(button) {
+            let window_ref = window.upcast_ref::<gtk4::Window>();
+            task_runner::run(window_ref, commands, "Unlock Pacman Database");
+        }
+    });
 }
 
 fn setup_plasma_x11(page_builder: &Builder) {
     let btn_plasma_x11 = extract_widget::<gtk4::Button>(page_builder, "btn_plasma_x11");
     btn_plasma_x11.connect_clicked(move |button| {
-            info!("Servicing: Plasma X11 Session button clicked");
-            let commands = CommandSequence::new()
-                .then(
-                    Command::builder()
-                        .aur()
-                        .args(&["-S", "--noconfirm", "kwin-x11", "plasma-x11-session"])
-                        .description("Installing KDE Plasma X11 session components...")
-                        .build(),
-                )
-                .build();
+        info!("Servicing: Plasma X11 Session button clicked");
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&["-S", "--noconfirm", "kwin-x11", "plasma-x11-session"])
+                    .description("Installing KDE Plasma X11 session components...")
+                    .build(),
+            )
+            .build();
+        if let Some(window) = get_window_from_button(button) {
+            let window_ref = window.upcast_ref::<gtk4::Window>();
+            task_runner::run(window_ref, commands, "Install KDE X11 Session");
+        }
+    });
+}
+
+fn setup_vm_guest_utils(page_builder: &Builder) {
+    let btn_vm_guest_utils = extract_widget::<gtk4::Button>(page_builder, "btn_vm_guest_utils");
+    btn_vm_guest_utils.connect_clicked(move |button| {
+        info!("Servicing: VM Guest Utils button clicked");
+        let output = std::process::Command::new("systemd-detect-virt").output();
+        let mut commands = CommandSequence::new();
+        match output {
+            Ok(result) if result.status.success() => {
+                let virt = String::from_utf8_lossy(&result.stdout).trim().to_string();
+                match virt.as_str() {
+                    "oracle" => {
+                        commands = commands.then(
+                            Command::builder()
+                                .aur()
+                                .args(&["-S", "--needed", "--noconfirm", "virtualbox-guest-utils"])
+                                .description("Installing VirtualBox guest utilities...")
+                                .build(),
+                        )
+                    }
+                    "kvm" => {
+                        commands = commands.then(
+                            Command::builder()
+                                .aur()
+                                .args(&[
+                                    "-S",
+                                    "--needed",
+                                    "--noconfirm",
+                                    "qemu-guest-agent",
+                                    "spice-vdagent",
+                                ])
+                                .description("Installing KVM/QEMU guest agents...")
+                                .build(),
+                        )
+                    }
+                    _ => {
+                        let widget = button.clone().upcast::<gtk4::Widget>();
+                        if let Some(window) = widget
+                            .root()
+                            .and_then(|r| r.downcast::<ApplicationWindow>().ok())
+                        {
+                            show_error(&window, "Unsupported or no virtualization detected.");
+                        }
+                        return;
+                    }
+                }
+            }
+            _ => {
+                let widget = button.clone().upcast::<gtk4::Widget>();
+                if let Some(window) = widget
+                    .root()
+                    .and_then(|r| r.downcast::<ApplicationWindow>().ok())
+                {
+                    show_error(&window, "Failed to detect virtualization environment.");
+                }
+                return;
+            }
+        }
+
+        if !commands.is_empty() {
             let widget = button.clone().upcast::<gtk4::Widget>();
             if let Some(window) = widget
                 .root()
                 .and_then(|r| r.downcast::<ApplicationWindow>().ok())
             {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
-                task_runner::run(window_ref, commands, "Install KDE X11 Session");
+                task_runner::run(window_ref, commands.build(), "Install VM Guest Utilities");
             }
-        });
-}
-
-fn setup_vm_guest_utils(page_builder: &Builder) {
-    let btn_vm_guest_utils = extract_widget::<gtk4::Button>(page_builder, "btn_vm_guest_utils");
-    btn_vm_guest_utils.connect_clicked(move |button| {
-            info!("Servicing: VM Guest Utils button clicked");
-            let output = std::process::Command::new("systemd-detect-virt").output();
-            let mut commands = CommandSequence::new();
-            match output {
-                Ok(result) if result.status.success() => {
-                    let virt = String::from_utf8_lossy(&result.stdout).trim().to_string();
-                    match virt.as_str() {
-                        "oracle" => {
-                            commands = commands.then(
-                                Command::builder()
-                                    .aur()
-                                    .args(&[
-                                        "-S",
-                                        "--needed",
-                                        "--noconfirm",
-                                        "virtualbox-guest-utils",
-                                    ])
-                                    .description("Installing VirtualBox guest utilities...")
-                                    .build(),
-                            )
-                        }
-                        "kvm" => {
-                            commands = commands.then(
-                                Command::builder()
-                                    .aur()
-                                    .args(&[
-                                        "-S",
-                                        "--needed",
-                                        "--noconfirm",
-                                        "qemu-guest-agent",
-                                        "spice-vdagent",
-                                    ])
-                                    .description("Installing KVM/QEMU guest agents...")
-                                    .build(),
-                            )
-                        }
-                        _ => {
-                            let widget = button.clone().upcast::<gtk4::Widget>();
-                            if let Some(window) = widget
-                                .root()
-                                .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-                            {
-                                show_error(&window, "Unsupported or no virtualization detected.");
-                            }
-                            return;
-                        }
-                    }
-                }
-                _ => {
-                    let widget = button.clone().upcast::<gtk4::Widget>();
-                    if let Some(window) = widget
-                        .root()
-                        .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-                    {
-                        show_error(&window, "Failed to detect virtualization environment.");
-                    }
-                    return;
-                }
-            }
-
-            if !commands.is_empty() {
-                let widget = button.clone().upcast::<gtk4::Widget>();
-                if let Some(window) = widget
-                    .root()
-                    .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-                {
-                    let window_ref = window.upcast_ref::<gtk4::Window>();
-                    task_runner::run(window_ref, commands.build(), "Install VM Guest Utilities");
-                }
-            }
-        });
+        }
+    });
 }
 
 fn setup_waydroid_guide(page_builder: &Builder) {
     let btn_waydroid_guide = extract_widget::<gtk4::Button>(page_builder, "btn_waydroid_guide");
     btn_waydroid_guide.connect_clicked(move |_| {
-            info!("Servicing: WayDroid Guide button clicked - opening guide");
-            let _ = std::process::Command::new("xdg-open")
-                .arg("https://xerolinux.xyz/posts/waydroid-guide/")
-                .spawn();
-        });
+        info!("Servicing: WayDroid Guide button clicked - opening guide");
+        let _ = std::process::Command::new("xdg-open")
+            .arg("https://xerolinux.xyz/posts/waydroid-guide/")
+            .spawn();
+    });
 }
 
 fn setup_fix_gpgme(page_builder: &Builder) {
     let btn_fix_gpgme = extract_widget::<gtk4::Button>(page_builder, "btn_fix_gpgme");
     btn_fix_gpgme.connect_clicked(move |button| {
-            info!("Servicing: Fix GPGME Database button clicked");
-            let widget = button.clone().upcast::<gtk4::Widget>();
-            if let Some(window) = widget
-                .root()
-                .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-            {
-                // Use terminal dialog for interactive GPGME fix
-                terminal::show_terminal_dialog(
-                    window.upcast_ref(),
-                    "Fix GPGME Database",
-                    "pkexec",
-                    &["sh", "-c", "rm -rf /var/lib/pacman/sync && pacman -Syy"],
-                );
-            }
-        });
+        info!("Servicing: Fix GPGME Database button clicked");
+        if let Some(window) = get_window_from_button(button) {
+            // Use terminal dialog for interactive GPGME fix
+            terminal::show_terminal_dialog(
+                window.upcast_ref(),
+                "Fix GPGME Database",
+                "pkexec",
+                &["sh", "-c", "rm -rf /var/lib/pacman/sync && pacman -Syy"],
+            );
+        }
+    });
 }
 
 fn setup_fix_arch_keyring(page_builder: &Builder) {
@@ -247,11 +226,7 @@ fn setup_fix_arch_keyring(page_builder: &Builder) {
                     .description("Reinstalling Arch Linux keyring...")
                     .build())
                 .build();
-            let widget = button.clone().upcast::<gtk4::Widget>();
-            if let Some(window) = widget
-                .root()
-                .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-            {
+            if let Some(window) = get_window_from_button(button) {
                 let window_ref = window.upcast_ref::<gtk4::Window>();
                 task_runner::run(window_ref, commands, "Fix GnuPG Keyring");
             }
@@ -259,7 +234,8 @@ fn setup_fix_arch_keyring(page_builder: &Builder) {
 }
 
 fn setup_update_mirrorlist(page_builder: &Builder) {
-    let btn_update_mirrorlist = extract_widget::<gtk4::Button>(page_builder, "btn_update_mirrorlist");
+    let btn_update_mirrorlist =
+        extract_widget::<gtk4::Button>(page_builder, "btn_update_mirrorlist");
     btn_update_mirrorlist.connect_clicked(move |button| {
             info!("Servicing: Update Mirrorlist button clicked");            let widget = button.clone().upcast::<gtk4::Widget>();
             let window = widget.root().and_then(|r| r.downcast::<ApplicationWindow>().ok());
@@ -317,21 +293,18 @@ fn setup_update_mirrorlist(page_builder: &Builder) {
 }
 
 fn setup_parallel_downloads(page_builder: &Builder) {
-    let btn_parallel_downloads = extract_widget::<gtk4::Button>(page_builder, "btn_parallel_downloads");
+    let btn_parallel_downloads =
+        extract_widget::<gtk4::Button>(page_builder, "btn_parallel_downloads");
     btn_parallel_downloads.connect_clicked(move |button| {
-            info!("Servicing: Change Parallel Downloads button clicked");
-            let widget = button.clone().upcast::<gtk4::Widget>();
-            if let Some(window) = widget
-                .root()
-                .and_then(|r| r.downcast::<ApplicationWindow>().ok())
-            {
-                // Use terminal dialog for interactive pmpd tool
-                terminal::show_terminal_dialog(
-                    window.upcast_ref(),
-                    "Change Parallel Downloads",
-                    "pkexec",
-                    &["pmpd"],
-                );
-            }
-        });
+        info!("Servicing: Change Parallel Downloads button clicked");
+        if let Some(window) = get_window_from_button(button) {
+            // Use terminal dialog for interactive pmpd tool
+            terminal::show_terminal_dialog(
+                window.upcast_ref(),
+                "Change Parallel Downloads",
+                "pkexec",
+                &["pmpd"],
+            );
+        }
+    });
 }

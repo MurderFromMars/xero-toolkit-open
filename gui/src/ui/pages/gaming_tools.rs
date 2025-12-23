@@ -6,10 +6,10 @@
 //! - LACT GPU overclocking
 //! - Game launchers (Lutris, Heroic, Bottles)
 
-use crate::ui::app::extract_widget;
 use crate::ui::task_runner::{self, Command, CommandSequence};
+use crate::ui::utils::{extract_widget, get_window_from_button};
 use gtk4::prelude::*;
-use gtk4::{ApplicationWindow, Builder, Button};
+use gtk4::{Builder, Button};
 use log::info;
 
 /// Set up all button handlers for the gaming tools page.
@@ -28,7 +28,7 @@ fn setup_steam_aio(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Steam AiO button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -131,7 +131,7 @@ fn setup_lact_oc(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("LACT OC button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -163,7 +163,7 @@ fn setup_lutris(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Lutris button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -194,7 +194,7 @@ fn setup_heroic(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Heroic button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -229,7 +229,7 @@ fn setup_bottles(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Bottles button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -252,11 +252,4 @@ fn setup_bottles(builder: &Builder) {
 
         task_runner::run(window.upcast_ref(), commands, "Bottles Installation");
     });
-}
-
-/// Helper to get the parent window from a button.
-fn get_window(button: &Button) -> Option<ApplicationWindow> {
-    button
-        .root()
-        .and_then(|root| root.downcast::<ApplicationWindow>().ok())
 }

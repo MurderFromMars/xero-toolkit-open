@@ -11,9 +11,9 @@ use tokio::net::{UnixListener, UnixStream};
 use tokio::process::Command;
 
 /// Run the authentication daemon.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `effective_uid` - Optional user ID of the original user (when running via pkexec).
 ///   If provided, the socket will be created in that user's runtime directory.
 /// * `parent_pid` - Optional parent process ID to monitor. If provided, the daemon will
@@ -25,49 +25,48 @@ pub async fn run_daemon(effective_uid: Option<u32>, parent_pid: Option<u32>) -> 
     }
 
     let socket_path = get_socket_path(effective_uid)?;
-    
+
     if socket_path.exists() {
-        std::fs::remove_file(&socket_path)
-            .context("Failed to remove old socket")?;
+        std::fs::remove_file(&socket_path).context("Failed to remove old socket")?;
     }
 
     if let Some(parent) = socket_path.parent() {
-        std::fs::create_dir_all(parent)
-            .context("Failed to create socket directory")?;
+        std::fs::create_dir_all(parent).context("Failed to create socket directory")?;
     }
 
     info!("Starting xero-authd daemon");
     info!("Socket path: {:?}", socket_path);
 
-    let listener = UnixListener::bind(&socket_path)
-        .context("Failed to bind Unix socket")?;
+    let listener = UnixListener::bind(&socket_path).context("Failed to bind Unix socket")?;
 
     if let Some(uid) = effective_uid {
-        use std::os::unix::fs::PermissionsExt;
         use std::ffi::CString;
-        
+        use std::os::unix::fs::PermissionsExt;
+
         let socket_path_cstr = CString::new(socket_path.to_string_lossy().as_ref())
             .context("Failed to convert socket path to CString")?;
-        
+
         unsafe {
             let passwd = libc::getpwuid(uid as libc::uid_t);
             if !passwd.is_null() {
                 let gid = (*passwd).pw_gid;
-                let result = libc::chown(
-                    socket_path_cstr.as_ptr(),
-                    0,
-                    gid,
-                );
+                let result = libc::chown(socket_path_cstr.as_ptr(), 0, gid);
                 if result == 0 {
                     std::fs::set_permissions(&socket_path, std::fs::Permissions::from_mode(0o660))
                         .context("Failed to set socket permissions")?;
                 } else {
-                    warn!("Failed to chown socket (errno: {}), using 0666 permissions", std::io::Error::last_os_error());
+                    warn!(
+                        "Failed to chown socket (errno: {}), using 0666 permissions",
+                        std::io::Error::last_os_error()
+                    );
                     std::fs::set_permissions(&socket_path, std::fs::Permissions::from_mode(0o666))
                         .context("Failed to set socket permissions")?;
                 }
             } else {
-                warn!("Failed to get user info for UID {}, using 0666 permissions", uid);
+                warn!(
+                    "Failed to get user info for UID {}, using 0666 permissions",
+                    uid
+                );
                 std::fs::set_permissions(&socket_path, std::fs::Permissions::from_mode(0o666))
                     .context("Failed to set socket permissions")?;
             }
@@ -92,7 +91,10 @@ pub async fn run_daemon(effective_uid: Option<u32>, parent_pid: Option<u32>) -> 
             loop {
                 interval.tick().await;
                 if !is_process_running(pid) {
-                    warn!("Parent process {} is no longer running, shutting down daemon", pid);
+                    warn!(
+                        "Parent process {} is no longer running, shutting down daemon",
+                        pid
+                    );
                     shutdown_clone.store(true, Ordering::SeqCst);
                     break;
                 }
@@ -102,12 +104,10 @@ pub async fn run_daemon(effective_uid: Option<u32>, parent_pid: Option<u32>) -> 
 
     let shutdown_clone = shutdown.clone();
     tokio::spawn(async move {
-        let mut sigterm = tokio::signal::unix::signal(
-            tokio::signal::unix::SignalKind::terminate(),
-        ).expect("Failed to register SIGTERM handler");
-        let mut sigint = tokio::signal::unix::signal(
-            tokio::signal::unix::SignalKind::interrupt(),
-        ).expect("Failed to register SIGINT handler");
+        let mut sigterm = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("Failed to register SIGTERM handler");
+        let mut sigint = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::interrupt())
+            .expect("Failed to register SIGINT handler");
 
         tokio::select! {
             _ = sigterm.recv() => {
@@ -127,7 +127,7 @@ pub async fn run_daemon(effective_uid: Option<u32>, parent_pid: Option<u32>) -> 
 
         let accept_future = listener.accept();
         let timeout_future = tokio::time::sleep(tokio::time::Duration::from_millis(100));
-        
+
         tokio::select! {
             result = accept_future => {
                 match result {
@@ -179,7 +179,7 @@ async fn handle_client(
     let (mut reader, writer) = stream.split();
     let mut buf_reader = BufReader::new(&mut reader);
     let mut line = String::new();
-    
+
     use std::sync::Arc;
     use tokio::sync::Mutex;
     let writer_arc = Arc::new(Mutex::new(writer));
@@ -187,7 +187,7 @@ async fn handle_client(
     loop {
         line.clear();
         let bytes_read = buf_reader.read_line(&mut line).await?;
-        
+
         if bytes_read == 0 {
             break;
         }
@@ -198,10 +198,12 @@ async fn handle_client(
 
         if let Some(pid) = parent_pid {
             if !is_process_running(pid) {
-                warn!("Parent process {} is no longer running, rejecting command", pid);
-                let error_msg = DaemonMessage::ErrorMessage(
-                    "Parent process is no longer running".to_string()
+                warn!(
+                    "Parent process {} is no longer running, rejecting command",
+                    pid
                 );
+                let error_msg =
+                    DaemonMessage::ErrorMessage("Parent process is no longer running".to_string());
                 let response = serde_json::to_string(&error_msg)? + "\n";
                 let mut w = writer_arc.lock().await;
                 w.write_all(response.as_bytes()).await?;
@@ -214,9 +216,8 @@ async fn handle_client(
             Ok(msg) => msg,
             Err(e) => {
                 warn!("Failed to parse message: {}", e);
-                let error_msg = DaemonMessage::ErrorMessage(
-                    format!("Failed to parse message: {}", e)
-                );
+                let error_msg =
+                    DaemonMessage::ErrorMessage(format!("Failed to parse message: {}", e));
                 let response = serde_json::to_string(&error_msg)? + "\n";
                 let mut w = writer_arc.lock().await;
                 w.write_all(response.as_bytes()).await?;
@@ -238,12 +239,16 @@ async fn handle_client(
                 shutdown.store(true, Ordering::SeqCst);
                 break;
             }
-            ClientMessage::Execute { program, args, working_dir } => {
+            ClientMessage::Execute {
+                program,
+                args,
+                working_dir,
+            } => {
                 info!("Executing: {} {:?}", program, args);
-                
+
                 let mut cmd = Command::new(&program);
                 cmd.args(&args);
-                
+
                 if let Some(dir) = &working_dir {
                     cmd.current_dir(dir);
                 }
@@ -255,7 +260,7 @@ async fn handle_client(
                     Ok(mut child) => {
                         let status = child.wait().await;
                         let writer_exec = writer_arc.clone();
-                        
+
                         if let Some(stdout) = child.stdout.take() {
                             let mut reader = BufReader::new(stdout);
                             let mut line = String::new();
@@ -273,7 +278,7 @@ async fn handle_client(
                                 }
                             }
                         }
-                        
+
                         if let Some(stderr) = child.stderr.take() {
                             let mut reader = BufReader::new(stderr);
                             let mut line = String::new();
@@ -291,20 +296,21 @@ async fn handle_client(
                                 }
                             }
                         }
-                        
+
                         match status {
                             Ok(status) => {
                                 let exit_code = status.code().unwrap_or(-1);
-                                let response = serde_json::to_string(
-                                    &DaemonMessage::Completed { exit_code }
-                                )? + "\n";
+                                let response =
+                                    serde_json::to_string(&DaemonMessage::Completed { exit_code })?
+                                        + "\n";
                                 let mut w = writer_exec.lock().await;
                                 w.write_all(response.as_bytes()).await?;
                             }
                             Err(e) => {
-                                let error_msg = DaemonMessage::ErrorMessage(
-                                    format!("Failed to wait for process: {}", e)
-                                );
+                                let error_msg = DaemonMessage::ErrorMessage(format!(
+                                    "Failed to wait for process: {}",
+                                    e
+                                ));
                                 let response = serde_json::to_string(&error_msg)? + "\n";
                                 let mut w = writer_exec.lock().await;
                                 w.write_all(response.as_bytes()).await?;
@@ -312,9 +318,8 @@ async fn handle_client(
                         }
                     }
                     Err(e) => {
-                        let error_msg = DaemonMessage::ErrorMessage(
-                            format!("Failed to spawn process: {}", e)
-                        );
+                        let error_msg =
+                            DaemonMessage::ErrorMessage(format!("Failed to spawn process: {}", e));
                         let response = serde_json::to_string(&error_msg)? + "\n";
                         let mut w = writer_arc.lock().await;
                         w.write_all(response.as_bytes()).await?;
@@ -326,4 +331,3 @@ async fn handle_client(
 
     Ok(())
 }
-

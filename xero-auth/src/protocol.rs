@@ -33,4 +33,3 @@ pub enum DaemonMessage {
     /// Shutdown acknowledged.
     ShutdownAck,
 }
-

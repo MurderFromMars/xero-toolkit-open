@@ -14,6 +14,7 @@ pub mod dialogs;
 pub mod navigation;
 pub mod pages;
 pub mod task_runner;
+pub mod utils;
 
 // Re-export the main entry point
 pub use app::setup_application_ui;

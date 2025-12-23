@@ -8,13 +8,13 @@
 //! - KVM/QEMU virtualization setup
 
 use crate::core;
-use crate::ui::app::extract_widget;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
 use crate::ui::task_runner::{self, Command, CommandSequence};
+use crate::ui::utils::{extract_widget, get_window_from_button};
 use gtk4::prelude::*;
-use gtk4::{ApplicationWindow, Builder, Button};
+use gtk4::{Builder, Button};
 use log::info;
 
 /// Set up all button handlers for the containers/VMs page.
@@ -32,7 +32,7 @@ fn setup_docker(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Docker button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -89,7 +89,7 @@ fn setup_podman(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("Podman button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -154,7 +154,7 @@ fn setup_vbox(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("VirtualBox button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -178,7 +178,7 @@ fn setup_distrobox(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("DistroBox button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -210,7 +210,7 @@ fn setup_kvm(builder: &Builder) {
     button.connect_clicked(move |btn| {
         info!("KVM button clicked");
 
-        let Some(window) = get_window(btn) else {
+        let Some(window) = get_window_from_button(btn) else {
             return;
         };
 
@@ -274,11 +274,4 @@ fn setup_kvm(builder: &Builder) {
 
         task_runner::run(window.upcast_ref(), commands.build(), "KVM / QEMU Setup");
     });
-}
-
-/// Helper to get the parent window from a button.
-fn get_window(button: &Button) -> Option<ApplicationWindow> {
-    button
-        .root()
-        .and_then(|root| root.downcast::<ApplicationWindow>().ok())
 }
