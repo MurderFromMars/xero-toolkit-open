@@ -30,8 +30,9 @@ fn setup_zsh_aio(builder: &Builder, window: &ApplicationWindow) {
     button.connect_clicked(move |_| {
         info!("ZSH AiO button clicked");
 
-        let home = std::env::var("HOME").unwrap_or_default();
-        let user = std::env::var("USER").unwrap_or_default();
+        let env = crate::config::env::get();
+        let home = env.home.clone();
+        let user = env.user.clone();
 
         let commands = CommandSequence::new()
             .then(Command::builder()
@@ -178,15 +179,15 @@ fn setup_grub_theme(builder: &Builder, window: &ApplicationWindow) {
     button.connect_clicked(move |_| {
         info!("GRUB Theme button clicked");
 
-        let home = std::env::var("HOME").unwrap_or_default();
+        let home = crate::config::env::get().home.clone();
         let repo_path = format!("{}/xero-grubs", home);
-        
+
         // Run everything in terminal - clone if needed, then run interactive install script
         let install_command = format!(
             "if [ ! -d \"{}\" ]; then git clone --depth 1 https://github.com/xerolinux/xero-grubs \"{}\"; fi && cd \"{}\" && pkexec ./install.sh",
             repo_path, repo_path, repo_path
         );
-        
+
         terminal::show_terminal_dialog(
             window.upcast_ref(),
             "XeroLinux GRUB Theme Installation",
@@ -228,7 +229,7 @@ fn setup_layan_patch(builder: &Builder, window: &ApplicationWindow) {
     button.connect_clicked(move |_| {
         info!("Layan GTK4 Patch button clicked");
 
-        let home = std::env::var("HOME").unwrap_or_default();
+        let home = crate::config::env::get().home.clone();
 
         let commands = CommandSequence::new()
             .then(

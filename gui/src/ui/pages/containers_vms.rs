@@ -33,7 +33,7 @@ fn setup_docker(builder: &Builder, window: &ApplicationWindow) {
     button.connect_clicked(move |_| {
         info!("Docker button clicked");
 
-        let user = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
+        let user = crate::config::env::get().user.clone();
 
         let commands = CommandSequence::new()
             .then(

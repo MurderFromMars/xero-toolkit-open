@@ -10,7 +10,7 @@ use adw::prelude::*;
 use adw::Application;
 use gtk4::glib;
 use gtk4::{gio, ApplicationWindow, Builder, CssProvider, Stack};
-use log::{info, warn};
+use log::{error, info, warn};
 
 /// Initialize and set up main application UI.
 pub fn setup_application_ui(app: &Application) {
@@ -22,6 +22,14 @@ pub fn setup_application_ui(app: &Application) {
     let window = create_main_window(app, &builder);
 
     window.present();
+
+    // Initialize environment variables
+    info!("Initializing environment variables");
+    if let Err(e) = config::env::init() {
+        error!("Failed to initialize environment variables: {}", e);
+        crate::ui::dialogs::error::show_error(&window, &format!("Failed to initialize environment variables: {}\n\nRequired environment variables (USER, HOME) are not set.", e));
+        return;
+    }
 
     info!("Checking system dependencies");
     if !core::check_system_requirements(&window) {

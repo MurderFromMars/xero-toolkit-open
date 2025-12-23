@@ -20,4 +20,5 @@ simple_logger = "5.1"
 anyhow = "1.0"
 libc = "0.2"
 clap = { version = "4", features = ["derive"] }
+pty = "0.2"
 

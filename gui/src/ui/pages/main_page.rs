@@ -9,11 +9,11 @@
 use crate::config;
 use crate::core;
 use crate::ui::dialogs::download::show_download_dialog;
-use crate::ui::dialogs::warning::show_warning_confirmation;
 use crate::ui::dialogs::selection::{
     show_selection_dialog, SelectionDialogConfig, SelectionOption,
 };
 use crate::ui::dialogs::terminal;
+use crate::ui::dialogs::warning::show_warning_confirmation;
 use crate::ui::task_runner::{self, Command, CommandSequence};
 use crate::ui::utils::extract_widget;
 use gtk4::prelude::*;
@@ -211,7 +211,7 @@ fn setup_install_nix(builder: &Builder, window: &ApplicationWindow) {
             "Experimental Feature Warning",
             move || {
                 info!("User confirmed Nix installation after warning");
-                
+
                 // Show selection dialog to choose installation type
                 let window_for_selection = window_clone.clone();
                 let config = SelectionDialogConfig::new(
@@ -231,12 +231,12 @@ fn setup_install_nix(builder: &Builder, window: &ApplicationWindow) {
                     false,
                 ))
                 .confirm_label("Continue");
-                
+
                 show_selection_dialog(window_clone.upcast_ref(), config, move |selected| {
                     if selected.is_empty() {
                         return;
                     }
-                    
+
                     // Get the selected installation type (should be only one)
                     let install_type = &selected[0];
                     let install_command = if install_type == "multi-user" {
@@ -246,10 +246,10 @@ fn setup_install_nix(builder: &Builder, window: &ApplicationWindow) {
                         info!("Installing Nix with single-user (no-daemon) mode");
                         "sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --no-daemon"
                     };
-                    
+
                     terminal::show_terminal_dialog(
                         window_for_selection.upcast_ref(),
-                        "Install Nix Package Manager",
+            "Install Nix Package Manager",
                         "sh",
                         &["-c", install_command],
                     );

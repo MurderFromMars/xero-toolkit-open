@@ -49,7 +49,7 @@ where
 
     let dialog_clone = dialog.clone();
     let on_confirm_rc = Rc::new(RefCell::new(Some(on_confirm)));
-    
+
     continue_button.connect_clicked(move |_| {
         info!("Warning dialog confirmed");
         if let Some(on_confirm) = on_confirm_rc.borrow_mut().take() {
@@ -61,4 +61,3 @@ where
     // Show the dialog
     dialog.present();
 }
-

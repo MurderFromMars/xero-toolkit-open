@@ -3,7 +3,12 @@
 //! Handles:
 //! - Tailscale VPN
 //! - ASUS ROG laptop tools
+//! - OpenRazer drivers
 
+use crate::core;
+use crate::ui::dialogs::selection::{
+    show_selection_dialog, SelectionDialogConfig, SelectionOption,
+};
 use crate::ui::task_runner::{self, Command, CommandSequence};
 use crate::ui::utils::extract_widget;
 use gtk4::prelude::*;
@@ -14,6 +19,7 @@ use log::info;
 pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &ApplicationWindow) {
     setup_tailscale(page_builder, window);
     setup_asus_rog(page_builder, window);
+    setup_openrazer(page_builder, window);
 }
 
 fn setup_tailscale(builder: &Builder, window: &ApplicationWindow) {
@@ -73,4 +79,104 @@ fn setup_asus_rog(builder: &Builder, window: &ApplicationWindow) {
 
         task_runner::run(window.upcast_ref(), commands, "Install ASUS ROG Tools");
     });
+}
+
+fn setup_openrazer(builder: &Builder, window: &ApplicationWindow) {
+    let button = extract_widget::<Button>(builder, "btn_openrazer");
+    let window = window.clone();
+
+    button.connect_clicked(move |_| {
+        info!("OpenRazer Drivers button clicked");
+
+        // Show selection dialog for optional frontends
+        let window_clone = window.clone();
+        let config = SelectionDialogConfig::new(
+            "OpenRazer Drivers & Frontend",
+            "OpenRazer drivers will be installed. Optionally select a frontend application for managing your Razer devices.",
+        )
+        .add_option(SelectionOption::new(
+            "polychromatic",
+            "Polychromatic",
+            "Graphical frontend for managing Razer devices (GTK-based)",
+            core::is_package_installed("polychromatic"),
+        ))
+        .add_option(SelectionOption::new(
+            "razergenie",
+            "RazerGenie",
+            "Graphical frontend for managing Razer devices (Qt-based)",
+            core::is_package_installed("razergenie"),
+        ))
+        .confirm_label("Install");
+
+        show_selection_dialog(window.upcast_ref(), config, move |selected| {
+            let commands = build_openrazer_commands(&selected);
+            task_runner::run(
+                window_clone.upcast_ref(),
+                commands,
+                "Install OpenRazer Drivers (Reboot Required)",
+            );
+        });
+    });
+}
+
+/// Build commands for OpenRazer installation.
+fn build_openrazer_commands(selected_frontends: &[String]) -> CommandSequence {
+    let user = crate::config::env::get().user.clone();
+    let mut commands = CommandSequence::new();
+
+    // Always install openrazer-meta-git
+    commands = commands.then(
+        Command::builder()
+            .aur()
+            .args(&["-S", "--noconfirm", "--needed", "openrazer-meta-git"])
+            .description("Installing OpenRazer drivers...")
+            .build(),
+    );
+
+    // Add user to plugdev group
+    commands = commands.then(
+        Command::builder()
+            .privileged()
+            .program("usermod")
+            .args(&["-aG", "plugdev", &user])
+            .description("Adding user to plugdev group...")
+            .build(),
+    );
+
+    // Add informational message about reboot requirement
+    commands = commands.then(
+        Command::builder()
+            .normal()
+            .program("echo")
+            .args(&[
+                "⚠️ IMPORTANT: Please reboot your system for the DKMS module to load properly.",
+            ])
+            .description(
+                "⚠️ IMPORTANT: Please reboot your system for the DKMS module to load properly.",
+            )
+            .build(),
+    );
+
+    // Optionally install selected frontends
+    if selected_frontends.contains(&"polychromatic".to_string()) {
+        commands = commands.then(
+            Command::builder()
+                .aur()
+                .args(&["-S", "--noconfirm", "--needed", "polychromatic"])
+                .description("Installing Polychromatic frontend...")
+                .build(),
+        );
+    }
+
+    if selected_frontends.contains(&"razergenie".to_string()) {
+        commands = commands.then(
+            Command::builder()
+                .aur()
+                .args(&["-S", "--noconfirm", "--needed", "razergenie"])
+                .description("Installing RazerGenie frontend...")
+                .build(),
+        );
+    }
+
+    commands
 }

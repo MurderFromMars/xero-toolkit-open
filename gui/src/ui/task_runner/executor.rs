@@ -10,6 +10,7 @@ use super::command::{Command, CommandResult, CommandType, TaskStatus};
 use super::widgets::TaskRunnerWidgets;
 use crate::core;
 use crate::core::daemon::get_xero_auth_path;
+use crate::ui::utils::strip_ansi_codes;
 use gtk4::gio;
 use gtk4::glib;
 use log::{error, info, warn};
@@ -257,11 +258,13 @@ pub fn execute_commands(
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
         // Process stdout
         while let Ok(text) = stdout_rx.try_recv() {
-            widgets_stdout.append_timestamped(&format!("{}\n", text), "stdout");
+            let cleaned_text = strip_ansi_codes(&text);
+            widgets_stdout.append_timestamped(&format!("{}\n", cleaned_text), "stdout");
         }
         // Process stderr
         while let Ok(text) = stderr_rx.try_recv() {
-            widgets_stderr.append_timestamped(&format!("{}\n", text), "stderr");
+            let cleaned_text = strip_ansi_codes(&text);
+            widgets_stderr.append_timestamped(&format!("{}\n", cleaned_text), "stderr");
         }
         // Stop if result is ready
         if result_arc_for_output.lock().unwrap().is_some() {

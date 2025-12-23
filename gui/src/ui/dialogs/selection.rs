@@ -173,9 +173,7 @@ where
             selected.len()
         );
 
-        if !selected.is_empty() {
-            on_confirm(selected);
-        }
+        on_confirm(selected);
 
         dialog_clone.close();
     });

@@ -84,7 +84,7 @@ pub fn show_download_dialog(parent: &Window) {
                         // Set default download path
                         let default_path = format!(
                             "{}/Downloads/{}",
-                            std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string()),
+                            crate::config::env::get().home.clone(),
                             iso_name
                         );
                         download_path_entry_clone.set_text(&default_path);
