@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<interface>
+    <requires lib="gtk" version="4.0" />
+    <requires lib="adw" version="1.0" />
+
+    <object class="AdwWindow" id="warning_dialog">
+        <property name="title">Xero Toolkit - Warning</property>
+        <property name="default-width">520</property>
+        <property name="default-height">300</property>
+        <property name="modal">true</property>
+        <property name="resizable">false</property>
+
+        <property name="content">
+            <object class="AdwToolbarView">
+                <child type="top">
+                    <object class="AdwHeaderBar">
+                        <property name="show-title">true</property>
+                        <property name="show-end-title-buttons">true</property>
+                    </object>
+                </child>
+
+                <property name="content">
+                    <object class="GtkBox" id="warning_root_box">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">20</property>
+                        <property name="margin-top">28</property>
+                        <property name="margin-bottom">28</property>
+                        <property name="margin-start">30</property>
+                        <property name="margin-end">30</property>
+
+                        <child>
+                            <object class="GtkBox" id="warning_title_box">
+                                <property name="orientation">horizontal</property>
+                                <property name="spacing">10</property>
+                                <property name="halign">center</property>
+                                <child>
+                                    <object class="GtkImage" id="warning_icon">
+                                        <property name="icon-name">triangle-exclamation-symbolic</property>
+                                        <property name="pixel-size">40</property>
+                                    </object>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel" id="dialog_heading">
+                                        <property name="label">Experimental Feature Warning</property>
+                                        <property name="halign">center</property>
+                                        <style>
+                                            <class name="title-2" />
+                                        </style>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkLabel" id="warning_message">
+                                <property name="use-markup">true</property>
+                                <property name="wrap">true</property>
+                                <property name="justify">center</property>
+                                <property name="halign">center</property>
+                                <property name="label"><![CDATA[]]></property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkBox" id="warning_button_box">
+                                <property name="orientation">horizontal</property>
+                                <property name="halign">center</property>
+                                <property name="spacing">12</property>
+                                <child>
+                                    <object class="GtkButton" id="cancel_button">
+                                        <property name="label">Cancel</property>
+                                        <property name="width-request">100</property>
+                                    </object>
+                                </child>
+                                <child>
+                                    <object class="GtkButton" id="continue_button">
+                                        <property name="label">Continue</property>
+                                        <property name="width-request">100</property>
+                                        <style>
+                                            <class name="suggested-action" />
+                                        </style>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </property>
+            </object>
+        </property>
+    </object>
+</interface>
+

@@ -12,3 +12,4 @@ pub mod download;
 pub mod error;
 pub mod selection;
 pub mod terminal;
+pub mod warning;
