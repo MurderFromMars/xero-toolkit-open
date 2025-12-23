@@ -3,9 +3,9 @@
 //! Command-line client for testing the authentication daemon.
 
 use anyhow::{Context, Result};
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::UnixStream;
 use xero_auth::protocol::{ClientMessage, DaemonMessage};
+use xero_auth::protocol_io::{read_message, write_message};
 use xero_auth::shared::{get_socket_path, is_daemon_running};
 
 struct Client {
@@ -38,34 +38,21 @@ impl Client {
         G: Fn(&str),
     {
         let (mut reader, mut writer) = self.stream.split();
-        let mut buf_reader = BufReader::new(&mut reader);
 
+        // Write request message
         let message = ClientMessage::Execute {
             program: program.to_string(),
             args: args.iter().map(|s| s.to_string()).collect(),
             working_dir: working_dir.map(|s| s.to_string()),
         };
+        write_message(&mut writer, &message).await?;
 
-        let request = serde_json::to_string(&message)? + "\n";
-        writer.write_all(request.as_bytes()).await?;
-
-        let mut line = String::new();
         let mut exit_code = None;
 
         loop {
-            line.clear();
-            let bytes_read = buf_reader.read_line(&mut line).await?;
-
-            if bytes_read == 0 {
-                break;
-            }
-
-            let response: DaemonMessage = match serde_json::from_str(line.trim()) {
-                Ok(msg) => msg,
-                Err(e) => {
-                    log::warn!("Failed to parse daemon response: {}", e);
-                    continue;
-                }
+            let response = match read_message::<_, DaemonMessage>(&mut reader).await? {
+                Some(msg) => msg,
+                None => break, // EOF
             };
 
             match response {

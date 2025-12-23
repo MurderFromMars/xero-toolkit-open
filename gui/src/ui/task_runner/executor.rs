@@ -10,7 +10,7 @@ use super::command::{Command, CommandResult, CommandType, TaskStatus};
 use super::widgets::TaskRunnerWidgets;
 use crate::core;
 use crate::core::daemon::get_xero_auth_path;
-use crate::ui::utils::strip_ansi_codes;
+use xero_auth::utils::read_buffer_with_line_processing;
 use gtk4::gio;
 use gtk4::glib;
 use log::{error, info, warn};
@@ -150,7 +150,6 @@ pub fn execute_commands(
     info!("Executing: {} {:?}", program, args);
 
     // Use std::process for real-time output streaming
-    use std::io::{BufRead, BufReader};
     use std::process::{Command, Stdio};
     use std::sync::Arc;
     use std::thread;
@@ -207,21 +206,21 @@ pub fn execute_commands(
         .and_then(|c| c.stdout.take())
         .map(|stdout| {
             thread::spawn(move || {
-                let reader = BufReader::new(stdout);
-                for line in reader.lines() {
-                    match line {
-                        Ok(text) => {
-                            if let Err(e) = stdout_tx.send(text) {
-                                warn!("Failed to send stdout line to channel: {}", e);
-                                break;
+                read_buffer_with_line_processing(
+                    stdout,
+                    |text| {
+                        match stdout_tx.send(text) {
+                            Ok(()) => true,
+                            Err(e) => {
+                                warn!("Failed to send stdout chunk to channel: {}", e);
+                                false
                             }
                         }
-                        Err(_) => {
-                            // End of stream or error
-                            break;
-                        }
-                    }
-                }
+                    },
+                    |e| {
+                        warn!("Error reading stdout: {}", e);
+                    },
+                );
             })
         });
 
@@ -233,21 +232,21 @@ pub fn execute_commands(
         .and_then(|c| c.stderr.take())
         .map(|stderr| {
             thread::spawn(move || {
-                let reader = BufReader::new(stderr);
-                for line in reader.lines() {
-                    match line {
-                        Ok(text) => {
-                            if let Err(e) = stderr_tx.send(text) {
-                                warn!("Failed to send stderr line to channel: {}", e);
-                                break;
+                read_buffer_with_line_processing(
+                    stderr,
+                    |text| {
+                        match stderr_tx.send(text) {
+                            Ok(()) => true,
+                            Err(e) => {
+                                warn!("Failed to send stderr chunk to channel: {}", e);
+                                false
                             }
                         }
-                        Err(_) => {
-                            // End of stream or error
-                            break;
-                        }
-                    }
-                }
+                    },
+                    |e| {
+                        warn!("Error reading stderr: {}", e);
+                    },
+                );
             })
         });
 
@@ -258,13 +257,15 @@ pub fn execute_commands(
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
         // Process stdout
         while let Ok(text) = stdout_rx.try_recv() {
-            let cleaned_text = strip_ansi_codes(&text);
-            widgets_stdout.append_timestamped(&format!("{}\n", cleaned_text), "stdout");
+            let cleaned_text = strip_ansi_escapes::strip_str(&text);
+            // Text already includes newline from buffer processing
+            widgets_stdout.append_colored(&cleaned_text, "stdout");
         }
         // Process stderr
         while let Ok(text) = stderr_rx.try_recv() {
-            let cleaned_text = strip_ansi_codes(&text);
-            widgets_stderr.append_timestamped(&format!("{}\n", cleaned_text), "stderr");
+            let cleaned_text = strip_ansi_escapes::strip_str(&text);
+            // Text already includes newline from buffer processing
+            widgets_stderr.append_colored(&cleaned_text, "stderr");
         }
         // Stop if result is ready
         if result_arc_for_output.lock().unwrap().is_some() {

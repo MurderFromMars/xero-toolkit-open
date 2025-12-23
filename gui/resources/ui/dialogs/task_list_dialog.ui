@@ -6,8 +6,8 @@
     <object class="AdwWindow" id="task_window">
         <property name="title">Xero Toolkit - Operation in Progress</property>
         <property name="icon-name">xero-toolkit</property>
-        <property name="default-width">600</property>
-        <property name="default-height">500</property>
+        <property name="default-width">680</property>
+        <property name="default-height">650</property>
         <property name="modal">true</property>
 
         <property name="content">

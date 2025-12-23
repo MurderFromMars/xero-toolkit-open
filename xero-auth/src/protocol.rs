@@ -1,9 +1,9 @@
 //! Protocol definitions for communication between client and daemon.
 
-use serde::{Deserialize, Serialize};
+use rkyv::{Archive, Deserialize, Serialize};
 
 /// Message sent from client to daemon.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Archive, Serialize, Deserialize)]
 pub enum ClientMessage {
     /// Execute a command with arguments.
     Execute {
@@ -18,7 +18,7 @@ pub enum ClientMessage {
 }
 
 /// Message sent from daemon to client.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Archive, Serialize, Deserialize)]
 pub enum DaemonMessage {
     /// Command output (stdout line).
     Output(String),

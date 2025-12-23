@@ -1,7 +1,9 @@
 //! Daemon implementation that runs as root and executes commands.
 
 use crate::protocol::{ClientMessage, DaemonMessage};
+use crate::protocol_io::{read_message, write_message};
 use crate::shared::{get_socket_path, is_process_running};
+use crate::utils::read_buffer_with_line_processing;
 use anyhow::{Context, Result};
 use log::{error, info, warn};
 use pty::fork::Fork;
@@ -10,7 +12,6 @@ use std::os::unix::fs::PermissionsExt;
 use std::os::unix::process::CommandExt;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::{UnixListener, UnixStream};
 use tokio::sync::Mutex;
 
@@ -180,24 +181,16 @@ fn spawn_signal_handler(shutdown: Arc<AtomicBool>) {
     });
 }
 
+
 async fn handle_client(
     mut stream: UnixStream,
     shutdown: Arc<AtomicBool>,
     parent_pid: Option<u32>,
 ) -> Result<()> {
     let (mut reader, writer) = stream.split();
-    let mut buf_reader = BufReader::new(&mut reader);
-    let mut line = String::new();
     let writer_arc = Arc::new(Mutex::new(writer));
 
     loop {
-        line.clear();
-        let bytes_read = buf_reader.read_line(&mut line).await?;
-
-        if bytes_read == 0 {
-            break;
-        }
-
         if shutdown.load(Ordering::SeqCst) {
             break;
         }
@@ -208,28 +201,27 @@ async fn handle_client(
                     "Parent process {} is no longer running, rejecting command",
                     pid
                 );
-                send_error(&writer_arc, "Parent process is no longer running").await?;
+                let mut w = writer_arc.lock().await;
+                write_message(&mut *w, &DaemonMessage::ErrorMessage("Parent process is no longer running".to_string())).await?;
                 shutdown.store(true, Ordering::SeqCst);
                 break;
             }
         }
 
-        let message: ClientMessage = match serde_json::from_str(line.trim()) {
-            Ok(msg) => msg,
-            Err(e) => {
-                warn!("Failed to parse message: {}", e);
-                send_error(&writer_arc, &format!("Failed to parse message: {}", e)).await?;
-                continue;
-            }
+        let message = match read_message(&mut reader).await? {
+            Some(msg) => msg,
+            None => break, // EOF
         };
 
         match message {
             ClientMessage::Ping => {
-                send_message(&writer_arc, &DaemonMessage::Pong).await?;
+                let mut w = writer_arc.lock().await;
+                write_message(&mut *w, &DaemonMessage::Pong).await?;
             }
             ClientMessage::Shutdown => {
                 info!("Received shutdown request from client");
-                send_message(&writer_arc, &DaemonMessage::ShutdownAck).await?;
+                let mut w = writer_arc.lock().await;
+                write_message(&mut *w, &DaemonMessage::ShutdownAck).await?;
                 shutdown.store(true, Ordering::SeqCst);
                 break;
             }
@@ -244,23 +236,6 @@ async fn handle_client(
     }
 
     Ok(())
-}
-
-async fn send_message(
-    writer: &Arc<Mutex<tokio::net::unix::WriteHalf<'_>>>,
-    message: &DaemonMessage,
-) -> Result<()> {
-    let response = serde_json::to_string(message)? + "\n";
-    let mut w = writer.lock().await;
-    w.write_all(response.as_bytes()).await?;
-    Ok(())
-}
-
-async fn send_error(
-    writer: &Arc<Mutex<tokio::net::unix::WriteHalf<'_>>>,
-    error: &str,
-) -> Result<()> {
-    send_message(writer, &DaemonMessage::ErrorMessage(error.to_string())).await
 }
 
 async fn execute_command(
@@ -289,7 +264,8 @@ async fn execute_command(
         }
         Fork::Parent(pid, master) => {
             let exit_code = read_pty_output(writer.clone(), master, pid).await?;
-            send_message(writer, &DaemonMessage::Completed { exit_code }).await?;
+            let mut w = writer.lock().await;
+            write_message(&mut *w, &DaemonMessage::Completed { exit_code }).await?;
         }
     }
 
@@ -304,27 +280,17 @@ async fn read_pty_output(
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<Result<String, std::io::Error>>();
 
     let read_handle = tokio::task::spawn_blocking(move || {
-        use std::io::{BufRead, BufReader};
-        let mut reader = BufReader::new(master);
-        let mut line = String::new();
-
-        loop {
-            line.clear();
-            match reader.read_line(&mut line) {
-                Ok(0) => break,
-                Ok(_) => {
-                    if tx.send(Ok(line.clone())).is_err() {
-                        break;
-                    }
-                }
-                Err(e) => {
-                    if e.kind() != std::io::ErrorKind::Interrupted {
-                        let _ = tx.send(Err(e));
-                        break;
-                    }
-                }
-            }
-        }
+        read_buffer_with_line_processing(
+            master,
+            |text| {
+                // Send successful chunk
+                tx.send(Ok(text)).is_ok()
+            },
+            |e| {
+                // Send error
+                let _ = tx.send(Err(e));
+            },
+        );
     });
 
     let writer_output = writer.clone();
@@ -333,11 +299,8 @@ async fn read_pty_output(
             match result {
                 Ok(line) => {
                     let msg = DaemonMessage::Output(line);
-                    if let Ok(response) = serde_json::to_string(&msg) {
-                        let response = response + "\n";
-                        let mut w = writer_output.lock().await;
-                        let _ = w.write_all(response.as_bytes()).await;
-                    }
+                    let mut w = writer_output.lock().await;
+                    let _ = write_message(&mut *w, &msg).await;
                 }
                 Err(e) => {
                     if e.kind() != std::io::ErrorKind::UnexpectedEof {

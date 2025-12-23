@@ -5,7 +5,9 @@
 
 pub mod daemon;
 pub mod protocol;
+pub mod protocol_io;
 pub mod shared;
+pub mod utils;
 
 pub use daemon::run_daemon;
 pub use shared::{get_socket_path, is_daemon_running, wait_for_socket};

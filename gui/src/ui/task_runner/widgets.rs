@@ -297,52 +297,6 @@ impl TaskRunnerWidgets {
         self.scroll_to_bottom();
     }
 
-    /// Append text with timestamp and color tag.
-    pub fn append_timestamped(&self, text: &str, tag_name: &str) {
-        use std::time::SystemTime;
-
-        let timestamp = SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| {
-                let secs = d.as_secs();
-                let hours = (secs / 3600) % 24;
-                let minutes = (secs / 60) % 60;
-                let seconds = secs % 60;
-                format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
-            })
-            .unwrap_or_else(|_| "??:??:??".to_string());
-
-        // Get start position (character offset) before insertion
-        let start_offset = self.output_text_buffer.end_iter().offset();
-
-        // Insert timestamp and text together
-        let timestamp_text = format!("[{}] ", timestamp);
-        let full_text = format!("{}{}", timestamp_text, text);
-        let mut end = self.output_text_buffer.end_iter();
-        self.output_text_buffer.insert(&mut end, &full_text);
-
-        // Get fresh iterators after insertion
-        let timestamp_start = self.output_text_buffer.iter_at_offset(start_offset);
-        let timestamp_end = self
-            .output_text_buffer
-            .iter_at_offset(start_offset + timestamp_text.len() as i32);
-        let text_start = timestamp_end;
-        let text_end = self.output_text_buffer.end_iter();
-
-        // Apply timestamp tag
-        if let Some(tag) = self.output_text_buffer.tag_table().lookup("timestamp") {
-            self.output_text_buffer
-                .apply_tag(&tag, &timestamp_start, &timestamp_end);
-        }
-
-        // Apply color tag
-        if let Some(tag) = self.output_text_buffer.tag_table().lookup(tag_name) {
-            self.output_text_buffer
-                .apply_tag(&tag, &text_start, &text_end);
-        }
-
-        self.scroll_to_bottom();
-    }
 
     /// Append a command header.
     pub fn append_command_header(&self, description: &str) {
