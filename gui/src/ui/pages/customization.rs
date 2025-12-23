@@ -4,7 +4,7 @@
 //! - ZSH All-in-One setup
 //! - Save Desktop tool
 //! - GRUB theme installation
-//! - Plasma wallpapers
+//! - Plymouth Manager
 //! - Layan GTK4 patch
 
 use crate::ui::dialogs::terminal;
@@ -19,7 +19,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_zsh_aio(page_builder, window);
     setup_save_desktop(page_builder, window);
     setup_grub_theme(page_builder, window);
-    setup_wallpapers(page_builder, window);
+    setup_plymouth_manager(page_builder, window);
     setup_layan_patch(page_builder, window);
 }
 
@@ -197,27 +197,18 @@ fn setup_grub_theme(builder: &Builder, window: &ApplicationWindow) {
     });
 }
 
-fn setup_wallpapers(builder: &Builder, window: &ApplicationWindow) {
-    let button = extract_widget::<Button>(builder, "btn_wallpapers");
+fn setup_plymouth_manager(builder: &Builder, window: &ApplicationWindow) {
+    let button = extract_widget::<Button>(builder, "btn_plymouth_manager");
     let window = window.clone();
 
     button.connect_clicked(move |_| {
-        info!("Plasma Wallpapers button clicked");
+        info!("Plymouth Manager button clicked");
 
-        let commands = CommandSequence::new()
-            .then(
-                Command::builder()
-                    .aur()
-                    .args(&["-S", "--noconfirm", "--needed", "kde-wallpapers-extra"])
-                    .description("Installing KDE wallpapers collection (~1.2GB)...")
-                    .build(),
-            )
-            .build();
-
-        task_runner::run(
+        terminal::show_terminal_dialog(
             window.upcast_ref(),
-            commands,
-            "Plasma Wallpapers Installation (~1.2GB)",
+            "Plymouth Manager",
+            "/usr/local/bin/xpm",
+            &[],
         );
     });
 }

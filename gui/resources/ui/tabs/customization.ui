@@ -94,7 +94,7 @@
                     </object>
                 </child>
 
-                <!-- Row 2: GRUB Theme, Wallpapers, Layan Patch -->
+                <!-- Row 2: GRUB Theme, Plymouth Manager, Layan Patch -->
                 <child>
                     <object class="GtkBox">
                         <property name="orientation">horizontal</property>
@@ -113,10 +113,10 @@
                         </child>
 
                         <child>
-                            <object class="GtkButton" id="btn_wallpapers">
+                            <object class="GtkButton" id="btn_plymouth_manager">
                                 <property
                                     name="label"
-                                >Plasma Wallpapers</property>
+                                >Plymouth Manager</property>
                                 <property name="width-request">200</property>
                                 <property name="height-request">50</property>
                                 <property
