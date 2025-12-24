@@ -273,6 +273,8 @@ pub fn run(parent: &Window, commands: CommandSequence, title: &str) {
     if needs_daemon {
         if let Err(e) = crate::core::daemon::start_daemon() {
             error!("Failed to start daemon: {}", e);
+            let error_msg = format!("Failed to start authentication daemon: {}\n", e);
+            widgets.append_colored(&error_msg, "error");
             widgets.set_title(&format!("Failed to start authentication daemon: {}", e));
             widgets.show_completion(false, "Failed to start authentication daemon");
             return;

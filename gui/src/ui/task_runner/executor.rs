@@ -75,9 +75,12 @@ impl RunningContext {
             return;
         }
 
-        // Handle result normally
+        // Handle result and print exit code to terminal
         match result {
             CommandResult::Success => {
+                // Print exit code for successful command
+                self.widgets.append_colored("\n[Exit code: 0]\n", "stdout");
+
                 self.widgets
                     .update_task_status(self.index, TaskStatus::Success);
                 execute_commands(
@@ -88,15 +91,26 @@ impl RunningContext {
                     self.current_process.clone(),
                 );
             }
-            CommandResult::Failure { .. } => {
+            CommandResult::Failure { exit_code } => {
+                // Print exit code for failed command
+                let exit_msg = match exit_code {
+                    Some(code) => format!("\n[Exit code: {}]\n", code),
+                    None => "\n[Exit code: unknown]\n".to_string(),
+                };
+                self.widgets.append_colored(&exit_msg, "stderr");
+
                 self.widgets
                     .update_task_status(self.index, TaskStatus::Failed);
 
-                // Only show error in title, not the full error message
+                // Include exit code in error message if available
+                let exit_msg = exit_code
+                    .map(|code| format!(" (exit code: {})", code))
+                    .unwrap_or_default();
                 let final_message = format!(
-                    "Operation failed at step {} of {}",
+                    "Operation failed at step {} of {}{}",
                     self.index + 1,
-                    self.commands.len()
+                    self.commands.len(),
+                    exit_msg
                 );
 
                 finalize_execution(&self.widgets, false, &final_message);
@@ -137,6 +151,8 @@ pub fn execute_commands(
         Ok(result) => result,
         Err(err) => {
             error!("Failed to prepare command: {}", err);
+            let error_msg = format!("Failed to prepare command: {}\n", err);
+            widgets.append_colored(&error_msg, "error");
             widgets.update_task_status(index, TaskStatus::Failed);
             finalize_execution(
                 &widgets,
@@ -175,6 +191,8 @@ pub fn execute_commands(
         Ok(child) => child,
         Err(err) => {
             error!("Failed to start command: {}", err);
+            let error_msg = format!("Failed to start operation: {}\n", err);
+            widgets.append_colored(&error_msg, "error");
             widgets.update_task_status(index, TaskStatus::Failed);
             finalize_execution(
                 &widgets,
@@ -297,18 +315,12 @@ pub fn execute_commands(
                     } else {
                         CommandResult::Failure {
                             exit_code: status.code(),
-                            stdout: None, // Already streamed
-                            stderr: None, // Already streamed
                         }
                     }
                 }
                 Err(e) => {
                     error!("Error waiting for process: {}", e);
-                    CommandResult::Failure {
-                        exit_code: None,
-                        stdout: None,
-                        stderr: None,
-                    }
+                    CommandResult::Failure { exit_code: None }
                 }
             };
             *result_arc_clone.lock().unwrap() = Some(result);
@@ -375,6 +387,15 @@ pub fn finalize_execution(widgets: &TaskRunnerWidgets, success: bool, message: &
 
     // Stop daemon before finalizing
     stop_daemon_if_needed();
+
+    // Print final message to terminal
+    if success {
+        let success_msg = format!("\n{}\n", message);
+        widgets.append_colored(&success_msg, "stdout");
+    } else {
+        let error_msg = format!("\n{}\n", message);
+        widgets.append_colored(&error_msg, "error");
+    }
 
     super::ACTION_RUNNING.store(false, Ordering::SeqCst);
     widgets.show_completion(success, message);
