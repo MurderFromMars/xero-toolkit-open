@@ -28,6 +28,8 @@ impl AppContext {
 #[derive(Clone)]
 pub struct UiComponents {
     pub stack: Stack,
+    #[allow(dead_code)]
+    // Stored for potential future use, currently only used during initialization
     pub tabs_container: GtkBox,
     pub main_split_view: adw::OverlaySplitView,
     pub sidebar_toggle: ToggleButton,
@@ -73,17 +75,5 @@ impl UiComponents {
                 };
                 toggle.set_tooltip_text(Some(tooltip));
             });
-    }
-
-    /// Get the tabs container for tab management.
-    #[allow(dead_code)]
-    pub fn tabs_container(&self) -> &GtkBox {
-        &self.tabs_container
-    }
-
-    /// Get the stack widget for page navigation.
-    #[allow(dead_code)]
-    pub fn stack(&self) -> &Stack {
-        &self.stack
     }
 }

@@ -15,6 +15,7 @@ pub struct TaskRunnerWidgets {
     pub window: Window,
     pub title_label: Label,
     #[allow(dead_code)]
+    // Stored for potential future use, currently only used during initialization
     pub task_list_container: GtkBox,
     pub scrolled_window: ScrolledWindow,
     pub cancel_button: Button,
@@ -271,12 +272,6 @@ impl TaskRunnerWidgets {
         self.enable_close();
     }
 
-    /// Clear the output buffer.
-    #[allow(dead_code)] // Useful API method for future use
-    pub fn clear_output(&self) {
-        self.output_text_buffer.set_text("");
-    }
-
     /// Append text with a specific color tag.
     pub fn append_colored(&self, text: &str, tag_name: &str) {
         // Get start position before insertion
@@ -309,13 +304,6 @@ impl TaskRunnerWidgets {
         let _ = self
             .output_text_view
             .scroll_to_iter(&mut end, 0.0, false, 0.0, 0.0);
-    }
-
-    /// Toggle the sidebar visibility.
-    #[allow(dead_code)] // Useful API method for future use
-    pub fn toggle_sidebar(&self) {
-        self.sidebar_toggle
-            .set_active(!self.sidebar_toggle.is_active());
     }
 
     /// Initialize sidebar to collapsed state.

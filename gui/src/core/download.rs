@@ -13,10 +13,6 @@ pub struct DownloadState {
     pub downloaded: u64,
     pub total: u64,
     pub speed: f64, // bytes per second
-    #[allow(dead_code)]
-    pub is_paused: bool,
-    #[allow(dead_code)]
-    pub is_cancelled: bool,
 }
 
 /// Fetch the latest Arch Linux ISO information
@@ -154,8 +150,6 @@ where
                 downloaded,
                 total: total_size,
                 speed: avg_speed,
-                is_paused: pause_flag.load(Ordering::Relaxed),
-                is_cancelled: cancel_flag.load(Ordering::Relaxed),
             };
 
             progress_callback(state);
@@ -173,8 +167,6 @@ where
         downloaded,
         total: total_size,
         speed: 0.0,
-        is_paused: false,
-        is_cancelled: false,
     };
     progress_callback(state);
 
