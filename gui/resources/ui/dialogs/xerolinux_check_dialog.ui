@@ -11,6 +11,7 @@
         <property name="default-width">400</property>
         <property name="default-height">250</property>
         <property name="modal">true</property>
+        <property name="resizable">false</property>
 
         <property name="content">
             <object class="AdwToolbarView">
@@ -97,6 +98,7 @@
                                 <property name="use-markup">true</property>
                                 <property name="halign">center</property>
                                 <property name="margin-top">10</property>
+                                <property name="vexpand">true</property>
                             </object>
                         </child>
 

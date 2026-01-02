@@ -57,6 +57,7 @@
                                 <property name="wrap">true</property>
                                 <property name="justify">center</property>
                                 <property name="halign">center</property>
+                                <property name="vexpand">true</property>
                                 <property name="label"><![CDATA[]]></property>
                             </object>
                         </child>

@@ -72,6 +72,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">15</property>
                                 <property name="margin-top">10</property>
+                                <property name="vexpand">true</property>
 
                                 <!-- UI Design Credit -->
                                 <child>

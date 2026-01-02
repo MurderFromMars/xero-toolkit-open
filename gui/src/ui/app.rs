@@ -31,17 +31,6 @@ pub fn setup_application_ui(app: &Application) {
         return;
     }
 
-    info!("Checking system dependencies");
-    if !core::check_system_requirements(&window) {
-        warn!("Dependency check failed - application will not continue");
-        return;
-    }
-
-    // Initialize AUR helper after dependency checks pass
-    if core::aur::init() {
-        info!("AUR helper initialized successfully");
-    }
-    info!("Dependency check passed");
 
     // Extract tabs_container first for stack creation
     let tabs_container = extract_widget(&builder, "tabs_container");
@@ -59,6 +48,22 @@ pub fn setup_application_ui(app: &Application) {
 
     // Apply seasonal effects (snow for December, Halloween for October, etc.)
     crate::ui::seasonal::apply_seasonal_effects(&window);
+
+    // Perform system checks after UI is ready
+    let window_clone = window.clone();
+    glib::idle_add_local(move || {
+        info!("Checking system dependencies");
+        if !core::check_system_requirements(&window_clone) {
+            warn!("Dependency check failed - application will not continue");
+        } else {
+            // Initialize AUR helper after dependency checks pass
+            if core::aur::init() {
+                info!("AUR helper initialized successfully");
+            }
+            info!("Dependency check passed");
+        }
+        glib::ControlFlow::Break
+    });
 
     info!("Xero Toolkit application startup complete");
 }

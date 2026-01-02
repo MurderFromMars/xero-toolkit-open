@@ -29,7 +29,6 @@
                         <property name="margin-start">32</property>
                         <property name="margin-end">32</property>
                         <property name="vexpand">true</property>
-                        <property name="valign">center</property>
 
                         <!-- Title -->
                         <child>
@@ -73,6 +72,8 @@
                                 <property name="css-classes">dim-label</property>
                                 <property name="halign">center</property>
                                 <property name="margin-top">8</property>
+                                <property name="vexpand">true</property>
+                                <property name="valign">end</property>
                             </object>
                         </child>
 
