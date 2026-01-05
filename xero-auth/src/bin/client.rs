@@ -104,7 +104,17 @@ async fn main() {
         std::process::exit(1);
     }
 
-    let args = Args::parse();
+    let mut args = Args::parse();
+
+    // Capture current environment variables
+    let mut env_vars = Vec::new();
+    for (key, value) in std::env::vars() {
+        env_vars.push(format!("{}={}", key, value));
+    }
+
+    // Prepend inherited environment variables so explicit --env overrides them
+    env_vars.extend(args.env);
+    args.env = env_vars;
 
     let mut client = match Client::new().await {
         Ok(client) => client,

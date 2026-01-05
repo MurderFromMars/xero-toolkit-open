@@ -52,9 +52,7 @@ fn setup_zsh_aio(builder: &Builder, window: &ApplicationWindow) {
                 .program("sh")
                 .args(&[
                     "-c",
-                    "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)",
-                    "",
-                    "--unattended",
+                    "curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh -s -- --unattended",
                 ])
                 .description("Installing Oh My Zsh framework...")
                 .build())
