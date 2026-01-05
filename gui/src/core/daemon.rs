@@ -71,26 +71,12 @@ pub fn start_daemon() -> Result<()> {
 }
 
 pub async fn stop_daemon() -> Result<()> {
-    use tokio::net::UnixStream;
-    use xero_auth::protocol::{ClientMessage, DaemonMessage};
-    use xero_auth::protocol_io::{read_message, write_message};
-    use xero_auth::shared::get_socket_path;
+    use xero_auth::Client;
 
     if is_daemon_running() {
-        if let Ok(socket_path) = get_socket_path(None) {
-            if let Ok(mut stream) = UnixStream::connect(&socket_path).await {
-                let (mut reader, mut writer) = stream.split();
-
-                // Send shutdown message
-                let message = ClientMessage::Shutdown;
-                if let Err(e) = write_message(&mut writer, &message).await {
-                    warn!("Failed to send shutdown message to daemon: {}", e);
-                } else {
-                    // Read shutdown acknowledgment
-                    if let Err(e) = read_message::<_, DaemonMessage>(&mut reader).await {
-                        warn!("Failed to read shutdown acknowledgment from daemon: {}", e);
-                    }
-                }
+        if let Ok(mut client) = Client::new().await {
+            if let Err(e) = client.shutdown().await {
+                warn!("Failed to shutdown daemon: {}", e);
             }
         }
     }
