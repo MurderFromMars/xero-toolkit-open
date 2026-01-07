@@ -3,8 +3,8 @@
 //! Command-line client for testing the authentication daemon.
 
 use clap::Parser;
-use xero_auth::Client;
 use xero_auth::shared::is_daemon_running;
+use xero_auth::Client;
 
 #[derive(Parser, Debug)]
 #[command(name = "xero-auth")]
@@ -21,7 +21,6 @@ struct Args {
     #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
     args: Vec<String>,
 }
-
 
 #[tokio::main]
 async fn main() {
