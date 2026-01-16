@@ -266,6 +266,9 @@ fn setup_falcond(builder: &Builder, window: &ApplicationWindow) {
     let button = extract_widget::<Button>(builder, "btn_falcond");
     let window = window.clone();
 
+    let env = crate::config::env::get();
+    let user = env.user.clone();
+
     button.connect_clicked(move |_| {
         info!("Falcond button clicked");
 
@@ -282,6 +285,22 @@ fn setup_falcond(builder: &Builder, window: &ApplicationWindow) {
                         "falcond-profiles",
                     ])
                     .description("Installing Falcond Gaming utility...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("groupadd")
+                    .args(&["-f", "falcond"])
+                    .description("Ensuring falcond group exists...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("usermod")
+                    .args(&["-aG", "falcond", &user])
+                    .description("Adding your user to falcond group...")
                     .build(),
             )
             .then(
