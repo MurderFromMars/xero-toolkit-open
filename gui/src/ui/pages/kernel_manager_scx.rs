@@ -12,7 +12,8 @@ use gtk4::glib;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder, Button, Label, ListBox};
 use log::{info, warn};
-use std::process::Stdio;
+use std::process::{Command as StdCommand, Stdio};
+use std::sync::mpsc;
 
 /// Set up all button handlers for the kernel manager page.
 pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &ApplicationWindow) {
@@ -26,7 +27,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
 fn setup_kernel_lists(builder: &Builder, window: &ApplicationWindow) {
     let window = window.clone();
     let builder = builder.clone();
-    glib::MainContext::default().spawn_local(async move {
+    glib::spawn_future_local(async move {
         scan_and_populate_kernels(&builder, &window).await;
     });
 }
@@ -42,7 +43,7 @@ fn setup_refresh_button(builder: &Builder, window: &ApplicationWindow) {
         let builder = builder.clone();
         let window = window.clone();
 
-        glib::MainContext::default().spawn_local(async move {
+        glib::spawn_future_local(async move {
             scan_and_populate_kernels(&builder, &window).await;
         });
     });
@@ -122,44 +123,59 @@ fn setup_remove_button(builder: &Builder, window: &ApplicationWindow) {
 async fn scan_and_populate_kernels(builder: &Builder, _window: &ApplicationWindow) {
     info!("Scanning for kernels...");
 
-    // Get available kernels
-    let available_kernels = match get_available_kernels().await {
-        Ok(kernels) => kernels,
-        Err(e) => {
-            warn!("Failed to get available kernels: {}", e);
-            Vec::new()
+    let builder = builder.clone();
+
+    // Create a channel to communicate between threads
+    let (sender, receiver) = mpsc::channel();
+
+    // Run blocking operations in a separate thread
+    std::thread::spawn(move || {
+        let available_result = get_available_kernels();
+        let installed_result = get_installed_kernels();
+
+        let available_kernels = match available_result {
+            Ok(kernels) => kernels,
+            Err(e) => {
+                warn!("Failed to get available kernels: {}", e);
+                Vec::new()
+            }
+        };
+
+        let installed_kernels = match installed_result {
+            Ok(kernels) => kernels,
+            Err(e) => {
+                warn!("Failed to get installed kernels: {}", e);
+                Vec::new()
+            }
+        };
+
+        info!(
+            "Found {} available kernels, {} installed",
+            available_kernels.len(),
+            installed_kernels.len()
+        );
+
+        // Send results back to main thread
+        let _ = sender.send((available_kernels, installed_kernels));
+    });
+
+    // Receive results in main thread and update UI
+    glib::idle_add_local_once(move || {
+        if let Ok((available_kernels, installed_kernels)) = receiver.recv() {
+            populate_installed_list(&builder, &installed_kernels);
+            populate_available_list(&builder, &available_kernels, &installed_kernels);
+            update_status_labels(&builder, &available_kernels, &installed_kernels);
         }
-    };
-
-    // Get installed kernels
-    let installed_kernels = match get_installed_kernels().await {
-        Ok(kernels) => kernels,
-        Err(e) => {
-            warn!("Failed to get installed kernels: {}", e);
-            Vec::new()
-        }
-    };
-
-    info!(
-        "Found {} available kernels, {} installed",
-        available_kernels.len(),
-        installed_kernels.len()
-    );
-
-    // Update UI
-    populate_installed_list(builder, &installed_kernels);
-    populate_available_list(builder, &available_kernels, &installed_kernels);
-    update_status_labels(builder, &available_kernels, &installed_kernels);
+    });
 }
 
 /// Get list of available kernel packages from repositories.
-async fn get_available_kernels() -> anyhow::Result<Vec<String>> {
-    let output = tokio::process::Command::new("pacman")
+fn get_available_kernels() -> anyhow::Result<Vec<String>> {
+    let output = StdCommand::new("pacman")
         .args(["-Ss", "^linux"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
-        .await?;
+        .output()?;
 
     if !output.status.success() {
         return Err(anyhow::anyhow!("pacman -Ss failed"));
@@ -202,13 +218,12 @@ async fn get_available_kernels() -> anyhow::Result<Vec<String>> {
 }
 
 /// Get list of installed kernel packages.
-async fn get_installed_kernels() -> anyhow::Result<Vec<String>> {
-    let output = tokio::process::Command::new("pacman")
+fn get_installed_kernels() -> anyhow::Result<Vec<String>> {
+    let output = StdCommand::new("pacman")
         .args(["-Q"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
-        .await?;
+        .output()?;
 
     if !output.status.success() {
         return Err(anyhow::anyhow!("pacman -Q failed"));
@@ -247,7 +262,7 @@ async fn get_installed_kernels() -> anyhow::Result<Vec<String>> {
 
 /// Check if a kernel is currently running.
 fn is_running_kernel(kernel_name: &str) -> bool {
-    if let Ok(output) = std::process::Command::new("uname").arg("-r").output() {
+    if let Ok(output) = StdCommand::new("uname").arg("-r").output() {
         let running = String::from_utf8_lossy(&output.stdout);
         return running.contains(kernel_name);
     }
@@ -375,7 +390,7 @@ fn install_kernel(kernel_name: &str, window: &ApplicationWindow, builder: &Build
                 if !task_runner::is_running() {
                     let builder = builder_clone.clone();
                     let window = window_clone.clone();
-                    glib::MainContext::default().spawn_local(async move {
+                    glib::spawn_future_local(async move {
                         scan_and_populate_kernels(&builder, &window).await;
                     });
                     glib::ControlFlow::Break
@@ -425,7 +440,7 @@ fn remove_kernel(kernel_name: &str, window: &ApplicationWindow, builder: &Builde
                 if !task_runner::is_running() {
                     let builder = builder_clone.clone();
                     let window = window_clone.clone();
-                    glib::MainContext::default().spawn_local(async move {
+                    glib::spawn_future_local(async move {
                         scan_and_populate_kernels(&builder, &window).await;
                     });
                     glib::ControlFlow::Break
