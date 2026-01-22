@@ -112,7 +112,7 @@ async fn scan_and_populate_kernels(builder: &Builder, window: &ApplicationWindow
 /// This function searches for kernel headers and then derives the kernel package names.
 /// Adapted from cachyos-kernel-manager logic.
 fn get_available_kernels() -> anyhow::Result<Vec<String>> {
-    // Search for kernel headers packages
+    // Get all packages in one call
     let output = StdCommand::new("pacman")
         .args(["-Sl"])
         .stdout(Stdio::piped())
@@ -124,16 +124,14 @@ fn get_available_kernels() -> anyhow::Result<Vec<String>> {
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    let mut kernels = Vec::new();
+
+    // First pass: collect all available packages
+    let mut all_packages = std::collections::HashSet::new();
+    let mut kernel_headers = Vec::new();
 
     for line in stdout.lines() {
-        // Look for lines containing 'linux' and 'headers'
-        if !line.contains("linux") || !line.contains("headers") {
-            continue;
-        }
-
-        // Skip testing repo and linux-api-headers
-        if line.contains("testing/") || line.contains("linux-api-headers") {
+        // Skip testing repo
+        if line.contains("testing/") {
             continue;
         }
 
@@ -145,28 +143,27 @@ fn get_available_kernels() -> anyhow::Result<Vec<String>> {
 
         let pkg_name = parts[1];
 
-        // Verify this is a headers package
-        if !pkg_name.ends_with("-headers") {
-            continue;
+        // Collect all package names
+        if pkg_name.starts_with("linux") {
+            all_packages.insert(pkg_name.to_string());
         }
 
-        // Derive the kernel package name by removing '-headers'
-        let kernel_name = pkg_name.strip_suffix("-headers").unwrap_or(pkg_name);
+        // Find kernel headers (but not linux-api-headers)
+        if pkg_name.starts_with("linux")
+            && pkg_name.ends_with("-headers")
+            && pkg_name != "linux-api-headers"
+        {
+            kernel_headers.push(pkg_name.to_string());
+        }
+    }
 
-        // Verify the actual kernel package exists
-        let verify_output = StdCommand::new("pacman")
-            .args(["-Ss", &format!("^{}$", kernel_name)])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output();
-
-        if let Ok(verify) = verify_output {
-            if verify.status.success() && !verify.stdout.is_empty() {
-                let verify_str = String::from_utf8_lossy(&verify.stdout);
-                // Check if the kernel package actually exists (not just the headers)
-                if verify_str.contains(&format!("/{}", kernel_name)) {
-                    kernels.push(kernel_name.to_string());
-                }
+    // Second pass: for each headers package, check if kernel exists
+    let mut kernels = Vec::new();
+    for headers_pkg in kernel_headers {
+        if let Some(kernel_name) = headers_pkg.strip_suffix("-headers") {
+            // Check if the corresponding kernel package exists
+            if all_packages.contains(kernel_name) {
+                kernels.push(kernel_name.to_string());
             }
         }
     }
@@ -251,7 +248,7 @@ fn populate_installed_list(builder: &Builder, kernels: &[String], window: &Appli
         row_box.append(&label);
 
         let remove_button = Button::new();
-        remove_button.set_icon_name("user-trash-symbolic");
+        remove_button.set_icon_name("trash-symbolic");
         remove_button.set_valign(gtk4::Align::Center);
         remove_button.add_css_class("flat");
         remove_button.add_css_class("destructive-action");
@@ -308,7 +305,7 @@ fn populate_available_list(
             row_box.append(&label);
 
             let install_button = Button::new();
-            install_button.set_icon_name("folder-download-symbolic");
+            install_button.set_icon_name("download-symbolic");
             install_button.set_valign(gtk4::Align::Center);
             install_button.add_css_class("flat");
             install_button.add_css_class("suggested-action");
