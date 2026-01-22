@@ -278,13 +278,8 @@ fn setup_ipa_sideloader(builder: &Builder, window: &ApplicationWindow) {
             .then(
                 Command::builder()
                     .normal()
-                    .args(&[
-                        "flatpak",
-                        "install",
-                        "-y",
-                        "flathub",
-                        "dev.khcrysalis.PlumeImpactor",
-                    ])
+                    .program("flatpak")
+                    .args(&["install", "-y", "flathub", "dev.khcrysalis.PlumeImpactor"])
                     .description("Installing Plume Impactor from Flathub...")
                     .build(),
             )
