@@ -105,12 +105,12 @@
                                         <property name="tightening-threshold">900</property>
                                         <property name="margin-start">12</property>
                                         <property name="margin-end">12</property>
-                                        <property name="margin-bottom">48</property>
-                                        <property name="margin-top">24</property>
+                                        <property name="margin-bottom">12</property>
+                                        <property name="margin-top">12</property>
                                         <child>
                                             <object class="GtkBox">
                                                 <property name="orientation">vertical</property>
-                                                <property name="spacing">24</property>
+                                                <property name="spacing">12</property>
 
                                                 <!-- Status Section -->
                                                 <child>
@@ -281,12 +281,12 @@
                                         <property name="tightening-threshold">600</property>
                                         <property name="margin-start">12</property>
                                         <property name="margin-end">12</property>
-                                        <property name="margin-bottom">32</property>
-                                        <property name="margin-top">24</property>
+                                        <property name="margin-bottom">12</property>
+                                        <property name="margin-top">12</property>
                                         <child>
                                             <object class="GtkBox">
                                                 <property name="orientation">vertical</property>
-                                                <property name="spacing">24</property>
+                                                <property name="spacing">12</property>
 
                                                 <!-- System Status -->
                                                 <child>
@@ -335,25 +335,10 @@
                                                         <child>
                                                             <object class="AdwActionRow">
                                                                 <property name="title">Active Scheduler</property>
-                                                                <property name="subtitle">Current CPU scheduler</property>
+                                                                <property name="subtitle">Current scheduler and profile</property>
                                                                 <child>
                                                                     <object class="GtkLabel" id="active_scheduler_label">
                                                                         <property name="label">EEVDF (Default)</property>
-                                                                        <property name="valign">center</property>
-                                                                        <style>
-                                                                            <class name="dim-label"/>
-                                                                        </style>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Operating Mode</property>
-                                                                <property name="subtitle">Current scheduler profile</property>
-                                                                <child>
-                                                                    <object class="GtkLabel" id="mode_label">
-                                                                        <property name="label">N/A</property>
                                                                         <property name="valign">center</property>
                                                                         <style>
                                                                             <class name="dim-label"/>
@@ -410,7 +395,7 @@
                                                         <property name="orientation">horizontal</property>
                                                         <property name="spacing">12</property>
                                                         <property name="homogeneous">true</property>
-                                                        <property name="margin-top">12</property>
+                                                        <property name="margin-top">0</property>
 
 
 
@@ -418,7 +403,7 @@
                                                             <object class="GtkButton" id="btn_stop_scheduler">
                                                                 <property name="label">Stop Scheduler</property>
                                                                 <property name="tooltip-text">Revert to default kernel scheduler</property>
-                                                                <property name="height-request">50</property>
+                                                                <property name="height-request">44</property>
                                                                 <style>
                                                                     <class name="destructive-action"/>
                                                                     <class name="pill"/>
@@ -430,7 +415,7 @@
                                                             <object class="GtkButton" id="btn_switch_scheduler">
                                                                 <property name="label">Start/Switch Scheduler</property>
                                                                 <property name="tooltip-text">Apply selected scheduler configuration</property>
-                                                                <property name="height-request">50</property>
+                                                                <property name="height-request">44</property>
                                                                 <style>
                                                                     <class name="suggested-action"/>
                                                                     <class name="pill"/>

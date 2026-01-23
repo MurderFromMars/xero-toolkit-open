@@ -302,20 +302,15 @@ fn update_status(builder: &Builder, state: &Rc<RefCell<State>>) {
 
 fn update_status_labels(builder: &Builder, is_active: bool, name: &str, mode: &str) {
     let active_label = extract_widget::<Label>(builder, "active_scheduler_label");
-    let mode_label = extract_widget::<Label>(builder, "mode_label");
 
     if is_active {
-        active_label.set_text(&humanize_name(name));
+        active_label.set_text(&format!("{} ({})", humanize_name(name), mode));
         active_label.remove_css_class("dim-label");
         active_label.add_css_class("accent");
-        mode_label.set_text(mode);
-        mode_label.remove_css_class("dim-label");
     } else {
         active_label.set_text("EEVDF (Default)");
         active_label.remove_css_class("accent");
         active_label.add_css_class("dim-label");
-        mode_label.set_text("N/A");
-        mode_label.add_css_class("dim-label");
     }
 }
 
