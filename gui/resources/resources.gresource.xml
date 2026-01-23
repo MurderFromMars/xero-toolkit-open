@@ -35,11 +35,7 @@
         <file
             preprocess="xml-stripblanks"
             compressed="true"
-        >ui/tabs/kernel_manager.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/scx_scheduler.ui</file>
+        >ui/tabs/kernel_system.ui</file>
         <file
             preprocess="xml-stripblanks"
             compressed="true"

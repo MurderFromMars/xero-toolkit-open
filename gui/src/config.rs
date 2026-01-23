@@ -180,9 +180,8 @@ pub mod resources {
         pub const DRIVERS: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/drivers.ui";
         pub const GAMESCOPE: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/gamescope.ui";
         pub const GAMING_TOOLS: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/gaming_tools.ui";
-        pub const KERNEL_MANAGER: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/kernel_manager.ui";
+        pub const KERNEL_SYSTEM: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/kernel_system.ui";
         pub const MAIN_PAGE: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/main_page.ui";
-        pub const SCX_SCHEDULER: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/scx_scheduler.ui";
         pub const MULTIMEDIA_TOOLS: &str =
             "/xyz/xerolinux/xero-toolkit/ui/tabs/multimedia_tools.ui";
         pub const SERVICING_SYSTEM_TWEAKS: &str =

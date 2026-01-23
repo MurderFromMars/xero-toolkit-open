@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <requires lib="gtk" version="4.0"/>
+    <requires lib="libadwaita" version="1.0"/>
+
+    <object class="GtkBox" id="page_kernel_system">
+        <property name="orientation">vertical</property>
+        <property name="spacing">0</property>
+        <property name="margin-top">24</property>
+        <property name="margin-bottom">24</property>
+        <property name="margin-start">24</property>
+        <property name="margin-end">24</property>
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <property name="halign">fill</property>
+        <property name="valign">fill</property>
+
+        <!-- Header Section -->
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">16</property>
+                <property name="halign">fill</property>
+                <property name="valign">start</property>
+                <property name="vexpand">false</property>
+                <property name="margin-start">24</property>
+                <property name="margin-end">24</property>
+                <property name="margin-bottom">12</property>
+
+                <child>
+                    <object class="GtkImage">
+                        <property name="icon-name">hammer-symbolic</property>
+                        <property name="pixel-size">48</property>
+                        <property name="valign">center</property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">4</property>
+                        <property name="valign">center</property>
+                        <property name="hexpand">true</property>
+
+                        <child>
+                            <object class="GtkLabel">
+                                <property name="label">Kernel &amp; System</property>
+                                <property name="css-classes">title-2</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkLabel">
+                                <property name="label">Manage kernels and CPU schedulers</property>
+                                <property name="css-classes">dim-label</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                                <property name="wrap">true</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+
+        <!-- Tab View with Subtabs -->
+        <child>
+            <object class="AdwTabBar">
+                <property name="view">tab_view</property>
+                <property name="autohide">false</property>
+                <property name="expand-tabs">false</property>
+            </object>
+        </child>
+
+        <child>
+            <object class="AdwTabView" id="tab_view">
+                <property name="vexpand">true</property>
+                <property name="hexpand">true</property>
+
+                <!-- Kernel Manager Tab -->
+                <child>
+                    <object class="AdwTabPage">
+                        <property name="title">Kernel Manager</property>
+                        <property name="child">
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">0</property>
+                                <property name="margin-top">24</property>
+                                <property name="margin-bottom">24</property>
+                                <property name="margin-start">24</property>
+                                <property name="margin-end">24</property>
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+
+                                <!-- Kernel Manager Header -->
+                                <child>
+                                    <object class="GtkBox">
+                                        <property name="orientation">horizontal</property>
+                                        <property name="spacing">12</property>
+                                        <property name="margin-bottom">12</property>
+
+                                        <child>
+                                            <object class="GtkLabel">
+                                                <property name="label">Install and manage Linux kernels with headers</property>
+                                                <property name="css-classes">dim-label</property>
+                                                <property name="halign">start</property>
+                                                <property name="xalign">0</property>
+                                                <property name="hexpand">true</property>
+                                            </object>
+                                        </child>
+
+                                        <child>
+                                            <object class="GtkButton" id="btn_refresh_kernels">
+                                                <property name="icon-name">view-refresh-symbolic</property>
+                                                <property name="tooltip-text">Scan for available and installed kernels</property>
+                                                <property name="valign">center</property>
+                                                <style>
+                                                    <class name="flat"/>
+                                                    <class name="circular"/>
+                                                </style>
+                                            </object>
+                                        </child>
+                                    </object>
+                                </child>
+
+                                <!-- Loading State -->
+                                <child>
+                                    <object class="GtkBox" id="loading_box">
+                                        <property name="orientation">horizontal</property>
+                                        <property name="spacing">8</property>
+                                        <property name="halign">center</property>
+                                        <property name="margin-top">24</property>
+                                        <property name="margin-bottom">24</property>
+                                        <property name="visible">false</property>
+
+                                        <child>
+                                            <object class="GtkLabel">
+                                                <property name="label">Scanning for kernels...</property>
+                                                <style>
+                                                    <class name="accent"/>
+                                                </style>
+                                            </object>
+                                        </child>
+
+                                        <child>
+                                            <object class="GtkSpinner" id="loading_spinner">
+                                                <property name="spinning">true</property>
+                                            </object>
+                                        </child>
+                                    </object>
+                                </child>
+
+                                <!-- Kernel Lists -->
+                                <child>
+                                    <object class="GtkBox" id="content_box">
+                                        <property name="orientation">horizontal</property>
+                                        <property name="spacing">24</property>
+                                        <property name="homogeneous">true</property>
+                                        <property name="vexpand">true</property>
+                                        <property name="valign">fill</property>
+
+                                        <!-- Installed Kernels -->
+                                        <child>
+                                            <object class="AdwPreferencesGroup">
+                                                <property name="title">Installed Kernels</property>
+                                                <child>
+                                                    <object class="GtkLabel" id="installed_count_label">
+                                                        <property name="label">0 installed</property>
+                                                        <property name="xalign">0</property>
+                                                        <property name="margin-start">12</property>
+                                                        <property name="margin-bottom">6</property>
+                                                        <style>
+                                                            <class name="dim-label"/>
+                                                            <class name="caption"/>
+                                                        </style>
+                                                    </object>
+                                                </child>
+                                                <child>
+                                                    <object class="GtkFrame">
+                                                        <property name="vexpand">true</property>
+                                                        <style>
+                                                            <class name="view"/>
+                                                        </style>
+                                                        <child>
+                                                            <object class="GtkScrolledWindow">
+                                                                <property name="vexpand">true</property>
+                                                                <child>
+                                                                    <object class="GtkListBox" id="installed_kernels_list">
+                                                                        <property name="selection-mode">none</property>
+                                                                        <style>
+                                                                            <class name="boxed-list"/>
+                                                                        </style>
+                                                                    </object>
+                                                                </child>
+                                                            </object>
+                                                        </child>
+                                                    </object>
+                                                </child>
+                                            </object>
+                                        </child>
+
+                                        <!-- Available Kernels -->
+                                        <child>
+                                            <object class="AdwPreferencesGroup">
+                                                <property name="title">Available Kernels</property>
+                                                <child>
+                                                    <object class="GtkLabel" id="available_count_label">
+                                                        <property name="label">0 available</property>
+                                                        <property name="xalign">0</property>
+                                                        <property name="margin-start">12</property>
+                                                        <property name="margin-bottom">6</property>
+                                                        <style>
+                                                            <class name="dim-label"/>
+                                                            <class name="caption"/>
+                                                        </style>
+                                                    </object>
+                                                </child>
+                                                <child>
+                                                    <object class="GtkFrame">
+                                                        <property name="vexpand">true</property>
+                                                        <style>
+                                                            <class name="view"/>
+                                                        </style>
+                                                        <child>
+                                                            <object class="GtkScrolledWindow">
+                                                                <property name="vexpand">true</property>
+                                                                <child>
+                                                                    <object class="GtkListBox" id="available_kernels_list">
+                                                                        <property name="selection-mode">none</property>
+                                                                        <style>
+                                                                            <class name="boxed-list"/>
+                                                                        </style>
+                                                                    </object>
+                                                                </child>
+                                                            </object>
+                                                        </child>
+                                                    </object>
+                                                </child>
+                                            </object>
+                                        </child>
+                                    </object>
+                                </child>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+
+                <!-- SCX Scheduler Tab -->
+                <child>
+                    <object class="AdwTabPage">
+                        <property name="title">SCX Scheduler</property>
+                        <property name="child">
+                            <object class="GtkScrolledWindow">
+                                <property name="vexpand">true</property>
+                                <property name="hscrollbar-policy">never</property>
+                                <child>
+                                    <object class="AdwClamp">
+                                        <property name="maximum-size">900</property>
+                                        <property name="tightening-threshold">700</property>
+                                        <property name="margin-start">24</property>
+                                        <property name="margin-end">24</property>
+                                        <property name="margin-bottom">24</property>
+                                        <property name="margin-top">24</property>
+                                        <child>
+                                            <object class="GtkBox">
+                                                <property name="orientation">vertical</property>
+                                                <property name="spacing">24</property>
+
+                                                <!-- Scheduler Status Section -->
+                                                <child>
+                                                    <object class="AdwPreferencesGroup">
+                                                        <property name="title">System Status</property>
+                                                        <child>
+                                                            <object class="AdwActionRow">
+                                                                <property name="title">Kernel Version</property>
+                                                                <child>
+                                                                    <object class="GtkBox">
+                                                                        <property name="orientation">horizontal</property>
+                                                                        <property name="spacing">8</property>
+                                                                        <property name="valign">center</property>
+                                                                        <child>
+                                                                            <object class="GtkImage" id="kernel_status_icon">
+                                                                                <property name="icon-name">circle-check</property>
+                                                                                <property name="pixel-size">16</property>
+                                                                            </object>
+                                                                        </child>
+                                                                        <child>
+                                                                            <object class="GtkLabel" id="kernel_version_label">
+                                                                                <property name="label">Checking...</property>
+                                                                            </object>
+                                                                        </child>
+                                                                        <child>
+                                                                            <object class="GtkLabel" id="kernel_support_label">
+                                                                                <property name="visible">false</property>
+                                                                                <property name="label">Checking...</property>
+                                                                            </object>
+                                                                        </child>
+                                                                    </object>
+                                                                </child>
+                                                            </object>
+                                                        </child>
+                                                        <child>
+                                                            <object class="AdwActionRow">
+                                                                <property name="title">Active Scheduler</property>
+                                                                <child>
+                                                                    <object class="GtkLabel" id="active_scheduler_label">
+                                                                        <property name="label">EEVDF (Default)</property>
+                                                                        <property name="valign">center</property>
+                                                                        <style>
+                                                                            <class name="dim-label"/>
+                                                                        </style>
+                                                                    </object>
+                                                                </child>
+                                                            </object>
+                                                        </child>
+                                                        <child>
+                                                            <object class="AdwActionRow">
+                                                                <property name="title">Scheduler Mode</property>
+                                                                <child>
+                                                                    <object class="GtkLabel" id="mode_label">
+                                                                        <property name="label">N/A</property>
+                                                                        <property name="valign">center</property>
+                                                                        <style>
+                                                                            <class name="dim-label"/>
+                                                                        </style>
+                                                                    </object>
+                                                                </child>
+                                                            </object>
+                                                        </child>
+                                                    </object>
+                                                </child>
+
+                                                <!-- Scheduler Configuration -->
+                                                <child>
+                                                    <object class="AdwPreferencesGroup">
+                                                        <property name="title">Scheduler Configuration</property>
+                                                        <child>
+                                                            <object class="AdwComboRow" id="scheduler_combo">
+                                                                <property name="title">Select Scheduler</property>
+                                                                <property name="subtitle">Choose which sched-ext scheduler to use</property>
+                                                            </object>
+                                                        </child>
+                                                        <child>
+                                                            <object class="AdwComboRow" id="mode_combo">
+                                                                <property name="title">Scheduler Mode</property>
+                                                                <property name="subtitle">Auto mode selects based on system configuration</property>
+                                                                <property name="model">
+                                                                    <object class="GtkStringList">
+                                                                        <items>
+                                                                            <item>auto</item>
+                                                                            <item>user</item>
+                                                                            <item>kernel</item>
+                                                                        </items>
+                                                                    </object>
+                                                                </property>
+                                                                <property name="selected">0</property>
+                                                            </object>
+                                                        </child>
+                                                    </object>
+                                                </child>
+
+                                                <!-- Control Buttons -->
+                                                <child>
+                                                    <object class="AdwPreferencesGroup">
+                                                        <property name="title">Actions</property>
+                                                        <child>
+                                                            <object class="GtkBox">
+                                                                <property name="orientation">horizontal</property>
+                                                                <property name="spacing">12</property>
+                                                                <property name="homogeneous">true</property>
+                                                                <property name="margin-start">12</property>
+                                                                <property name="margin-end">12</property>
+                                                                <property name="margin-top">12</property>
+                                                                <property name="margin-bottom">12</property>
+
+                                                                <child>
+                                                                    <object class="GtkButton" id="btn_switch_scheduler">
+                                                                        <property name="label">Start/Switch Scheduler</property>
+                                                                        <property name="tooltip-text">Start or switch to the selected scheduler</property>
+                                                                        <style>
+                                                                            <class name="suggested-action"/>
+                                                                            <class name="pill"/>
+                                                                        </style>
+                                                                    </object>
+                                                                </child>
+
+                                                                <child>
+                                                                    <object class="GtkButton" id="btn_refresh_schedulers">
+                                                                        <property name="label">Refresh</property>
+                                                                        <property name="tooltip-text">Rescan available schedulers and update status</property>
+                                                                        <style>
+                                                                            <class name="pill"/>
+                                                                        </style>
+                                                                    </object>
+                                                                </child>
+
+                                                                <child>
+                                                                    <object class="GtkButton" id="btn_stop_scheduler">
+                                                                        <property name="label">Stop Scheduler</property>
+                                                                        <property name="tooltip-text">Stop the current scheduler and return to EEVDF</property>
+                                                                        <style>
+                                                                            <class name="destructive-action"/>
+                                                                            <class name="pill"/>
+                                                                        </style>
+                                                                    </object>
+                                                                </child>
+                                                            </object>
+                                                        </child>
+                                                    </object>
+                                                </child>
+
+                                                <!-- Persistence Settings -->
+                                                <child>
+                                                    <object class="AdwPreferencesGroup">
+                                                        <property name="title">Persistence</property>
+                                                        <child>
+                                                            <object class="AdwSwitchRow" id="persist_switch">
+                                                                <property name="title">Start Scheduler on Boot</property>
+                                                                <property name="subtitle">Enable systemd service to automatically start the selected scheduler</property>
+                                                            </object>
+                                                        </child>
+                                                    </object>
+                                                </child>
+
+                                            </object>
+                                        </child>
+                                    </object>
+                                </child>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+
+            </object>
+        </child>
+    </object>
+</interface>
