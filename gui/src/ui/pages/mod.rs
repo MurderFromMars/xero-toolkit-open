@@ -8,7 +8,7 @@
 //! - `containers_vms`: Docker, Podman, VirtualBox, KVM
 //! - `multimedia_tools`: OBS, Jellyfin
 //! - `customization`: ZSH, themes, wallpapers
-//! - `kernel_system`: Kernel Manager and SCX Scheduler (with subtabs)
+//! - `kernel_schedulers`: Kernel Manager and SCX Scheduler (with subtabs)
 //! - `servicing`: System fixes and maintenance
 
 pub mod containers_vms;
@@ -16,7 +16,7 @@ pub mod customization;
 pub mod drivers;
 pub mod gamescope;
 pub mod gaming_tools;
-pub mod kernel_system;
+pub mod kernel_schedulers;
 pub mod main_page;
 pub mod multimedia_tools;
 pub mod servicing;

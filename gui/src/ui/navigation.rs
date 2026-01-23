@@ -75,11 +75,11 @@ pub const PAGES: &[PageConfig] = &[
         setup_handler: Some(pages::multimedia_tools::setup_handlers),
     },
     PageConfig {
-        id: "kernel_system",
-        title: "Kernel & System",
+        id: "kernel_schedulers",
+        title: "Kernel & Schedulers",
         icon: "hammer-symbolic",
-        ui_resource: crate::config::resources::tabs::KERNEL_SYSTEM,
-        setup_handler: Some(pages::kernel_system::setup_handlers),
+        ui_resource: crate::config::resources::tabs::KERNEL_SCHEDULERS,
+        setup_handler: Some(pages::kernel_schedulers::setup_handlers),
     },
     PageConfig {
         id: "servicing_system_tweaks",

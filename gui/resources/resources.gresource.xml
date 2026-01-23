@@ -35,7 +35,7 @@
         <file
             preprocess="xml-stripblanks"
             compressed="true"
-        >ui/tabs/kernel_system.ui</file>
+        >ui/tabs/kernel_schedulers.ui</file>
         <file
             preprocess="xml-stripblanks"
             compressed="true"
