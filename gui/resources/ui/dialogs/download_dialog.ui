@@ -88,6 +88,7 @@
                         <child>
                           <object class="GtkLabel" id="speed_label">
                             <property name="label">0 MB/s</property>
+                            <property name="css-classes">tabular-digits</property>
                             <property name="halign">start</property>
                           </object>
                         </child>
@@ -108,6 +109,7 @@
                         <child>
                           <object class="GtkLabel" id="downloaded_label">
                             <property name="label">0 MB / 0 MB</property>
+                            <property name="css-classes">tabular-digits</property>
                             <property name="halign">start</property>
                           </object>
                         </child>
@@ -129,6 +131,7 @@
                         <child>
                           <object class="GtkLabel" id="time_remaining_label">
                             <property name="label">Calculating...</property>
+                            <property name="css-classes">tabular-digits</property>
                             <property name="halign">start</property>
                           </object>
                         </child>
