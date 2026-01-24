@@ -14,7 +14,7 @@ depends=(
     'libadwaita'
     'vte4'
     'flatpak'
-    'scx-km'
+    'scx-tool'
     'polkit')
 optdepends=(
     'scxctl: SCX scheduler management for sched-ext kernels')
