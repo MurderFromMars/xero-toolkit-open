@@ -510,34 +510,12 @@ fn show_scheduler_selector(
     current_selected: Option<String>,
     on_select: impl Fn(String) + 'static,
 ) {
-    // create window
-    let window = adw::Window::builder()
-        .title("Select Scheduler")
-        .modal(true)
-        .transient_for(parent)
-        .default_width(400)
-        .default_height(600)
-        .build();
+    // Load UI from resource
+    let builder = Builder::from_resource(crate::config::resources::dialogs::SCHEDULER_SELECTION);
+    let window: adw::Window = extract_widget(&builder, "scheduler_selection_window");
+    window.set_transient_for(Some(parent));
 
-    let page = adw::ToolbarView::new();
-    let header = adw::HeaderBar::new();
-    page.add_top_bar(&header);
-
-    let content = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-
-    // clamp for better width on wide screens
-    let clamp = adw::Clamp::builder()
-        .maximum_size(600)
-        .child(&content)
-        .build();
-
-    // adjust scrolling hierarchy
-    let scroll = gtk4::ScrolledWindow::builder()
-        .hscrollbar_policy(gtk4::PolicyType::Never)
-        .vexpand(true)
-        .child(&clamp)
-        .build();
-    page.set_content(Some(&scroll));
+    let content: GtkBox = extract_widget(&builder, "schedulers_container");
 
     // Categories
     let categories = vec![
@@ -636,7 +614,6 @@ fn show_scheduler_selector(
         content.append(&group);
     }
 
-    window.set_content(Some(&page));
     window.present();
 }
 
