@@ -1,193 +1,175 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0" />
-    <requires lib="adw" version="1.4" />
-
-    <object class="AdwWindow" id="task_window">
-        <property name="title">Xero Toolkit - Operation in Progress</property>
-        <property name="icon-name">xero-toolkit</property>
-        <property name="default-width">680</property>
-        <property name="default-height">650</property>
-        <property name="modal">true</property>
-
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="adw" version="1.4"/>
+  <object class="AdwWindow" id="task_window">
+    <property name="title">Xero Toolkit - Operation in Progress</property>
+    <property name="icon-name">xero-toolkit</property>
+    <property name="default-width">680</property>
+    <property name="default-height">650</property>
+    <property name="modal">true</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="show-title">true</property>
+            <property name="show-end-title-buttons">true</property>
+            <!-- Toggle button in header bar -->
+            <child type="end">
+              <object class="GtkToggleButton" id="sidebar_toggle_button">
+                <property name="icon-name">terminal-symbolic</property>
+                <property name="tooltip-text">Show command output</property>
+              </object>
+            </child>
+          </object>
+        </child>
         <property name="content">
-            <object class="AdwToolbarView">
-                <child type="top">
-                    <object class="AdwHeaderBar">
-                        <property name="show-title">true</property>
-                        <property name="show-end-title-buttons">true</property>
-
-                        <!-- Toggle button in header bar -->
-                        <child type="end">
-                            <object class="GtkToggleButton" id="sidebar_toggle_button">
-                                <property name="icon-name">terminal-symbolic</property>
-                                <property name="tooltip-text">Show command output</property>
-                            </object>
-                        </child>
-                    </object>
+          <object class="GtkOverlay" id="overlay_container">
+            <!-- Main content: Task list (base layer) -->
+            <child>
+              <object class="GtkBox" id="main_content_box">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <!-- Header: Title + Subtitle centered -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">4</property>
+                    <property name="halign">center</property>
+                    <child>
+                      <object class="GtkLabel" id="task_title">
+                        <property name="label">Running operations…</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">0.5</property>
+                        <property name="halign">center</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="task_subtitle">
+                        <property name="label">This may take a while.</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">0.5</property>
+                        <property name="halign">center</property>
+                      </object>
+                    </child>
+                  </object>
                 </child>
-
-                <property name="content">
-                    <object class="GtkOverlay" id="overlay_container">
-                        <!-- Main content: Task list (base layer) -->
+                <!-- Task list container -->
+                <child>
+                  <object class="GtkFrame">
+                    <property name="hexpand">true</property>
+                    <property name="vexpand">true</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <style>
+                      <class name="view"/>
+                    </style>
+                    <child>
+                      <object class="GtkScrolledWindow" id="task_scrolled_window">
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                        <property name="min-content-height">300</property>
                         <child>
-                            <object class="GtkBox" id="main_content_box">
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">12</property>
-                                <property name="margin-top">12</property>
-                                <property name="margin-bottom">12</property>
-                                <property name="margin-start">12</property>
-                                <property name="margin-end">12</property>
-
-                                <!-- Header: Title + Subtitle centered -->
-                                <child>
-                                    <object class="GtkBox">
-                                        <property name="orientation">vertical</property>
-                                        <property name="spacing">4</property>
-                                        <property name="halign">center</property>
-
-                                        <child>
-                                            <object class="GtkLabel" id="task_title">
-                                                <property name="label">Running operations…</property>
-                                                <property name="wrap">true</property>
-                                                <property name="xalign">0.5</property>
-                                                <property name="halign">center</property>
-                                            </object>
-                                        </child>
-
-                                        <child>
-                                            <object class="GtkLabel" id="task_subtitle">
-                                                <property name="label">This may take a while.</property>
-                                                <property name="wrap">true</property>
-                                                <property name="xalign">0.5</property>
-                                                <property name="halign">center</property>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-
-                                <!-- Task list container -->
-                                <child>
-                                    <object class="GtkFrame">
-                                        <property name="hexpand">true</property>
-                                        <property name="vexpand">true</property>
-                                        <property name="margin-start">12</property>
-                                        <property name="margin-end">12</property>
-                                        <property name="margin-top">8</property>
-                                        <property name="margin-bottom">8</property>
-                                        <style>
-                                            <class name="view" />
-                                        </style>
-
-                                        <child>
-                                            <object class="GtkScrolledWindow" id="task_scrolled_window">
-                                                <property name="hexpand">true</property>
-                                                <property name="vexpand">true</property>
-                                                <property name="min-content-height">300</property>
-
-                                                <child>
-                                                    <object class="GtkBox" id="task_list_container">
-                                                        <property name="orientation">vertical</property>
-                                                        <property name="spacing">12</property>
-                                                        <property name="margin-start">16</property>
-                                                        <property name="margin-end">16</property>
-                                                        <property name="margin-top">16</property>
-                                                        <property name="margin-bottom">16</property>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-
-                                <!-- Button Box: Cancel + Close -->
-                                <child>
-                                    <object class="GtkBox">
-                                        <property name="orientation">horizontal</property>
-                                        <property name="spacing">8</property>
-                                        <property name="halign">center</property>
-                                        <property name="margin-top">12</property>
-
-                                        <child>
-                                            <object class="GtkButton" id="cancel_button">
-                                                <property name="label">Cancel</property>
-                                            </object>
-                                        </child>
-
-                                        <child>
-                                            <object class="GtkButton" id="close_button">
-                                                <property name="label">Close</property>
-                                                <property name="sensitive">false</property>
-                                                <property name="visible">false</property>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-                            </object>
+                          <object class="GtkBox" id="task_list_container">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">12</property>
+                            <property name="margin-start">16</property>
+                            <property name="margin-end">16</property>
+                            <property name="margin-top">16</property>
+                            <property name="margin-bottom">16</property>
+                          </object>
                         </child>
-
-                        <!-- Sidebar: Command output (overlay layer) -->
-                        <child type="overlay">
-                            <object class="GtkRevealer" id="sidebar_revealer">
-                                <property name="halign">fill</property>
-                                <property name="valign">fill</property>
-                                <property name="hexpand">false</property>
-                                <property name="vexpand">false</property>
-                                <property name="reveal-child">false</property>
-                                <property name="transition-type">crossfade</property>
-                                <property name="transition-duration">250</property>
-                                <property name="can-target">false</property>
-
-                                <child>
-                                    <object class="GtkBox">
-                                        <property name="orientation">vertical</property>
-                                        <property name="halign">fill</property>
-                                        <property name="valign">fill</property>
-                                        <property name="hexpand">true</property>
-                                        <property name="vexpand">true</property>
-                                        <property name="visible">true</property>
-                                        <style>
-                                            <class name="sidebar" />
-                                            <class name="background" />
-                                        </style>
-
-                                        <child>
-                                            <object class="AdwHeaderBar">
-                                                <property name="show-start-title-buttons">false</property>
-                                                <property name="show-end-title-buttons">false</property>
-                                                <property name="title-widget">
-                                                    <object class="AdwWindowTitle">
-                                                        <property name="title">Command Output</property>
-                                                    </object>
-                                                </property>
-                                            </object>
-                                        </child>
-
-                                        <child>
-                                            <object class="GtkScrolledWindow" id="output_scrolled_window">
-                                                <property name="hexpand">true</property>
-                                                <property name="vexpand">true</property>
-
-                                                <child>
-                                                    <object class="GtkTextView" id="output_text_view">
-                                                        <property name="editable">false</property>
-                                                        <property name="monospace">true</property>
-                                                        <property name="wrap-mode">word-char</property>
-                                                        <property name="left-margin">12</property>
-                                                        <property name="right-margin">12</property>
-                                                        <property name="top-margin">12</property>
-                                                        <property name="bottom-margin">12</property>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-                            </object>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <!-- Button Box: Cancel + Close -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">8</property>
+                    <property name="halign">center</property>
+                    <property name="margin-top">12</property>
+                    <child>
+                      <object class="GtkButton" id="cancel_button">
+                        <property name="label">Cancel</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="close_button">
+                        <property name="label">Close</property>
+                        <property name="sensitive">false</property>
+                        <property name="visible">false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <!-- Sidebar: Command output (overlay layer) -->
+            <child type="overlay">
+              <object class="GtkRevealer" id="sidebar_revealer">
+                <property name="halign">fill</property>
+                <property name="valign">fill</property>
+                <property name="hexpand">false</property>
+                <property name="vexpand">false</property>
+                <property name="reveal-child">false</property>
+                <property name="transition-type">crossfade</property>
+                <property name="transition-duration">250</property>
+                <property name="can-target">false</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="halign">fill</property>
+                    <property name="valign">fill</property>
+                    <property name="hexpand">true</property>
+                    <property name="vexpand">true</property>
+                    <property name="visible">true</property>
+                    <style>
+                      <class name="sidebar"/>
+                      <class name="background"/>
+                    </style>
+                    <child>
+                      <object class="AdwHeaderBar">
+                        <property name="show-start-title-buttons">false</property>
+                        <property name="show-end-title-buttons">false</property>
+                        <property name="title-widget">
+                          <object class="AdwWindowTitle">
+                            <property name="title">Command Output</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow" id="output_scrolled_window">
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                        <child>
+                          <object class="GtkTextView" id="output_text_view">
+                            <property name="editable">false</property>
+                            <property name="monospace">true</property>
+                            <property name="wrap-mode">word-char</property>
+                            <property name="left-margin">12</property>
+                            <property name="right-margin">12</property>
+                            <property name="top-margin">12</property>
+                            <property name="bottom-margin">12</property>
+                          </object>
                         </child>
-                    </object>
-                </property>
-            </object>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
         </property>
-    </object>
+      </object>
+    </property>
+  </object>
 </interface>

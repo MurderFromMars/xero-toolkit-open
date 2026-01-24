@@ -1,120 +1,101 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0" />
-    <requires lib="libadwaita" version="1.0" />
-
-    <object class="GtkBox" id="page_multimedia_tools">
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <object class="GtkBox" id="page_multimedia_tools">
+    <property name="orientation">vertical</property>
+    <property name="spacing">0</property>
+    <property name="margin-top">48</property>
+    <property name="margin-bottom">0</property>
+    <property name="margin-start">48</property>
+    <property name="margin-end">48</property>
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+    <property name="halign">fill</property>
+    <property name="valign">fill</property>
+    <!-- Top Section: Header (pinned at top) -->
+    <child>
+      <object class="GtkBox">
         <property name="orientation">vertical</property>
-        <property name="spacing">0</property>
-        <property name="margin-top">48</property>
-        <property name="margin-bottom">0</property>
-        <property name="margin-start">48</property>
-        <property name="margin-end">48</property>
-        <property name="hexpand">true</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+        <property name="valign">start</property>
+        <property name="vexpand">false</property>
+        <child>
+          <object class="GtkImage">
+            <property name="icon-name">play-symbolic</property>
+            <property name="pixel-size">96</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Multimedia Tools</property>
+            <property name="css-classes">title-1</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Manage multimedia applications and media servers</property>
+            <property name="css-classes">dim-label</property>
+            <property name="halign">center</property>
+            <property name="wrap">true</property>
+            <property name="justify">center</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Bottom Section: Buttons Layout (centered in remaining space) -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
         <property name="vexpand">true</property>
-        <property name="halign">fill</property>
-        <property name="valign">fill</property>
-
-        <!-- Top Section: Header (pinned at top) -->
+        <property name="margin-top">32</property>
+        <!-- Row 1: OBS-Studio -->
         <child>
-            <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">16</property>
-                <property name="halign">center</property>
-                <property name="valign">start</property>
-                <property name="vexpand">false</property>
-
-                <child>
-                    <object class="GtkImage">
-                        <property name="icon-name">play-symbolic</property>
-                        <property name="pixel-size">96</property>
-                        <property name="halign">center</property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkLabel">
-                        <property name="label">Multimedia Tools</property>
-                        <property name="css-classes">title-1</property>
-                        <property name="halign">center</property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkLabel">
-                        <property name="label">Manage multimedia applications and media servers</property>
-                        <property name="css-classes">dim-label</property>
-                        <property name="halign">center</property>
-                        <property name="wrap">true</property>
-                        <property name="justify">center</property>
-                    </object>
-                </child>
-            </object>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_obs_studio_aio">
+                <property name="label">OBS-Studio AiO</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+          </object>
         </child>
-
-        <!-- Bottom Section: Buttons Layout (centered in remaining space) -->
+        <!-- Row 2: Kdenlive and Jellyfin -->
         <child>
-            <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">16</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="vexpand">true</property>
-                <property name="margin-top">32</property>
-
-                <!-- Row 1: OBS-Studio -->
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">16</property>
-                        <property name="halign">center</property>
-
-                        <child>
-                            <object class="GtkButton" id="btn_obs_studio_aio">
-                                <property name="label">OBS-Studio AiO</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property
-                                    name="css-classes"
-                                >suggested-action pill</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-
-                <!-- Row 2: Kdenlive and Jellyfin -->
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">16</property>
-                        <property name="halign">center</property>
-
-                        <child>
-                            <object class="GtkButton" id="btn_kdenlive">
-                                <property name="label">Kdenlive</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property
-                                    name="css-classes"
-                                >suggested-action pill</property>
-                            </object>
-                        </child>
-
-                        <child>
-                            <object class="GtkButton" id="btn_jellyfin">
-                                <property
-                                    name="label"
-                                >Jellyfin Server</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property
-                                    name="css-classes"
-                                >suggested-action pill</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-            </object>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_kdenlive">
+                <property name="label">Kdenlive</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_jellyfin">
+                <property name="label">Jellyfin Server</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+          </object>
         </child>
-    </object>
+      </object>
+    </child>
+  </object>
 </interface>

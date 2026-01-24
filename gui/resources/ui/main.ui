@@ -1,161 +1,145 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0"/>
-    <requires lib="adw" version="1.4"/>
-
-    <object class="AdwApplicationWindow" id="app_window">
-        <property name="title">Xero Toolkit</property>
-        <property name="default-width">1100</property>
-        <property name="default-height">750</property>
-
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="adw" version="1.4"/>
+  <object class="AdwApplicationWindow" id="app_window">
+    <property name="title">Xero Toolkit</property>
+    <property name="default-width">1100</property>
+    <property name="default-height">750</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <property name="show-title">true</property>
+            <style>
+              <class name="flat"/>
+            </style>
+            <!-- Sidebar toggle button -->
+            <child type="start">
+              <object class="GtkToggleButton" id="sidebar_toggle_button">
+                <property name="icon-name">bars-symbolic</property>
+                <property name="tooltip-text">Toggle sidebar</property>
+                <property name="active">true</property>
+              </object>
+            </child>
+            <!-- Seasonal effects toggle button -->
+            <child type="end">
+              <object class="GtkToggleButton" id="seasonal_effects_toggle">
+                <property name="tooltip-text">Toggle seasonal effects</property>
+                <property name="icon-name">star-symbolic</property>
+                <property name="active">true</property>
+                <property name="visible">false</property>
+              </object>
+            </child>
+            <!-- About button -->
+            <child type="end">
+              <object class="GtkButton" id="about_button">
+                <property name="tooltip-text">About</property>
+                <!-- Use icon-name so the icon comes from the registered resources/icon theme -->
+                <property name="icon-name">heart</property>
+              </object>
+            </child>
+          </object>
+        </child>
         <property name="content">
-            <object class="AdwToolbarView">
-                <child type="top">
-                    <object class="AdwHeaderBar" id="header_bar">
-                        <property name="show-title">true</property>
-                        <style>
-                            <class name="flat"/>
-                        </style>
-
-                        <!-- Sidebar toggle button -->
-                        <child type="start">
-                            <object class="GtkToggleButton" id="sidebar_toggle_button">
-                                <property name="icon-name">bars-symbolic</property>
-                                <property name="tooltip-text">Toggle sidebar</property>
-                                <property name="active">true</property>
-                            </object>
-                        </child>
-
-                        <!-- Seasonal effects toggle button -->
-                        <child type="end">
-                            <object class="GtkToggleButton" id="seasonal_effects_toggle">
-                                <property name="tooltip-text">Toggle seasonal effects</property>
-                                <property name="icon-name">star-symbolic</property>
-                                <property name="active">true</property>
-                                <property name="visible">false</property>
-                            </object>
-                        </child>
-
-                        <!-- About button -->
-                        <child type="end">
-                            <object class="GtkButton" id="about_button">
-                                <property name="tooltip-text">About</property>
-                                <!-- Use icon-name so the icon comes from the registered resources/icon theme -->
-                                <property name="icon-name">heart</property>
-                            </object>
-                        </child>
-                    </object>
+          <!-- Main Split View (sidebar + content) -->
+          <object class="AdwOverlaySplitView" id="main_split_view">
+            <property name="show-sidebar">true</property>
+            <property name="sidebar-position">start</property>
+            <property name="collapsed">false</property>
+            <property name="max-sidebar-width">400</property>
+            <property name="min-sidebar-width">200</property>
+            <!-- Sidebar Content -->
+            <property name="sidebar">
+              <object class="GtkBox" id="sidebar">
+                <property name="orientation">vertical</property>
+                <property name="hexpand">false</property>
+                <property name="vexpand">true</property>
+                <property name="css-classes">sidebar</property>
+                <!-- Title at top of sidebar -->
+                <child>
+                  <object class="GtkLabel" id="sidebar_title">
+                    <property name="label">Toolkit</property>
+                    <property name="margin-top">16</property>
+                    <property name="margin-bottom">16</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="wrap">true</property>
+                    <property name="css-classes">section-title</property>
+                    <property name="xalign">0</property>
+                  </object>
                 </child>
-
-                <property name="content">
-                    <!-- Main Split View (sidebar + content) -->
-                    <object class="AdwOverlaySplitView" id="main_split_view">
-                        <property name="show-sidebar">true</property>
-                        <property name="sidebar-position">start</property>
-                        <property name="collapsed">false</property>
-                        <property name="max-sidebar-width">400</property>
-                        <property name="min-sidebar-width">200</property>
-
-                        <!-- Sidebar Content -->
-                        <property name="sidebar">
-                            <object class="GtkBox" id="sidebar">
-                                <property name="orientation">vertical</property>
-                                <property name="hexpand">false</property>
-                                <property name="vexpand">true</property>
-                                <property name="css-classes">sidebar</property>
-
-                                <!-- Title at top of sidebar -->
-                                <child>
-                                    <object class="GtkLabel" id="sidebar_title">
-                                        <property name="label">Toolkit</property>
-                                        <property name="margin-top">16</property>
-                                        <property name="margin-bottom">16</property>
-                                        <property name="margin-start">12</property>
-                                        <property name="margin-end">12</property>
-                                        <property name="wrap">true</property>
-                                        <property name="css-classes">section-title</property>
-                                        <property name="xalign">0</property>
-                                    </object>
-                                </child>
-
-                                <!-- Separator -->
-                                <child>
-                                    <object class="GtkSeparator">
-                                        <property name="orientation">horizontal</property>
-                                    </object>
-                                </child>
-
-                                <!-- Tab List -->
-                                <child>
-                                    <object class="GtkBox" id="tabs_container">
-                                        <property name="orientation">vertical</property>
-                                        <property name="spacing">4</property>
-                                        <property name="margin-top">8</property>
-                                        <property name="margin-bottom">8</property>
-                                        <property name="margin-start">8</property>
-                                        <property name="margin-end">8</property>
-                                        <property name="hexpand">true</property>
-                                        <property name="vexpand">true</property>
-                                        <property name="halign">fill</property>
-                                        <property name="valign">start</property>
-                                    </object>
-                                </child>
-
-                                <!-- Spacer to push autostart toggle to bottom -->
-                                <child>
-                                    <object class="GtkBox">
-                                        <property name="vexpand">true</property>
-                                    </object>
-                                </child>
-
-                                <!-- Autostart Toggle -->
-                                <child>
-                                    <object class="GtkBox">
-                                        <property name="orientation">horizontal</property>
-                                        <property name="spacing">8</property>
-                                        <property name="margin-start">12</property>
-                                        <property name="margin-end">12</property>
-                                        <property name="margin-bottom">12</property>
-
-                                        <child>
-                                            <object class="GtkLabel">
-                                                <property name="label">Start on Login</property>
-                                                <property name="hexpand">true</property>
-                                                <property name="xalign">0</property>
-                                                <property name="css-classes">dim</property>
-                                            </object>
-                                        </child>
-
-                                        <child>
-                                            <object class="GtkSwitch" id="switch_autostart">
-                                                <property name="valign">center</property>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-                            </object>
-                        </property>
-
-                        <!-- Main Content Area: page stack -->
-                        <property name="content">
-                            <object class="GtkScrolledWindow" id="page_scroll">
-                                <property name="hexpand">true</property>
-                                <property name="vexpand">true</property>
-                                <property name="hscrollbar-policy">never</property>
-                                <property name="vscrollbar-policy">automatic</property>
-
-                                <child>
-                                    <object class="GtkBox" id="right_container">
-                                        <property name="orientation">vertical</property>
-                                        <property name="hexpand">true</property>
-                                        <!-- Stack will be dynamically created and inserted here -->
-                                    </object>
-                                </child>
-                            </object>
-                        </property>
-                    </object>
-                </property>
-            </object>
+                <!-- Separator -->
+                <child>
+                  <object class="GtkSeparator">
+                    <property name="orientation">horizontal</property>
+                  </object>
+                </child>
+                <!-- Tab List -->
+                <child>
+                  <object class="GtkBox" id="tabs_container">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">4</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="margin-start">8</property>
+                    <property name="margin-end">8</property>
+                    <property name="hexpand">true</property>
+                    <property name="vexpand">true</property>
+                    <property name="halign">fill</property>
+                    <property name="valign">start</property>
+                  </object>
+                </child>
+                <!-- Spacer to push autostart toggle to bottom -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="vexpand">true</property>
+                  </object>
+                </child>
+                <!-- Autostart Toggle -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">8</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-bottom">12</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Start on Login</property>
+                        <property name="hexpand">true</property>
+                        <property name="xalign">0</property>
+                        <property name="css-classes">dim</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="switch_autostart">
+                        <property name="valign">center</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+            <!-- Main Content Area: page stack -->
+            <property name="content">
+              <object class="GtkScrolledWindow" id="page_scroll">
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <child>
+                  <object class="GtkBox" id="right_container">
+                    <property name="orientation">vertical</property>
+                    <property name="hexpand">true</property>
+                    <!-- Stack will be dynamically created and inserted here -->
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
         </property>
-    </object>
+      </object>
+    </property>
+  </object>
 </interface>

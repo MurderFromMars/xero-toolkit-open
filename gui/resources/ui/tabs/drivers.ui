@@ -1,214 +1,192 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0" />
-    <requires lib="libadwaita" version="1.0" />
-
-    <object class="GtkBox" id="page_drivers">
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <object class="GtkBox" id="page_drivers">
+    <property name="orientation">vertical</property>
+    <property name="spacing">0</property>
+    <property name="margin-top">48</property>
+    <property name="margin-bottom">0</property>
+    <property name="margin-start">48</property>
+    <property name="margin-end">48</property>
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+    <property name="halign">fill</property>
+    <property name="valign">fill</property>
+    <!-- Top Section: Header (pinned at top) -->
+    <child>
+      <object class="GtkBox">
         <property name="orientation">vertical</property>
-        <property name="spacing">0</property>
-        <property name="margin-top">48</property>
-        <property name="margin-bottom">0</property>
-        <property name="margin-start">48</property>
-        <property name="margin-end">48</property>
-        <property name="hexpand">true</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+        <property name="valign">start</property>
+        <property name="vexpand">false</property>
+        <child>
+          <object class="GtkImage">
+            <property name="icon-name">gear-symbolic</property>
+            <property name="pixel-size">96</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Drivers &amp; Hardware Tools</property>
+            <property name="css-classes">title-1</property>
+            <property name="halign">center</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Install and configure drivers and hardware-specific tools</property>
+            <property name="css-classes">dim-label</property>
+            <property name="halign">center</property>
+            <property name="wrap">true</property>
+            <property name="justify">center</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Bottom Section: Buttons Layout (centered in remaining space) -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">16</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
         <property name="vexpand">true</property>
-        <property name="halign">fill</property>
-        <property name="valign">fill</property>
-
-        <!-- Top Section: Header (pinned at top) -->
+        <property name="margin-top">32</property>
+        <!-- Important Drivers Section -->
+        <!-- Row 1 (Pyramid Top): Nvidia Legacy Drivers -->
         <child>
-            <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">16</property>
-                <property name="halign">center</property>
-                <property name="valign">start</property>
-                <property name="vexpand">false</property>
-
-                <child>
-                    <object class="GtkImage">
-                        <property name="icon-name">gear-symbolic</property>
-                        <property name="pixel-size">96</property>
-                        <property name="halign">center</property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkLabel">
-                        <property name="label">Drivers &amp; Hardware Tools</property>
-                        <property name="css-classes">title-1</property>
-                        <property name="halign">center</property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkLabel">
-                        <property name="label">Install and configure drivers and hardware-specific tools</property>
-                        <property name="css-classes">dim-label</property>
-                        <property name="halign">center</property>
-                        <property name="wrap">true</property>
-                        <property name="justify">center</property>
-                    </object>
-                </child>
-            </object>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_nvidia_legacy">
+                <property name="label">Nvidia Legacy Drivers</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+          </object>
         </child>
-
-        <!-- Bottom Section: Buttons Layout (centered in remaining space) -->
+        <!-- Row 2 (Pyramid Base): ROCm, CUDA -->
         <child>
-            <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">16</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="vexpand">true</property>
-                <property name="margin-top">32</property>
-
-                <!-- Important Drivers Section -->
-
-                <!-- Row 1 (Pyramid Top): Nvidia Legacy Drivers -->
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">16</property>
-                        <property name="halign">center</property>
-
-                        <child>
-                            <object class="GtkButton" id="btn_nvidia_legacy">
-                                <property name="label">Nvidia Legacy Drivers</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-
-                <!-- Row 2 (Pyramid Base): ROCm, CUDA -->
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">16</property>
-                        <property name="halign">center</property>
-
-                        <child>
-                            <object class="GtkButton" id="btn_rocm">
-                                <property name="label">AMD ROCm</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-
-                        <child>
-                            <object class="GtkButton" id="btn_cuda">
-                                <property name="label">NVIDIA CUDA</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-
-                <!-- Separator -->
-                <child>
-                    <object class="GtkSeparator">
-                        <property name="orientation">horizontal</property>
-                        <property name="margin-top">16</property>
-                        <property name="margin-bottom">16</property>
-                    </object>
-                </child>
-
-                <!-- Other Tools Section -->
-
-                <!-- Row 3: Tailscale, ASUS ROG -->
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">16</property>
-                        <property name="halign">center</property>
-
-                        <child>
-                            <object class="GtkButton" id="btn_tailscale">
-                                <property name="label">Tailscale VPN</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-
-                        <child>
-                            <object class="GtkButton" id="btn_asus_rog">
-                                <property name="label">ASUS ROG Tools</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-
-                <!-- Row 4: OpenRazer, Fingerprint GUI -->
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">16</property>
-                        <property name="halign">center</property>
-
-                        <child>
-                            <object class="GtkButton" id="btn_openrazer">
-                                <property name="label">OpenRazer Drivers</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-
-                        <child>
-                            <object class="GtkButton" id="btn_fingerprint">
-                                <property name="child">
-                                    <object class="GtkBox">
-                                        <property name="orientation">horizontal</property>
-                                        <property name="spacing">8</property>
-                                        <property name="halign">center</property>
-                                        <child>
-                                            <object class="GtkImage">
-                                                <property name="icon-name">xfprintd-gui</property>
-                                                <property name="pixel-size">32</property>
-                                            </object>
-                                        </child>
-                                        <child>
-                                            <object class="GtkLabel">
-                                                <property name="label">Fingerprint GUI</property>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-
-                <!-- Row 5: Zenergy -->
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">16</property>
-                        <property name="halign">center</property>
-
-                        <child>
-                            <object class="GtkButton" id="btn_zenergy">
-                                <property name="label">Zenergy Driver</property>
-                                <property name="width-request">200</property>
-                                <property name="height-request">50</property>
-                                <property name="css-classes">suggested-action pill</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-            </object>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_rocm">
+                <property name="label">AMD ROCm</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_cuda">
+                <property name="label">NVIDIA CUDA</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+          </object>
         </child>
-    </object>
+        <!-- Separator -->
+        <child>
+          <object class="GtkSeparator">
+            <property name="orientation">horizontal</property>
+            <property name="margin-top">16</property>
+            <property name="margin-bottom">16</property>
+          </object>
+        </child>
+        <!-- Other Tools Section -->
+        <!-- Row 3: Tailscale, ASUS ROG -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_tailscale">
+                <property name="label">Tailscale VPN</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_asus_rog">
+                <property name="label">ASUS ROG Tools</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <!-- Row 4: OpenRazer, Fingerprint GUI -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_openrazer">
+                <property name="label">OpenRazer Drivers</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_fingerprint">
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">8</property>
+                    <property name="halign">center</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="icon-name">xfprintd-gui</property>
+                        <property name="pixel-size">32</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Fingerprint GUI</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <!-- Row 5: Zenergy -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_zenergy">
+                <property name="label">Zenergy Driver</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>

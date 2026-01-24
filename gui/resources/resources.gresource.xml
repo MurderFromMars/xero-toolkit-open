@@ -1,137 +1,65 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-    <gresource prefix="/xyz/xerolinux/xero-toolkit">
-
-        <!-- UI definitions -->
-        <file preprocess="xml-stripblanks" compressed="true">ui/main.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/main_page.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/drivers.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/customization.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/gaming_tools.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/gamescope.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/containers_vms.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/multimedia_tools.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/kernel_schedulers.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/tabs/servicing_system_tweaks.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/selection_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/xerolinux_check_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/dependency_error_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/task_list_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/download_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/download_setup_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/terminal_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/about_dialog.ui</file>
-        <file
-            preprocess="xml-stripblanks"
-            compressed="true"
-        >ui/dialogs/warning_dialog.ui</file>
-
-        <!-- Stylesheet -->
-        <file compressed="true">css/style.css</file>
-
-        <!-- Icons -->
-        <file compressed="true">icons/scalable/actions/brush-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/discord-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/youtube-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/coffee-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/globe-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/house-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/gear-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/gamepad-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/box-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/play-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/toolbox-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/hammer-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/circle-check.svg</file>
-        <file compressed="true">icons/scalable/actions/circle-xmark.svg</file>
-        <file compressed="true">icons/scalable/actions/circle-stop.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/circle-noth-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/terminal-symbolic.svg</file>
-        <file
-            compressed="true"
-        >icons/scalable/actions/triangle-exclamation-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/star-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/xfprintd-gui.svg</file>
-        <file compressed="true">icons/scalable/actions/heart.svg</file>
-        <file compressed="true">icons/scalable/actions/steam-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/document-edit-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/trash-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/download-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/asterisk-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/gauge-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/gears-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/info-circle-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/bars-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/circle-question-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/copy-symbolic.svg</file>
-        <file compressed="true">icons/scalable/actions/arrows-rotate-symbolic.svg</file>
-        <file compressed="true">icons/scalable/apps/xero-toolkit.png</file>
-    </gresource>
+  <gresource prefix="/xyz/xerolinux/xero-toolkit">
+    <!-- UI definitions -->
+    <file preprocess="xml-stripblanks" compressed="true">ui/main.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/main_page.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/drivers.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/customization.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/gaming_tools.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/gamescope.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/containers_vms.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/multimedia_tools.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/kernel_schedulers.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/tabs/servicing_system_tweaks.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/selection_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/xerolinux_check_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/dependency_error_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/task_list_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/download_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/download_setup_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/terminal_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/about_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/warning_dialog.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/dialogs/scheduler_selection_dialog.ui</file>
+    <!-- Stylesheet -->
+    <file compressed="true">css/style.css</file>
+    <!-- Icons -->
+    <file compressed="true">icons/scalable/actions/brush-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/discord-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/youtube-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/coffee-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/globe-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/house-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/gear-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/gamepad-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/box-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/play-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/toolbox-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/hammer-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/circle-check.svg</file>
+    <file compressed="true">icons/scalable/actions/circle-xmark.svg</file>
+    <file compressed="true">icons/scalable/actions/circle-stop.svg</file>
+    <file compressed="true">icons/scalable/actions/circle-noth-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/terminal-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/triangle-exclamation-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/star-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/xfprintd-gui.svg</file>
+    <file compressed="true">icons/scalable/actions/heart.svg</file>
+    <file compressed="true">icons/scalable/actions/steam-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/document-edit-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/trash-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/download-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/asterisk-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/gauge-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/gears-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/info-circle-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/bars-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/circle-question-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/copy-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/arrows-rotate-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/arrow-right-symbolic.svg</file>
+    <file compressed="true">icons/scalable/actions/circle-check-symbolic.svg</file>
+    <file compressed="true">icons/scalable/apps/xero-toolkit.png</file>
+  </gresource>
 </gresources>

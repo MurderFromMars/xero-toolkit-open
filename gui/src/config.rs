@@ -167,6 +167,8 @@ pub mod resources {
         pub const DOWNLOAD: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/download_dialog.ui";
         pub const DOWNLOAD_SETUP: &str =
             "/xyz/xerolinux/xero-toolkit/ui/dialogs/download_setup_dialog.ui";
+        pub const SCHEDULER_SELECTION: &str =
+            "/xyz/xerolinux/xero-toolkit/ui/dialogs/scheduler_selection_dialog.ui";
         pub const SELECTION: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/selection_dialog.ui";
         pub const TASK_LIST: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/task_list_dialog.ui";
         pub const TERMINAL: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/terminal_dialog.ui";

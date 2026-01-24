@@ -9,7 +9,7 @@ use crate::ui::utils::{
 };
 use adw::prelude::*;
 use gtk4::glib;
-use gtk4::{ApplicationWindow, Box as GtkBox, Builder, Button, Image, Label, StringList};
+use gtk4::{ApplicationWindow, Box as GtkBox, Builder, Button, Image, Label};
 use log::{info, warn};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -22,6 +22,7 @@ struct State {
     schedulers: Vec<String>,
     kernel_supported: bool,
     is_active: bool,
+    selected_scheduler: Option<String>,
 }
 
 pub fn setup_handlers(builder: &Builder, _main_builder: &Builder, window: &ApplicationWindow) {
@@ -29,7 +30,7 @@ pub fn setup_handlers(builder: &Builder, _main_builder: &Builder, window: &Appli
 
     init_kernel_support(builder, &state);
     setup_buttons(builder, window, &state);
-    setup_persistence(builder, window);
+    setup_persistence(builder, window, &state);
 
     // Initial scan
     let b = builder.clone();
@@ -75,6 +76,25 @@ fn init_kernel_support(builder: &Builder, state: &Rc<RefCell<State>>) {
 }
 
 fn setup_buttons(builder: &Builder, window: &ApplicationWindow, state: &Rc<RefCell<State>>) {
+    // Scheduler Selection Row
+    let b = builder.clone();
+    let w = window.clone();
+    let s = Rc::clone(state);
+    extract_widget::<adw::ActionRow>(builder, "scheduler_selection_row").connect_activated(
+        move |_| {
+            let schedulers = s.borrow().schedulers.clone();
+            let current = s.borrow().selected_scheduler.clone();
+            let s = s.clone();
+            let b = b.clone();
+
+            show_scheduler_selector(&w, schedulers, current, move |selected| {
+                s.borrow_mut().selected_scheduler = Some(selected.clone());
+                extract_widget::<Label>(&b, "selected_scheduler_label")
+                    .set_label(&humanize_name(&selected));
+            });
+        },
+    );
+
     // Refresh button
     let b = builder.clone();
     let s = Rc::clone(state);
@@ -87,17 +107,15 @@ fn setup_buttons(builder: &Builder, window: &ApplicationWindow, state: &Rc<RefCe
     let w = window.clone();
     let s = Rc::clone(state);
     extract_widget::<Button>(builder, "btn_switch_scheduler").connect_clicked(move |_| {
-        let scheduler =
-            get_combo_row_value(&extract_widget::<adw::ComboRow>(&b, "scheduler_combo"));
+        let scheduler = s.borrow().selected_scheduler.clone();
         let mode = get_combo_row_value(&extract_widget::<adw::ComboRow>(&b, "mode_combo"))
             .unwrap_or_else(|| "auto".to_string());
 
-        let Some(sched_display) = scheduler else {
+        let Some(sched_name) = scheduler else {
             warn!("No valid scheduler selected");
             return;
         };
 
-        let sched_name = sched_display.to_lowercase();
         let sched = format!("scx_{}", sched_name);
         let cmd = if s.borrow().is_active {
             "switch"
@@ -162,26 +180,25 @@ fn setup_buttons(builder: &Builder, window: &ApplicationWindow, state: &Rc<RefCe
     });
 }
 
-fn setup_persistence(builder: &Builder, window: &ApplicationWindow) {
+fn setup_persistence(builder: &Builder, window: &ApplicationWindow, state: &Rc<RefCell<State>>) {
     let switch = extract_widget::<adw::SwitchRow>(builder, "persist_switch");
     switch.set_active(is_service_enabled("scx.service"));
 
     let b = builder.clone();
     let w = window.clone();
+    let s = state.clone();
     switch.connect_active_notify(move |sw| {
         if sw.is_active() {
-            let scheduler =
-                get_combo_row_value(&extract_widget::<adw::ComboRow>(&b, "scheduler_combo"));
+            let scheduler = s.borrow().selected_scheduler.clone();
             let mode = get_combo_row_value(&extract_widget::<adw::ComboRow>(&b, "mode_combo"))
                 .unwrap_or_else(|| "auto".to_string());
 
-            let Some(sched_display) = scheduler else {
+            let Some(sched_name) = scheduler else {
                 warn!("No valid scheduler selected for persistence");
                 sw.set_active(false);
                 return;
             };
 
-            let sched_name = sched_display.to_lowercase();
             let sched = format!("scx_{}", sched_name);
             let template_path = crate::config::paths::systemd().join("scx.service.in");
 
@@ -284,13 +301,13 @@ fn refresh_state(builder: &Builder, state: &Rc<RefCell<State>>, refresh_btn: Opt
     let btn_opt = refresh_btn.cloned();
 
     // Disable controls while refreshing
-    let combo = extract_widget::<adw::ComboRow>(&builder, "scheduler_combo");
+    let row = extract_widget::<adw::ActionRow>(&builder, "scheduler_selection_row");
     let mode_combo = extract_widget::<adw::ComboRow>(&builder, "mode_combo");
     let switch_btn = extract_widget::<Button>(&builder, "btn_switch_scheduler");
     let stop_btn = extract_widget::<Button>(&builder, "btn_stop_scheduler");
     let persist = extract_widget::<adw::SwitchRow>(&builder, "persist_switch");
 
-    combo.set_sensitive(false);
+    row.set_sensitive(false);
     mode_combo.set_sensitive(false);
     switch_btn.set_sensitive(false);
     stop_btn.set_sensitive(false);
@@ -334,21 +351,32 @@ fn refresh_state(builder: &Builder, state: &Rc<RefCell<State>>, refresh_btn: Opt
                     s.is_active = is_active;
                 }
 
-                // Populate dropdown
-                let display_names: Vec<String> =
-                    schedulers.iter().map(|s| humanize_name(s)).collect();
-                let list =
-                    StringList::new(&display_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
-                combo.set_model(Some(&list));
-                if !schedulers.is_empty() {
-                    combo.set_selected(0);
+                // Select default scheduler if none selected
+                {
+                    let mut s = state.borrow_mut();
+                    if s.selected_scheduler.is_none() && !schedulers.is_empty() {
+                        // Prefer scx_rusty or scx_lavd if available, otherwise first
+                        if schedulers.iter().any(|s| s == "scx_rusty") {
+                            s.selected_scheduler = Some("scx_rusty".to_string());
+                        } else if schedulers.iter().any(|s| s == "scx_lavd") {
+                            s.selected_scheduler = Some("scx_lavd".to_string());
+                        } else {
+                            s.selected_scheduler = Some(schedulers[0].clone());
+                        }
+                    }
+                }
+
+                // Update selected label
+                if let Some(selected) = &state.borrow().selected_scheduler {
+                    extract_widget::<Label>(&builder, "selected_scheduler_label")
+                        .set_label(&humanize_name(selected));
                 }
 
                 // Update status display
                 update_status_labels(&builder, is_active, &name, &mode);
 
                 // Update buttons and re-enable controls
-                combo.set_sensitive(true);
+                row.set_sensitive(true);
                 mode_combo.set_sensitive(true);
                 persist.set_sensitive(true);
 
@@ -385,7 +413,7 @@ fn refresh_state(builder: &Builder, state: &Rc<RefCell<State>>, refresh_btn: Opt
             Err(std::sync::mpsc::TryRecvError::Disconnected) => {
                 warn!("Scheduler scan thread disconnected");
                 // Re-enable controls on failure
-                combo.set_sensitive(true);
+                row.set_sensitive(true);
                 mode_combo.set_sensitive(true);
                 switch_btn.set_sensitive(true);
                 stop_btn.set_sensitive(true);
@@ -474,6 +502,119 @@ fn get_status() -> (bool, String, String) {
             (false, String::new(), String::new())
         })
         .unwrap_or((false, String::new(), String::new()))
+}
+
+fn show_scheduler_selector(
+    parent: &ApplicationWindow,
+    schedulers: Vec<String>,
+    current_selected: Option<String>,
+    on_select: impl Fn(String) + 'static,
+) {
+    // Load UI from resource
+    let builder = Builder::from_resource(crate::config::resources::dialogs::SCHEDULER_SELECTION);
+    let window: adw::Window = extract_widget(&builder, "scheduler_selection_window");
+    window.set_transient_for(Some(parent));
+
+    let content: GtkBox = extract_widget(&builder, "schedulers_container");
+
+    // Categories
+    let categories = vec![
+        ("Gaming", vec!["scx_rusty", "scx_lavd", "scx_bpfland"]),
+        ("Desktop", vec!["scx_cosmos", "scx_flash"]),
+        ("Servers", vec!["scx_layered", "scx_flatcg", "scx_tickless"]),
+        ("Low Latency", vec!["scx_nest"]),
+        ("Testing", vec!["scx_simple", "scx_chaos", "scx_userland"]),
+    ];
+
+    // Set for tracking used schedulers
+    let mut added = std::collections::HashSet::new();
+
+    let window_weak = window.downgrade();
+    let on_select = Rc::new(on_select);
+
+    for (cat_name, items) in categories {
+        let group = adw::PreferencesGroup::new();
+        group.set_title(cat_name);
+
+        let mut has_items = false;
+
+        for item in items {
+            if schedulers.iter().any(|s| s == item) {
+                has_items = true;
+                added.insert(item.to_string());
+
+                let row = adw::ActionRow::new();
+                row.set_title(&humanize_name(item));
+
+                if let Some(ref current) = current_selected {
+                    if current == item {
+                        row.add_suffix(&gtk4::Image::from_icon_name("circle-check-symbolic"));
+                    }
+                }
+
+                row.set_activatable(true);
+
+                let on_select_clone = on_select.clone();
+                let item_string = item.to_string();
+                let win_weak = window_weak.clone();
+
+                row.connect_activated(move |_| {
+                    on_select_clone(item_string.clone());
+                    if let Some(win) = win_weak.upgrade() {
+                        win.close();
+                    }
+                });
+
+                group.add(&row);
+            }
+        }
+
+        if has_items {
+            content.append(&group);
+        }
+    }
+
+    // Others category
+    let mut others = Vec::new();
+    for sched in &schedulers {
+        if !added.contains(sched) {
+            others.push(sched);
+        }
+    }
+    others.sort();
+
+    if !others.is_empty() {
+        let group = adw::PreferencesGroup::new();
+        group.set_title("Other");
+        for item in others {
+            let row = adw::ActionRow::new();
+            row.set_title(&humanize_name(item));
+
+            if let Some(ref current) = current_selected {
+                if current == item {
+                    row.add_suffix(&gtk4::Image::from_icon_name("circle-check-symbolic"));
+                }
+            }
+
+            row.set_activatable(true);
+
+            let on_select_clone = on_select.clone();
+            let item_string = item.to_string();
+            let win_weak = window_weak.clone();
+
+            row.connect_activated(move |_| {
+                on_select_clone(item_string.clone());
+                if let Some(win) = win_weak.upgrade() {
+                    win.close();
+                }
+            });
+
+            group.add(&row);
+        }
+        content.append(&group);
+    }
+
+    window.present();
 }
 
 fn humanize_name(name: &str) -> String {

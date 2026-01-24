@@ -1,289 +1,171 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0" />
-    <requires lib="adw" version="1.0" />
-
-    <object class="AdwWindow" id="download_window">
-        <property name="title">Downloading - Xero Toolkit</property>
-        <property name="icon-name">xero-toolkit</property>
-        <property name="default-width">550</property>
-        <property name="default-height">300</property>
-        <property name="modal">true</property>
-        <property name="resizable">false</property>
-
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="adw" version="1.0"/>
+  <object class="AdwWindow" id="download_window">
+    <property name="title">Downloading - Xero Toolkit</property>
+    <property name="icon-name">xero-toolkit</property>
+    <property name="default-width">550</property>
+    <property name="default-height">300</property>
+    <property name="modal">true</property>
+    <property name="resizable">false</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <property name="show-title">true</property>
+            <property name="show-end-title-buttons">true</property>
+          </object>
+        </child>
         <property name="content">
-            <object class="AdwToolbarView">
-                <child type="top">
-                    <object class="AdwHeaderBar" id="header_bar">
-                        <property name="show-title">true</property>
-                        <property name="show-end-title-buttons">true</property>
-                    </object>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">24</property>
+            <property name="margin-top">32</property>
+            <property name="margin-bottom">32</property>
+            <property name="margin-start">32</property>
+            <property name="margin-end">32</property>
+            <property name="vexpand">true</property>
+            <!-- Download Container -->
+            <child>
+              <object class="GtkBox" id="download_container">
+                <property name="orientation">vertical</property>
+                <property name="spacing">16</property>
+                <property name="css-classes">card</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="vexpand">true</property>
+                <!-- Title -->
+                <child>
+                  <object class="GtkLabel" id="download_title">
+                    <property name="label">Downloading Arch Linux ISO</property>
+                    <property name="css-classes">title-2</property>
+                    <property name="halign">start</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-start">12</property>
+                  </object>
                 </child>
-
-                <property name="content">
-                    <object class="GtkBox">
+                <!-- Filename -->
+                <child>
+                  <object class="GtkLabel" id="filename_label">
+                    <property name="label">Fetching ISO information...</property>
+                    <property name="halign">start</property>
+                    <property name="margin-start">12</property>
+                    <property name="wrap">true</property>
+                    <property name="xalign">0.0</property>
+                  </object>
+                </child>
+                <!-- Progress Bar -->
+                <child>
+                  <object class="GtkProgressBar" id="progress_bar">
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="show-text">true</property>
+                  </object>
+                </child>
+                <!-- Stats Box -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">32</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-bottom">12</property>
+                    <!-- Speed -->
+                    <child>
+                      <object class="GtkBox">
                         <property name="orientation">vertical</property>
-                        <property name="spacing">24</property>
-                        <property name="margin-top">32</property>
-                        <property name="margin-bottom">32</property>
-                        <property name="margin-start">32</property>
-                        <property name="margin-end">32</property>
-                        <property name="vexpand">true</property>
-
-                        <!-- Download Container -->
+                        <property name="spacing">4</property>
                         <child>
-                            <object class="GtkBox" id="download_container">
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">16</property>
-                                <property name="css-classes">card</property>
-                                <property name="margin-top">12</property>
-                                <property name="margin-bottom">12</property>
-                                <property name="margin-start">12</property>
-                                <property name="margin-end">12</property>
-                                <property name="vexpand">true</property>
-
-                                <!-- Title -->
-                                <child>
-                                    <object
-                                        class="GtkLabel"
-                                        id="download_title"
-                                    >
-                                        <property
-                                            name="label"
-                                        >Downloading Arch Linux ISO</property>
-                                        <property
-                                            name="css-classes"
-                                        >title-2</property>
-                                        <property name="halign">start</property>
-                                        <property
-                                            name="margin-top"
-                                        >12</property>
-                                        <property
-                                            name="margin-start"
-                                        >12</property>
-                                    </object>
-                                </child>
-
-                                <!-- Filename -->
-                                <child>
-                                    <object
-                                        class="GtkLabel"
-                                        id="filename_label"
-                                    >
-                                        <property
-                                            name="label"
-                                        >Fetching ISO information...</property>
-                                        <property name="halign">start</property>
-                                        <property
-                                            name="margin-start"
-                                        >12</property>
-                                        <property name="wrap">true</property>
-                                        <property name="xalign">0.0</property>
-                                    </object>
-                                </child>
-
-                                <!-- Progress Bar -->
-                                <child>
-                                    <object
-                                        class="GtkProgressBar"
-                                        id="progress_bar"
-                                    >
-                                        <property
-                                            name="margin-start"
-                                        >12</property>
-                                        <property
-                                            name="margin-end"
-                                        >12</property>
-                                        <property
-                                            name="show-text"
-                                        >true</property>
-                                    </object>
-                                </child>
-
-                                <!-- Stats Box -->
-                                <child>
-                                    <object class="GtkBox">
-                                        <property
-                                            name="orientation"
-                                        >horizontal</property>
-                                        <property name="spacing">32</property>
-                                        <property
-                                            name="margin-start"
-                                        >12</property>
-                                        <property
-                                            name="margin-end"
-                                        >12</property>
-                                        <property
-                                            name="margin-bottom"
-                                        >12</property>
-
-                                        <!-- Speed -->
-                                        <child>
-                                            <object class="GtkBox">
-                                                <property
-                                                    name="orientation"
-                                                >vertical</property>
-                                                <property
-                                                    name="spacing"
-                                                >4</property>
-
-                                                <child>
-                                                    <object class="GtkLabel">
-                                                        <property
-                                                            name="label"
-                                                        >Speed</property>
-                                                        <property
-                                                            name="css-classes"
-                                                        >dim-label</property>
-                                                        <property
-                                                            name="halign"
-                                                        >start</property>
-                                                    </object>
-                                                </child>
-
-                                                <child>
-                                                    <object
-                                                        class="GtkLabel"
-                                                        id="speed_label"
-                                                    >
-                                                        <property
-                                                            name="label"
-                                                        >0 MB/s</property>
-                                                        <property
-                                                            name="halign"
-                                                        >start</property>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-
-                                        <!-- Downloaded -->
-                                        <child>
-                                            <object class="GtkBox">
-                                                <property
-                                                    name="orientation"
-                                                >vertical</property>
-                                                <property
-                                                    name="spacing"
-                                                >4</property>
-
-                                                <child>
-                                                    <object class="GtkLabel">
-                                                        <property
-                                                            name="label"
-                                                        >Downloaded</property>
-                                                        <property
-                                                            name="css-classes"
-                                                        >dim-label</property>
-                                                        <property
-                                                            name="halign"
-                                                        >start</property>
-                                                    </object>
-                                                </child>
-
-                                                <child>
-                                                    <object
-                                                        class="GtkLabel"
-                                                        id="downloaded_label"
-                                                    >
-                                                        <property
-                                                            name="label"
-                                                        >0 MB / 0 MB</property>
-                                                        <property
-                                                            name="halign"
-                                                        >start</property>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-
-                                        <!-- Time Remaining -->
-                                        <child>
-                                            <object class="GtkBox">
-                                                <property
-                                                    name="orientation"
-                                                >vertical</property>
-                                                <property
-                                                    name="spacing"
-                                                >4</property>
-                                                <property
-                                                    name="hexpand"
-                                                >true</property>
-
-                                                <child>
-                                                    <object class="GtkLabel">
-                                                        <property
-                                                            name="label"
-                                                        >Time Remaining</property>
-                                                        <property
-                                                            name="css-classes"
-                                                        >dim-label</property>
-                                                        <property
-                                                            name="halign"
-                                                        >start</property>
-                                                    </object>
-                                                </child>
-
-                                                <child>
-                                                    <object
-                                                        class="GtkLabel"
-                                                        id="time_remaining_label"
-                                                    >
-                                                        <property
-                                                            name="label"
-                                                        >Calculating...</property>
-                                                        <property
-                                                            name="halign"
-                                                        >start</property>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-                            </object>
+                          <object class="GtkLabel">
+                            <property name="label">Speed</property>
+                            <property name="css-classes">dim-label</property>
+                            <property name="halign">start</property>
+                          </object>
                         </child>
-
-                        <!-- Action Buttons -->
                         <child>
-                            <object class="GtkBox">
-                                <property
-                                    name="orientation"
-                                >horizontal</property>
-                                <property name="spacing">12</property>
-                                <property name="halign">center</property>
-
-                                <child>
-                                    <object class="GtkButton" id="pause_button">
-                                        <property name="label">Pause</property>
-                                        <property
-                                            name="width-request"
-                                        >100</property>
-                                        <property
-                                            name="height-request"
-                                        >40</property>
-                                    </object>
-                                </child>
-
-                                <child>
-                                    <object
-                                        class="GtkButton"
-                                        id="cancel_button"
-                                    >
-                                        <property name="label">Cancel</property>
-                                        <property
-                                            name="width-request"
-                                        >100</property>
-                                        <property
-                                            name="height-request"
-                                        >40</property>
-                                    </object>
-                                </child>
-                            </object>
+                          <object class="GtkLabel" id="speed_label">
+                            <property name="label">0 MB/s</property>
+                            <property name="css-classes">tabular-digits</property>
+                            <property name="halign">start</property>
+                          </object>
                         </child>
-                    </object>
-                </property>
-            </object>
+                      </object>
+                    </child>
+                    <!-- Downloaded -->
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">4</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Downloaded</property>
+                            <property name="css-classes">dim-label</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="downloaded_label">
+                            <property name="label">0 MB / 0 MB</property>
+                            <property name="css-classes">tabular-digits</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <!-- Time Remaining -->
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">4</property>
+                        <property name="hexpand">true</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Time Remaining</property>
+                            <property name="css-classes">dim-label</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="time_remaining_label">
+                            <property name="label">Calculating...</property>
+                            <property name="css-classes">tabular-digits</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <!-- Action Buttons -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <property name="halign">center</property>
+                <child>
+                  <object class="GtkButton" id="pause_button">
+                    <property name="label">Pause</property>
+                    <property name="width-request">100</property>
+                    <property name="height-request">40</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="cancel_button">
+                    <property name="label">Cancel</property>
+                    <property name="width-request">100</property>
+                    <property name="height-request">40</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
         </property>
-    </object>
+      </object>
+    </property>
+  </object>
 </interface>

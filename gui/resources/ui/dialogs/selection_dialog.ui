@@ -1,163 +1,109 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0" />
-    <requires lib="adw" version="1.0" />
-
-    <object class="AdwWindow" id="selection_dialog">
-        <property name="title">Xero Toolkit - Select Options</property>
-        <property name="icon-name">xero-toolkit</property>
-        <property name="default-width">600</property>
-        <property name="default-height">500</property>
-        <property name="modal">true</property>
-
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="adw" version="1.0"/>
+  <object class="AdwWindow" id="selection_dialog">
+    <property name="title">Xero Toolkit - Select Options</property>
+    <property name="icon-name">xero-toolkit</property>
+    <property name="default-width">600</property>
+    <property name="default-height">500</property>
+    <property name="modal">true</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="show-title">true</property>
+            <property name="show-end-title-buttons">true</property>
+          </object>
+        </child>
         <property name="content">
-            <object class="AdwToolbarView">
-                <child type="top">
-                    <object class="AdwHeaderBar">
-                        <property name="show-title">true</property>
-                        <property name="show-end-title-buttons">true</property>
-                    </object>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <!-- Header: Title + Description centered -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">4</property>
+                <property name="halign">center</property>
+                <child>
+                  <object class="GtkLabel" id="dialog_title">
+                    <property name="label">Title</property>
+                    <property name="css-classes">title-2</property>
+                    <property name="wrap">true</property>
+                    <property name="xalign">0.5</property>
+                    <property name="halign">center</property>
+                  </object>
                 </child>
-
-                <property name="content">
-                    <object class="GtkBox">
+                <child>
+                  <object class="GtkLabel" id="dialog_description">
+                    <property name="label">Subtitle</property>
+                    <property name="css-classes">dim-label</property>
+                    <property name="wrap">true</property>
+                    <property name="xalign">0.5</property>
+                    <property name="halign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <!-- Options container with rounded darker background -->
+            <child>
+              <object class="GtkFrame">
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
+                <property name="margin-start">24</property>
+                <property name="margin-end">24</property>
+                <property name="margin-top">8</property>
+                <property name="margin-bottom">8</property>
+                <style>
+                  <class name="view"/>
+                </style>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="hexpand">true</property>
+                    <property name="vexpand">true</property>
+                    <property name="min-content-height">300</property>
+                    <child>
+                      <object class="GtkBox" id="options_container">
                         <property name="orientation">vertical</property>
                         <property name="spacing">12</property>
-                        <property name="margin-top">12</property>
-                        <property name="margin-bottom">12</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-
-                        <!-- Header: Title + Description centered -->
-                        <child>
-                            <object class="GtkBox">
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">4</property>
-                                <property name="halign">center</property>
-
-                                <child>
-                                    <object class="GtkLabel" id="dialog_title">
-                                        <property name="label">Title</property>
-                                        <property
-                                            name="css-classes"
-                                        >title-2</property>
-                                        <property name="wrap">true</property>
-                                        <property name="xalign">0.5</property>
-                                        <property
-                                            name="halign"
-                                        >center</property>
-                                    </object>
-                                </child>
-
-                                <child>
-                                    <object
-                                        class="GtkLabel"
-                                        id="dialog_description"
-                                    >
-                                        <property
-                                            name="label"
-                                        >Subtitle</property>
-                                        <property
-                                            name="css-classes"
-                                        >dim-label</property>
-                                        <property name="wrap">true</property>
-                                        <property name="xalign">0.5</property>
-                                        <property
-                                            name="halign"
-                                        >center</property>
-                                    </object>
-                                </child>
-                            </object>
-                        </child>
-
-                        <!-- Options container with rounded darker background -->
-                        <child>
-                            <object class="GtkFrame">
-                                <property name="hexpand">true</property>
-                                <property name="vexpand">true</property>
-                                <property name="margin-start">24</property>
-                                <property name="margin-end">24</property>
-                                <property name="margin-top">8</property>
-                                <property name="margin-bottom">8</property>
-                                <style>
-                                    <class name="view" />
-                                </style>
-
-                                <child>
-                                    <object class="GtkScrolledWindow">
-                                        <property name="hexpand">true</property>
-                                        <property name="vexpand">true</property>
-                                        <property
-                                            name="min-content-height"
-                                        >300</property>
-
-                                        <child>
-                                            <object
-                                                class="GtkBox"
-                                                id="options_container"
-                                            >
-                                                <property
-                                                    name="orientation"
-                                                >vertical</property>
-                                                <property
-                                                    name="spacing"
-                                                >12</property>
-                                                <property
-                                                    name="margin-start"
-                                                >16</property>
-                                                <property
-                                                    name="margin-end"
-                                                >16</property>
-                                                <property
-                                                    name="margin-top"
-                                                >16</property>
-                                                <property
-                                                    name="margin-bottom"
-                                                >16</property>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-                            </object>
-                        </child>
-
-                        <!-- Button Box: Centered -->
-                        <child>
-                            <object class="GtkBox">
-                                <property
-                                    name="orientation"
-                                >horizontal</property>
-                                <property name="spacing">8</property>
-                                <property name="halign">center</property>
-                                <property name="margin-top">12</property>
-
-                                <child>
-                                    <object
-                                        class="GtkButton"
-                                        id="cancel_button"
-                                    >
-                                        <property name="label">Cancel</property>
-                                    </object>
-                                </child>
-
-                                <child>
-                                    <object
-                                        class="GtkButton"
-                                        id="confirm_button"
-                                    >
-                                        <property
-                                            name="label"
-                                        >Confirm</property>
-                                        <property
-                                            name="css-classes"
-                                        >suggested-action</property>
-                                    </object>
-                                </child>
-                            </object>
-                        </child>
-                    </object>
-                </property>
-            </object>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+                        <property name="margin-top">16</property>
+                        <property name="margin-bottom">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <!-- Button Box: Centered -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <property name="halign">center</property>
+                <property name="margin-top">12</property>
+                <child>
+                  <object class="GtkButton" id="cancel_button">
+                    <property name="label">Cancel</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="confirm_button">
+                    <property name="label">Confirm</property>
+                    <property name="css-classes">suggested-action</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
         </property>
-    </object>
+      </object>
+    </property>
+  </object>
 </interface>

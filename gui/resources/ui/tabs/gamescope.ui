@@ -1,405 +1,386 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0" />
-    <requires lib="libadwaita" version="1.0" />
-
-    <object class="GtkBox" id="page_gamescope">
-        <property name="orientation">vertical</property>
-        <property name="spacing">0</property>
-        <property name="margin-top">32</property>
-        <property name="margin-bottom">0</property>
-        <property name="margin-start">48</property>
-        <property name="margin-end">48</property>
-        <property name="hexpand">true</property>
-        <property name="vexpand">true</property>
-        <property name="halign">fill</property>
-        <property name="valign">fill</property>
-
-        <!-- Top Section: Compact Header -->
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <object class="GtkBox" id="page_gamescope">
+    <property name="orientation">vertical</property>
+    <property name="spacing">0</property>
+    <property name="margin-top">32</property>
+    <property name="margin-bottom">0</property>
+    <property name="margin-start">48</property>
+    <property name="margin-end">48</property>
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+    <property name="halign">fill</property>
+    <property name="valign">fill</property>
+    <!-- Top Section: Compact Header -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="spacing">16</property>
+        <property name="halign">start</property>
+        <property name="valign">start</property>
+        <property name="vexpand">false</property>
+        <property name="margin-start">12</property>
+        <property name="margin-end">12</property>
+        <property name="margin-bottom">16</property>
         <child>
-            <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">16</property>
+          <object class="GtkImage">
+            <property name="icon-name">steam-symbolic</property>
+            <property name="pixel-size">48</property>
+            <property name="valign">center</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">4</property>
+            <property name="valign">center</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Gamescope</property>
+                <property name="css-classes">title-2</property>
                 <property name="halign">start</property>
-                <property name="valign">start</property>
-                <property name="vexpand">false</property>
-                <property name="margin-start">12</property>
-                <property name="margin-end">12</property>
-                <property name="margin-bottom">16</property>
-
-                <child>
-                    <object class="GtkImage">
-                        <property name="icon-name">steam-symbolic</property>
-                        <property name="pixel-size">48</property>
-                        <property name="valign">center</property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkBox">
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">4</property>
-                        <property name="valign">center</property>
-
-                        <child>
-                            <object class="GtkLabel">
-                                <property name="label">Gamescope</property>
-                                <property name="css-classes">title-2</property>
-                                <property name="halign">start</property>
-                                <property name="xalign">0</property>
-                            </object>
-                        </child>
-
-                        <child>
-                            <object class="GtkLabel">
-                                <property name="label">Generate gamescope commands quickly for Steam launch options</property>
-                                <property name="css-classes">dim-label</property>
-                                <property name="halign">start</property>
-                                <property name="xalign">0</property>
-                                <property name="wrap">true</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-            </object>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Generate gamescope commands quickly for Steam launch options</property>
+                <property name="css-classes">dim-label</property>
+                <property name="halign">start</property>
+                <property name="xalign">0</property>
+                <property name="wrap">true</property>
+              </object>
+            </child>
+          </object>
         </child>
-
-        <!-- Main Content Section -->
+      </object>
+    </child>
+    <!-- Main Content Section -->
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">true</property>
+        <property name="hscrollbar-policy">never</property>
         <child>
-            <object class="GtkScrolledWindow">
-                <property name="vexpand">true</property>
-                <property name="hscrollbar-policy">never</property>
+          <object class="AdwClamp">
+            <property name="maximum-size">1000</property>
+            <property name="tightening-threshold">800</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-bottom">48</property>
+            <property name="margin-top">24</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">24</property>
                 <child>
-                    <object class="AdwClamp">
-                        <property name="maximum-size">1000</property>
-                        <property name="tightening-threshold">800</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="margin-bottom">48</property>
-                        <property name="margin-top">24</property>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title">Launch Option</property>
+                    <property name="description">Copy and paste this into your Steam properties.</property>
+                    <child>
+                      <object class="AdwEntryRow" id="text_command_output">
+                        <property name="title">Command</property>
+                        <property name="editable">false</property>
+                        <property name="enable-emoji-completion">false</property>
                         <child>
-                            <object class="GtkBox">
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">24</property>
-
-                                <child>
-                                    <object class="AdwPreferencesGroup">
-                                        <property name="title">Launch Option</property>
-                                        <property name="description">Copy and paste this into your Steam properties.</property>
-                                        <child>
-                                            <object class="AdwEntryRow" id="text_command_output">
-                                                <property name="title">Command</property>
-                                                <property name="editable">false</property>
-                                                <property name="enable-emoji-completion">false</property>
-                                                <child>
-                                                    <object class="GtkButton" id="btn_copy_command">
-                                                        <property name="icon-name">copy-symbolic</property>
-                                                        <property name="valign">center</property>
-                                                        <property name="tooltip-text">Copy to Clipboard</property>
-                                                        <style>
-                                                            <class name="flat"/>
-                                                        </style>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-
-                                <child>
-                                    <object class="GtkBox">
-                                        <property name="orientation">horizontal</property>
-                                        <property name="spacing">24</property>
-                                        <property name="homogeneous">true</property>
-                                        <property name="valign">start</property>
-
-                                        <child>
-                                            <object class="GtkBox">
-                                                <property name="orientation">vertical</property>
-                                                <property name="spacing">24</property>
-
-                                                <child>
-                                                    <object class="AdwPreferencesGroup">
-                                                        <property name="title">Output (Visual)</property>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_output_width">
-                                                                <property name="title">Output Width</property>
-                                                                <property name="input-purpose">digits</property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_output_height">
-                                                                <property name="title">Output Height</property>
-                                                                <property name="input-purpose">digits</property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_max_scale">
-                                                                <property name="title">Max Scale</property>
-                                                                <property name="input-purpose">number</property>
-                                                            </object>
-                                                        </child>
-                                                    </object>
-                                                </child>
-
-                                                <child>
-                                                    <object class="AdwPreferencesGroup">
-                                                        <property name="title">Nested (Game)</property>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_nested_width">
-                                                                <property name="title">Game Width</property>
-                                                                <property name="input-purpose">digits</property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_nested_height">
-                                                                <property name="title">Game Height</property>
-                                                                <property name="input-purpose">digits</property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_nested_refresh">
-                                                                <property name="title">Game Refresh Rate</property>
-                                                                <property name="input-purpose">digits</property>
-                                                            </object>
-                                                        </child>
-                                                    </object>
-                                                </child>
-
-                                                <child>
-                                                    <object class="AdwPreferencesGroup">
-                                                        <property name="title">Backend &amp;amp; Misc</property>
-                                                        <child>
-                                                            <object class="AdwComboRow" id="combo_backend">
-                                                                <property name="title">Backend</property>
-                                                                <property name="model">
-                                                                    <object class="GtkStringList">
-                                                                        <items>
-                                                                            <item>auto</item>
-                                                                            <item>drm</item>
-                                                                            <item>sdl</item>
-                                                                            <item>openvr</item>
-                                                                            <item>headless</item>
-                                                                            <item>wayland</item>
-                                                                        </items>
-                                                                    </object>
-                                                                </property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">HDR</property>
-                                                                <property name="activatable-widget">check_hdr_enabled</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_hdr_enabled">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_cursor_path">
-                                                                <property name="title">Cursor Image Path</property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_framerate_limit">
-                                                                <property name="title">Framerate Limit</property>
-                                                                <property name="input-purpose">digits</property>
-                                                            </object>
-                                                        </child>
-                                                    </object>
-                                                </child>
-
-                                            </object>
-                                        </child>
-
-                                        <child>
-                                            <object class="GtkBox">
-                                                <property name="orientation">vertical</property>
-                                                <property name="spacing">24</property>
-
-                                                <child>
-                                                    <object class="AdwPreferencesGroup">
-                                                        <property name="title">Scaler / Filter</property>
-                                                        <child>
-                                                            <object class="AdwComboRow" id="combo_scaler">
-                                                                <property name="title">Scaler Type</property>
-                                                                <property name="model">
-                                                                    <object class="GtkStringList">
-                                                                        <items>
-                                                                            <item>auto</item>
-                                                                            <item>integer</item>
-                                                                            <item>fit</item>
-                                                                            <item>fill</item>
-                                                                            <item>stretch</item>
-                                                                        </items>
-                                                                    </object>
-                                                                </property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwComboRow" id="combo_filter">
-                                                                <property name="title">Filter Type</property>
-                                                                <property name="model">
-                                                                    <object class="GtkStringList">
-                                                                        <items>
-                                                                            <item>linear</item>
-                                                                            <item>nearest</item>
-                                                                            <item>fsr</item>
-                                                                            <item>nis</item>
-                                                                            <item>pixel</item>
-                                                                        </items>
-                                                                    </object>
-                                                                </property>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_fsr_sharpness">
-                                                                <property name="title">FSR Sharpness</property>
-                                                                <property name="input-purpose">digits</property>
-                                                            </object>
-                                                        </child>
-                                                    </object>
-                                                </child>
-
-                                                <child>
-                                                    <object class="AdwPreferencesGroup">
-                                                        <property name="title">Flags</property>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Fullscreen</property>
-                                                                <property name="activatable-widget">check_fullscreen</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_fullscreen">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Grab Keyboard</property>
-                                                                <property name="activatable-widget">check_grab</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_grab">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Force Grab Cursor</property>
-                                                                <property name="activatable-widget">check_force_grab_cursor</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_force_grab_cursor">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Adaptive Sync</property>
-                                                                <property name="activatable-widget">check_adaptive_sync</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_adaptive_sync">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Immediate Flips</property>
-                                                                <property name="activatable-widget">check_immediate_flips</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_immediate_flips">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Expose Wayland</property>
-                                                                <property name="activatable-widget">check_expose_wayland</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_expose_wayland">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Force Windows Fullscreen</property>
-                                                                <property name="subtitle">Proton Workaround</property>
-                                                                <property name="activatable-widget">check_force_windows_fullscreen</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_force_windows_fullscreen">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                    </object>
-                                                </child>
-
-                                                <child>
-                                                    <object class="AdwPreferencesGroup">
-                                                        <property name="title">Debug &amp;amp; Extra</property>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Debug Layers</property>
-                                                                <property name="activatable-widget">check_debug_layers</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_debug_layers">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">MangoHUD</property>
-                                                                <property name="activatable-widget">check_mangoapp</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_mangoapp">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwActionRow">
-                                                                <property name="title">Realtime Scheduling</property>
-                                                                <property name="activatable-widget">check_realtime</property>
-                                                                <child>
-                                                                    <object class="GtkSwitch" id="check_realtime">
-                                                                        <property name="valign">center</property>
-                                                                    </object>
-                                                                </child>
-                                                            </object>
-                                                        </child>
-                                                        <child>
-                                                            <object class="AdwEntryRow" id="entry_extra_flags">
-                                                                <property name="title">Extra Flags</property>
-                                                            </object>
-                                                        </child>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-                                    </object>
-                                </child>
-
-                            </object>
+                          <object class="GtkButton" id="btn_copy_command">
+                            <property name="icon-name">copy-symbolic</property>
+                            <property name="valign">center</property>
+                            <property name="tooltip-text">Copy to Clipboard</property>
+                            <style>
+                              <class name="flat"/>
+                            </style>
+                          </object>
                         </child>
-                    </object>
+                      </object>
+                    </child>
+                  </object>
                 </child>
-            </object>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">24</property>
+                    <property name="homogeneous">true</property>
+                    <property name="valign">start</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">24</property>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title">Output (Visual)</property>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_output_width">
+                                <property name="title">Output Width</property>
+                                <property name="input-purpose">digits</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_output_height">
+                                <property name="title">Output Height</property>
+                                <property name="input-purpose">digits</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_max_scale">
+                                <property name="title">Max Scale</property>
+                                <property name="input-purpose">number</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title">Nested (Game)</property>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_nested_width">
+                                <property name="title">Game Width</property>
+                                <property name="input-purpose">digits</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_nested_height">
+                                <property name="title">Game Height</property>
+                                <property name="input-purpose">digits</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_nested_refresh">
+                                <property name="title">Game Refresh Rate</property>
+                                <property name="input-purpose">digits</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title">Backend &amp;amp; Misc</property>
+                            <child>
+                              <object class="AdwComboRow" id="combo_backend">
+                                <property name="title">Backend</property>
+                                <property name="model">
+                                  <object class="GtkStringList">
+                                    <items>
+                                      <item>auto</item>
+                                      <item>drm</item>
+                                      <item>sdl</item>
+                                      <item>openvr</item>
+                                      <item>headless</item>
+                                      <item>wayland</item>
+                                    </items>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">HDR</property>
+                                <property name="activatable-widget">check_hdr_enabled</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_hdr_enabled">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_cursor_path">
+                                <property name="title">Cursor Image Path</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_framerate_limit">
+                                <property name="title">Framerate Limit</property>
+                                <property name="input-purpose">digits</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">24</property>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title">Scaler / Filter</property>
+                            <child>
+                              <object class="AdwComboRow" id="combo_scaler">
+                                <property name="title">Scaler Type</property>
+                                <property name="model">
+                                  <object class="GtkStringList">
+                                    <items>
+                                      <item>auto</item>
+                                      <item>integer</item>
+                                      <item>fit</item>
+                                      <item>fill</item>
+                                      <item>stretch</item>
+                                    </items>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwComboRow" id="combo_filter">
+                                <property name="title">Filter Type</property>
+                                <property name="model">
+                                  <object class="GtkStringList">
+                                    <items>
+                                      <item>linear</item>
+                                      <item>nearest</item>
+                                      <item>fsr</item>
+                                      <item>nis</item>
+                                      <item>pixel</item>
+                                    </items>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_fsr_sharpness">
+                                <property name="title">FSR Sharpness</property>
+                                <property name="input-purpose">digits</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title">Flags</property>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Fullscreen</property>
+                                <property name="activatable-widget">check_fullscreen</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_fullscreen">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Grab Keyboard</property>
+                                <property name="activatable-widget">check_grab</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_grab">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Force Grab Cursor</property>
+                                <property name="activatable-widget">check_force_grab_cursor</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_force_grab_cursor">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Adaptive Sync</property>
+                                <property name="activatable-widget">check_adaptive_sync</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_adaptive_sync">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Immediate Flips</property>
+                                <property name="activatable-widget">check_immediate_flips</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_immediate_flips">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Expose Wayland</property>
+                                <property name="activatable-widget">check_expose_wayland</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_expose_wayland">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Force Windows Fullscreen</property>
+                                <property name="subtitle">Proton Workaround</property>
+                                <property name="activatable-widget">check_force_windows_fullscreen</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_force_windows_fullscreen">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title">Debug &amp;amp; Extra</property>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Debug Layers</property>
+                                <property name="activatable-widget">check_debug_layers</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_debug_layers">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">MangoHUD</property>
+                                <property name="activatable-widget">check_mangoapp</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_mangoapp">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title">Realtime Scheduling</property>
+                                <property name="activatable-widget">check_realtime</property>
+                                <child>
+                                  <object class="GtkSwitch" id="check_realtime">
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="entry_extra_flags">
+                                <property name="title">Extra Flags</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
         </child>
-    </object>
+      </object>
+    </child>
+  </object>
 </interface>
