@@ -44,7 +44,7 @@
                                     <object class="GtkImage" id="error_icon">
                                         <property
                                             name="icon-name"
-                                        >dialog-error</property>
+                                        >circle-xmark</property>
                                         <property
                                             name="pixel-size"
                                         >48</property>

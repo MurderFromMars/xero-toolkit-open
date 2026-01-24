@@ -20,7 +20,7 @@
                         <!-- Sidebar toggle button -->
                         <child type="start">
                             <object class="GtkToggleButton" id="sidebar_toggle_button">
-                                <property name="icon-name">open-menu-symbolic</property>
+                                <property name="icon-name">bars-symbolic</property>
                                 <property name="tooltip-text">Toggle sidebar</property>
                                 <property name="active">true</property>
                             </object>

@@ -93,7 +93,7 @@
                                                 <property name="enable-emoji-completion">false</property>
                                                 <child>
                                                     <object class="GtkButton" id="btn_copy_command">
-                                                        <property name="icon-name">edit-copy-symbolic</property>
+                                                        <property name="icon-name">copy-symbolic</property>
                                                         <property name="valign">center</property>
                                                         <property name="tooltip-text">Copy to Clipboard</property>
                                                         <style>

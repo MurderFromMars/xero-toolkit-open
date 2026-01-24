@@ -131,7 +131,7 @@
                                                                 </child>
                                                                 <child>
                                                                     <object class="GtkButton" id="btn_refresh_kernels">
-                                                                        <property name="icon-name">view-refresh-symbolic</property>
+                                                                        <property name="icon-name">arrows-rotate-symbolic</property>
                                                                         <property name="tooltip-text">Scan for available and installed kernels</property>
                                                                         <property name="valign">center</property>
                                                                         <style>
@@ -275,7 +275,7 @@
                                                         </style>
                                                         <child>
                                                             <object class="GtkImage">
-                                                                <property name="icon-name">comment-dots-symbolic</property>
+                                                                <property name="icon-name">info-circle-symbolic</property>
                                                                 <property name="pixel-size">24</property>
                                                                 <property name="margin-start">12</property>
                                                                 <property name="margin-top">12</property>
@@ -313,7 +313,7 @@
                                                                         <property name="valign">center</property>
                                                                         <child>
                                                                             <object class="GtkImage" id="kernel_status_icon">
-                                                                                <property name="icon-name">dialog-question-symbolic</property>
+                                                                                <property name="icon-name">circle-question-symbolic</property>
                                                                                 <property name="pixel-size">16</property>
                                                                             </object>
                                                                         </child>
@@ -332,7 +332,7 @@
                                                                 </child>
                                                                 <child>
                                                                     <object class="GtkButton" id="btn_refresh_schedulers">
-                                                                        <property name="icon-name">view-refresh-symbolic</property>
+                                                                        <property name="icon-name">arrows-rotate-symbolic</property>
                                                                         <property name="tooltip-text">Refresh Status</property>
                                                                         <property name="valign">center</property>
                                                                         <style>
