@@ -97,7 +97,12 @@ fn setup_buttons(builder: &Builder, window: &ApplicationWindow, state: &Rc<RefCe
             return;
         };
 
-        let sched_name = sched_display.to_lowercase();
+        if sched_display.contains("───") {
+            warn!("Category header selected");
+            return;
+        }
+
+        let sched_name = sched_display.trim().to_lowercase();
         let sched = format!("scx_{}", sched_name);
         let cmd = if s.borrow().is_active {
             "switch"
@@ -181,7 +186,13 @@ fn setup_persistence(builder: &Builder, window: &ApplicationWindow) {
                 return;
             };
 
-            let sched_name = sched_display.to_lowercase();
+            if sched_display.contains("───") {
+                warn!("Cannot persist category header");
+                sw.set_active(false);
+                return;
+            }
+
+            let sched_name = sched_display.trim().to_lowercase();
             let sched = format!("scx_{}", sched_name);
             let template_path = crate::config::paths::systemd().join("scx.service.in");
 
@@ -334,13 +345,59 @@ fn refresh_state(builder: &Builder, state: &Rc<RefCell<State>>, refresh_btn: Opt
                     s.is_active = is_active;
                 }
 
-                // Populate dropdown
-                let display_names: Vec<String> =
-                    schedulers.iter().map(|s| humanize_name(s)).collect();
+                // Populate dropdown with categories
+                let categories = vec![
+                    ("Gaming", vec!["scx_rusty", "scx_lavd", "scx_bpfland"]),
+                    ("Desktop", vec!["scx_cosmos", "scx_flash"]),
+                    ("Servers", vec!["scx_layered", "scx_flatcg", "scx_tickless"]),
+                    ("Low Latency", vec!["scx_nest"]),
+                    ("Testing", vec!["scx_simple", "scx_chaos", "scx_userland"]),
+                ];
+
+                let mut display_names = Vec::new();
+                let mut added = std::collections::HashSet::new();
+
+                for (cat, items) in &categories {
+                    let mut cat_items = Vec::new();
+                    for item in items {
+                        if schedulers.iter().any(|s| s == *item) && !added.contains(*item) {
+                            cat_items.push(item);
+                            added.insert(item.to_string());
+                        }
+                    }
+
+                    if !cat_items.is_empty() {
+                        display_names.push(format!("─── {} ───", cat));
+                        for item in cat_items {
+                            display_names.push(format!("  {}", humanize_name(item)));
+                        }
+                    }
+                }
+
+                // Add remaining items
+                let mut others = Vec::new();
+                for sched in &schedulers {
+                    if !added.contains(sched) {
+                        others.push(sched);
+                    }
+                }
+                others.sort();
+
+                if !others.is_empty() {
+                    display_names.push("─── Other ───".to_string());
+                    for item in others {
+                        display_names.push(format!("  {}", humanize_name(item)));
+                    }
+                }
+
                 let list =
                     StringList::new(&display_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
                 combo.set_model(Some(&list));
-                if !schedulers.is_empty() {
+
+                // Select first valid item (skip header)
+                if display_names.len() > 1 {
+                    combo.set_selected(1);
+                } else if !display_names.is_empty() {
                     combo.set_selected(0);
                 }
 
