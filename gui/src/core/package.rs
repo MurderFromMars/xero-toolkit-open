@@ -40,6 +40,26 @@ pub fn is_package_installed(package: &str) -> bool {
     installed
 }
 
+/// Check if a package is available in the configured pacman repositories.
+/// This checks sync databases, not installed packages.
+pub fn is_package_in_repos(package: &str) -> bool {
+    debug!("Checking if package '{}' is available in repos", package);
+
+    let available = std::process::Command::new("pacman")
+        .args(["-Si", package])
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false);
+
+    if available {
+        debug!("Package '{}' found in repos", package);
+    } else {
+        debug!("Package '{}' not in repos (may need AUR)", package);
+    }
+
+    available
+}
+
 /// Check if a flatpak package is installed.
 pub fn is_flatpak_installed(package: &str) -> bool {
     debug!("Checking if Flatpak '{}' is installed", package);
