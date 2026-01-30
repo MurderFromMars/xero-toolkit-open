@@ -39,7 +39,7 @@
                 </child>
                 <child>
                   <object class="GtkLabel" id="title_label">
-                    <property name="label">Xero Toolkit</property>
+                    <property name="label">Xero Toolkit Open</property>
                     <property name="halign">center</property>
                     <style>
                       <class name="title-2"/>
@@ -51,7 +51,7 @@
             <!-- Main description -->
             <child>
               <object class="GtkLabel" id="main_message">
-                <property name="label">A comprehensive toolkit for managing and customizing your XeroLinux system.</property>
+                <property name="label">MurderFromMars' enhanced and jailbroken Xero Toolkit</property>
                 <property name="halign">center</property>
                 <property name="wrap">true</property>
                 <property name="justify">center</property>
