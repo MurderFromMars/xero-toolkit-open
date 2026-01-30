@@ -30,14 +30,14 @@
         </child>
         <child>
           <object class="GtkLabel">
-            <property name="label">Xero Toolkit</property>
+            <property name="label">Xero Toolkit Open</property>
             <property name="css-classes">title-1</property>
             <property name="halign">center</property>
           </object>
         </child>
         <child>
           <object class="GtkLabel">
-            <property name="label">Your comprehensive system management and customization hub</property>
+            <property name="label">MurderFromMars' enhanced and jailbroken Xero Toolkit</property>
             <property name="css-classes">dim-label</property>
             <property name="halign">center</property>
             <property name="wrap">true</property>
