@@ -33,6 +33,8 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_fix_arch_keyring(page_builder, window);
     setup_update_mirrorlist(page_builder, window);
     setup_parallel_downloads(page_builder, window);
+    setup_cachyos_repos(page_builder, window);
+    setup_chaotic_aur(page_builder, window);
 }
 
 fn setup_clr_pacman(page_builder: &Builder, window: &ApplicationWindow) {
@@ -246,5 +248,132 @@ fn setup_parallel_downloads(page_builder: &Builder, window: &ApplicationWindow) 
             "pkexec",
             &["pmpd"],
         );
+    });
+}
+
+fn setup_cachyos_repos(page_builder: &Builder, window: &ApplicationWindow) {
+    let btn_cachyos_repos = extract_widget::<gtk4::Button>(page_builder, "btn_cachyos_repos");
+    let window = window.clone();
+    btn_cachyos_repos.connect_clicked(move |_| {
+        info!("Servicing: Install CachyOS Repos button clicked");
+        
+        // CachyOS provides an official install script
+        // https://wiki.cachyos.org/configuration/general_system_tweaks/
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("sh")
+                    .args(&[
+                        "-c",
+                        "curl -fsSL https://mirror.cachyos.org/cachyos-repo.tar.xz -o /tmp/cachyos-repo.tar.xz && cd /tmp && tar xvf cachyos-repo.tar.xz",
+                    ])
+                    .description("Downloading CachyOS repository files...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("sh")
+                    .args(&[
+                        "-c",
+                        "cd /tmp/cachyos-repo && yes | ./cachyos-repo.sh",
+                    ])
+                    .description("Running CachyOS repository installer...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .normal()
+                    .program("rm")
+                    .args(&["-rf", "/tmp/cachyos-repo", "/tmp/cachyos-repo.tar.xz"])
+                    .description("Cleaning up temporary files...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman")
+                    .args(&["-Syy"])
+                    .description("Refreshing package databases...")
+                    .build(),
+            )
+            .build();
+
+        task_runner::run(window.upcast_ref(), commands, "Install CachyOS Repositories");
+    });
+}
+
+fn setup_chaotic_aur(page_builder: &Builder, window: &ApplicationWindow) {
+    let btn_chaotic_aur = extract_widget::<gtk4::Button>(page_builder, "btn_chaotic_aur");
+    let window = window.clone();
+    btn_chaotic_aur.connect_clicked(move |_| {
+        info!("Servicing: Install Chaotic-AUR button clicked");
+        
+        // Chaotic-AUR official install method
+        // https://aur.chaotic.cx/
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman-key")
+                    .args(&["--recv-key", "3056513887B78AEB", "--keyserver", "keyserver.ubuntu.com"])
+                    .description("Receiving Chaotic-AUR signing key...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman-key")
+                    .args(&["--lsign-key", "3056513887B78AEB"])
+                    .description("Locally signing Chaotic-AUR key...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman")
+                    .args(&[
+                        "-U",
+                        "--noconfirm",
+                        "https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst",
+                    ])
+                    .description("Installing Chaotic-AUR keyring...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman")
+                    .args(&[
+                        "-U",
+                        "--noconfirm",
+                        "https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst",
+                    ])
+                    .description("Installing Chaotic-AUR mirrorlist...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("sh")
+                    .args(&[
+                        "-c",
+                        "grep -q '\\[chaotic-aur\\]' /etc/pacman.conf || echo -e '\\n[chaotic-aur]\\nInclude = /etc/pacman.d/chaotic-mirrorlist' >> /etc/pacman.conf",
+                    ])
+                    .description("Adding Chaotic-AUR to pacman.conf...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman")
+                    .args(&["-Syy"])
+                    .description("Refreshing package databases...")
+                    .build(),
+            )
+            .build();
+
+        task_runner::run(window.upcast_ref(), commands, "Install Chaotic-AUR Repository");
     });
 }
