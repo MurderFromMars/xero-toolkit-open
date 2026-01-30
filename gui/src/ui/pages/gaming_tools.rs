@@ -287,11 +287,12 @@ fn setup_falcond(builder: &Builder, window: &ApplicationWindow) {
             );
         }
         
-        // Packages to try from pacman first (repos)
+        // Packages to install
         let repo_candidates = ["falcond", "falcond-gui", "tuned-ppd"];
         
         let mut pacman_packages: Vec<&str> = Vec::new();
         let mut aur_packages: Vec<&str> = Vec::new();
+        let mut all_in_repos = true;
         
         for pkg in repo_candidates {
             // Skip if already installed
@@ -307,11 +308,12 @@ fn setup_falcond(builder: &Builder, window: &ApplicationWindow) {
             } else {
                 info!("{} not in repos, will use AUR", pkg);
                 aur_packages.push(pkg);
+                all_in_repos = false;
             }
         }
         
-        // falcond-profiles is AUR-only, add if not installed
-        if !crate::core::is_package_installed("falcond-profiles") {
+        // If any package needs AUR, add falcond-profiles too (AUR-only)
+        if !all_in_repos && !crate::core::is_package_installed("falcond-profiles") {
             info!("falcond-profiles not installed, adding to AUR list");
             aur_packages.push("falcond-profiles");
         }
@@ -331,7 +333,7 @@ fn setup_falcond(builder: &Builder, window: &ApplicationWindow) {
             );
         }
         
-        // Install remaining from AUR
+        // Install remaining from AUR (only if needed)
         if !aur_packages.is_empty() {
             let mut args = vec!["-S", "--noconfirm", "--needed"];
             args.extend(aur_packages.iter());
