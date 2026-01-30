@@ -15,8 +15,9 @@ pub mod sidebar {
 
 /// External links.
 pub mod links {
-    pub const DISCORD: &str = "https://discord.xerolinux.xyz/";
-    pub const YOUTUBE: &str = "https://www.youtube.com/@XeroLinux";
+    pub const DISCORD: &str = "https://discord.gg/2pdhYusbKV";
+    pub const YOUTUBE: &str = "https://www.youtube.com/@MurderFromMars";
+    pub const GITHUB: &str = "https://github.com/MurderFromMars";
     pub const WEBSITE: &str = "https://xerolinux.xyz/";
     pub const DONATE: &str = "https://ko-fi.com/xerolinux";
 }
