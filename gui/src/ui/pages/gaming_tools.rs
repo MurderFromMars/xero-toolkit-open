@@ -280,8 +280,8 @@ fn setup_falcond(builder: &Builder, window: &ApplicationWindow) {
             commands = commands.then(
                 Command::builder()
                     .privileged()
-                    .program("pacman")
-                    .args(&["-Rns", "--noconfirm", "power-profiles-daemon"])
+                    .program("sh")
+                    .args(&["-c", "pacman -Rns --noconfirm power-profiles-daemon || true"])
                     .description("Removing power-profiles-daemon (conflicts with tuned-ppd)...")
                     .build(),
             );
