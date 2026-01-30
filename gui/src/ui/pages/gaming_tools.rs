@@ -272,70 +272,80 @@ fn setup_falcond(builder: &Builder, window: &ApplicationWindow) {
     button.connect_clicked(move |_| {
         info!("Falcond button clicked");
 
-        // Check if falcond is available in repos (e.g., CachyOS repos)
-        let in_repos = crate::core::is_package_in_repos("falcond");
-        
         let mut commands = CommandSequence::new();
         
-        if in_repos {
-            // Install from official repos (CachyOS, etc.)
-            info!("Falcond found in repos, using pacman");
+        // Remove power-profiles-daemon if installed (conflicts with tuned-ppd)
+        if crate::core::is_package_installed("power-profiles-daemon") {
+            info!("power-profiles-daemon installed, removing first (conflicts with tuned-ppd)");
             commands = commands.then(
                 Command::builder()
                     .privileged()
                     .program("pacman")
-                    .args(&[
-                        "-S",
-                        "--noconfirm",
-                        "--needed",
-                        "falcond",
-                        "falcond-profiles",
-                        "tuned-ppd",
-                    ])
-                    .description("Installing Falcond from repos...")
-                    .build(),
-            );
-            // Check if falcond-gui is also in repos
-            if crate::core::is_package_in_repos("falcond-gui") {
-                commands = commands.then(
-                    Command::builder()
-                        .privileged()
-                        .program("pacman")
-                        .args(&["-S", "--noconfirm", "--needed", "falcond-gui"])
-                        .description("Installing Falcond GUI from repos...")
-                        .build(),
-                );
-            } else {
-                // falcond-gui not in repos, try AUR
-                commands = commands.then(
-                    Command::builder()
-                        .aur()
-                        .args(&["-S", "--noconfirm", "--needed", "falcond-gui"])
-                        .description("Installing Falcond GUI from AUR...")
-                        .build(),
-                );
-            }
-        } else {
-            // Install from AUR
-            info!("Falcond not in repos, using AUR");
-            commands = commands.then(
-                Command::builder()
-                    .aur()
-                    .args(&[
-                        "-S",
-                        "--noconfirm",
-                        "--needed",
-                        "falcond",
-                        "falcond-gui",
-                        "falcond-profiles",
-                        "tuned-ppd",
-                    ])
-                    .description("Installing Falcond Gaming utility from AUR...")
+                    .args(&["-Rns", "--noconfirm", "power-profiles-daemon"])
+                    .description("Removing power-profiles-daemon (conflicts with tuned-ppd)...")
                     .build(),
             );
         }
         
-        // Common post-install setup
+        // Packages to try from pacman first (repos)
+        let repo_candidates = ["falcond", "falcond-gui", "tuned-ppd"];
+        
+        let mut pacman_packages: Vec<&str> = Vec::new();
+        let mut aur_packages: Vec<&str> = Vec::new();
+        
+        for pkg in repo_candidates {
+            // Skip if already installed
+            if crate::core::is_package_installed(pkg) {
+                info!("{} already installed, skipping", pkg);
+                continue;
+            }
+            
+            // Check if available in repos
+            if crate::core::is_package_in_repos(pkg) {
+                info!("{} found in repos", pkg);
+                pacman_packages.push(pkg);
+            } else {
+                info!("{} not in repos, will use AUR", pkg);
+                aur_packages.push(pkg);
+            }
+        }
+        
+        // falcond-profiles is AUR-only, add if not installed
+        if !crate::core::is_package_installed("falcond-profiles") {
+            info!("falcond-profiles not installed, adding to AUR list");
+            aur_packages.push("falcond-profiles");
+        }
+        
+        // Install from repos first
+        if !pacman_packages.is_empty() {
+            let mut args = vec!["-S", "--noconfirm", "--needed"];
+            args.extend(pacman_packages.iter());
+            
+            commands = commands.then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman")
+                    .args(&args)
+                    .description("Installing Falcond packages from repos...")
+                    .build(),
+            );
+        }
+        
+        // Install remaining from AUR
+        if !aur_packages.is_empty() {
+            let mut args = vec!["-S", "--noconfirm", "--needed"];
+            args.extend(aur_packages.iter());
+            
+            commands = commands.then(
+                Command::builder()
+                    .aur()
+                    .args(&args)
+                    .description("Installing Falcond packages from AUR...")
+                    .build(),
+            );
+        }
+        
+        // Post-install setup (always run to ensure proper configuration)
         commands = commands
             .then(
                 Command::builder()
