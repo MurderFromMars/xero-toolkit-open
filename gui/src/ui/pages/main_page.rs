@@ -281,6 +281,12 @@ fn setup_external_links(builder: &Builder) {
         let _ = core::package::open_url(config::links::YOUTUBE);
     });
 
+    let btn_github = extract_widget::<Button>(builder, "link_github");
+    btn_github.connect_clicked(|_| {
+        info!("GitHub link clicked");
+        let _ = core::package::open_url(config::links::GITHUB);
+    });
+
     let btn_website = extract_widget::<Button>(builder, "link_website");
     btn_website.connect_clicked(|_| {
         info!("Website link clicked");
