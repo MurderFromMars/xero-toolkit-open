@@ -95,7 +95,7 @@ Added buttons in the **Servicing / System Tweaks** page to easily add popular Ar
 
 - **Install CachyOS Repos** - Adds the [CachyOS](https://cachyos.org/) repositories, providing access to performance-optimized packages, kernels, and tools like Falcond
 - **Install Chaotic-AUR** - Adds the [Chaotic-AUR](https://aur.chaotic.cx/) repository, providing pre-built AUR packages for faster installation
-
+- **Add XeroLinux Repo** - Providing access to the full suite of features of XeroLinux.
 ### Smart Package Installation
 - **Falcond Gaming Utility** - Now intelligently checks if packages are available in your configured repos (e.g., CachyOS) before falling back to AUR
   - Installs `falcond`, `falcond-gui`, `falcond-profiles`, and `tuned-ppd`
