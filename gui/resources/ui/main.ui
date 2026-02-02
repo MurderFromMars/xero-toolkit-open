@@ -3,7 +3,7 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="adw" version="1.4"/>
   <object class="AdwApplicationWindow" id="app_window">
-    <property name="title">Xero Toolkit Open</property>
+    <property name="title">CyberXero Toolkit</property>
     <property name="default-width">1100</property>
     <property name="default-height">750</property>
     <property name="content">
