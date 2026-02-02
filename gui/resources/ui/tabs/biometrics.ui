@@ -13,7 +13,6 @@
     <property name="vexpand">true</property>
     <property name="halign">fill</property>
     <property name="valign">fill</property>
-
     <!-- Header Section -->
     <child>
       <object class="GtkBox">
@@ -58,7 +57,6 @@
         </child>
       </object>
     </child>
-
     <!-- Main Content -->
     <child>
       <object class="GtkScrolledWindow">
@@ -79,7 +77,6 @@
                 <property name="halign">center</property>
                 <property name="valign">start</property>
                 <property name="homogeneous">true</property>
-
                 <!-- Fingerprint Card -->
                 <child>
                   <object class="GtkBox">
@@ -87,11 +84,17 @@
                     <property name="css-classes">card</property>
                     <property name="overflow">hidden</property>
                     <child>
-                      <object class="GtkPicture">
-                        <property name="file">resource:///xyz/xerolinux/xero-toolkit/icons/scalable/apps/xfprintd-gui.png</property>
-                        <property name="content-fit">cover</property>
-                        <property name="height-request">200</property>
-                        <property name="can-shrink">true</property>
+                      <object class="GtkAspectFrame">
+                        <property name="ratio">1.5</property>
+                        <property name="obey-child">false</property>
+                        <property name="halign">fill</property>
+                        <child>
+                          <object class="GtkPicture">
+                            <property name="file">resource:///xyz/xerolinux/xero-toolkit/icons/scalable/apps/xfprintd-gui.png</property>
+                            <property name="content-fit">cover</property>
+                            <property name="can-shrink">true</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
@@ -107,6 +110,7 @@
                             <property name="label">Fingerprint Reader</property>
                             <property name="css-classes">title-3</property>
                             <property name="halign">center</property>
+                            <property name="justify">center</property>
                           </object>
                         </child>
                         <child>
@@ -132,7 +136,6 @@
                     </child>
                   </object>
                 </child>
-
                 <!-- Howdy Card -->
                 <child>
                   <object class="GtkBox">
@@ -140,11 +143,17 @@
                     <property name="css-classes">card</property>
                     <property name="overflow">hidden</property>
                     <child>
-                      <object class="GtkPicture">
-                        <property name="file">resource:///xyz/xerolinux/xero-toolkit/icons/scalable/apps/xero-howdy-qt.png</property>
-                        <property name="content-fit">cover</property>
-                        <property name="height-request">200</property>
-                        <property name="can-shrink">true</property>
+                      <object class="GtkAspectFrame">
+                        <property name="ratio">1.5</property>
+                        <property name="obey-child">false</property>
+                        <property name="halign">fill</property>
+                        <child>
+                          <object class="GtkPicture">
+                            <property name="file">resource:///xyz/xerolinux/xero-toolkit/icons/scalable/apps/xero-howdy-qt.png</property>
+                            <property name="content-fit">cover</property>
+                            <property name="can-shrink">true</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
@@ -160,6 +169,7 @@
                             <property name="label">Howdy Face Unlock</property>
                             <property name="css-classes">title-3</property>
                             <property name="halign">center</property>
+                            <property name="justify">center</property>
                           </object>
                         </child>
                         <child>
@@ -185,7 +195,6 @@
                     </child>
                   </object>
                 </child>
-
               </object>
             </child>
           </object>
