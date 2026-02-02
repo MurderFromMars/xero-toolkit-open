@@ -1,4 +1,4 @@
-# 🛠️ Xero Toolkit Open
+# 🛠️ CyberXero Toolkit - A Fork of the XeroLinux Toolkit
 
 A GTK4 GUI application for managing system tools, configurations, and customizations on **any Arch-based distribution**.
 
