@@ -35,6 +35,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_parallel_downloads(page_builder, window);
     setup_cachyos_repos(page_builder, window);
     setup_chaotic_aur(page_builder, window);
+    setup_xero_repo(page_builder, window);
 }
 
 fn setup_clr_pacman(page_builder: &Builder, window: &ApplicationWindow) {
