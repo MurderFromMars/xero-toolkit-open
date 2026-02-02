@@ -38,7 +38,7 @@ Any **Arch-based** distribution:
 
 **One-liner:**
 ```sh
-rm -rf /tmp/xero-toolkit-open && git clone https://github.com/MurderFromMars/xero-toolkit-open.git /tmp/xero-toolkit-open && sh /tmp/xero-toolkit-open/install.sh && rm -rf /tmp/xero-toolkit-open
+rm -rf /tmp/xero-toolkit-open && git clone https://github.com/MurderFromMars/CyberXero-Toolkit.git /tmp/xero-toolkit-open && sh /tmp/xero-toolkit-open/install.sh && rm -rf /tmp/xero-toolkit-open
 ```
 
 **Manual:**
