@@ -1,4 +1,4 @@
-//! About dialog showing creator information and credits.
+//! About dialog showing project information.
 
 use crate::core::package;
 use crate::ui::utils::extract_widget;
@@ -11,27 +11,22 @@ pub fn show_about_dialog(parent: &Window) {
     // Load the UI from resource
     let builder = Builder::from_resource(crate::config::resources::dialogs::ABOUT);
 
-    // Get the dialog window
+    // Get the dialog window (AdwWindow is a subclass of gtk4::Window)
     let dialog: Window = extract_widget(&builder, "about_window");
 
     // Get the close button
     let close_button: Button = extract_widget(&builder, "close_button");
 
-    // Get labels with links and set up link activation
-    let setup_link_handler = |label: &Label| {
-        label.connect_activate_link(|_, uri| {
-            if let Err(e) = package::open_url(uri) {
-                log::error!("Failed to open URL {}: {}", uri, e);
-            }
-            glib::Propagation::Stop
-        });
-    };
+    // Get the documentation link label
+    let docs_label: Label = extract_widget(&builder, "docs_label");
 
-    let darkxero_label = extract_widget::<Label>(&builder, "darkxero_donate_label");
-    setup_link_handler(&darkxero_label);
-
-    let synse_label = extract_widget::<Label>(&builder, "synse_donate_label");
-    setup_link_handler(&synse_label);
+    // Handle link activation
+    docs_label.connect_activate_link(|_, uri| {
+        if let Err(e) = package::open_url(uri) {
+            log::error!("Failed to open URL {}: {}", uri, e);
+        }
+        glib::Propagation::Stop
+    });
 
     // Set dialog as transient for parent
     dialog.set_transient_for(Some(parent));
