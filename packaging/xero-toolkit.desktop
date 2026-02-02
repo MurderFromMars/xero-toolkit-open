@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Xero Toolkit Open
+Name=CyberXero Toolkit 
 GenericName=Toolkit
-Comment=MurderFromMars' enhanced and jailbroken Xero Toolkit
+Comment=An enhanced and jailbroken Xero Toolkit
 Exec=xero-toolkit
 Icon=xero-toolkit
 Terminal=false
