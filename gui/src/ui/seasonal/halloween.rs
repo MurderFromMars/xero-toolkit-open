@@ -10,7 +10,7 @@ use crate::config::seasonal_debug;
 use crate::ui::seasonal::common::{
     add_overlay_to_window, setup_resize_handler, MouseContext, ResizableEffectState,
 };
-use crate::ui::seasonal::SeasonalEffect;
+use crate::ui::seasonal::{register_effect, SeasonalEffect};
 use gtk4::cairo;
 use gtk4::glib;
 use gtk4::prelude::*;
@@ -74,11 +74,14 @@ impl SeasonalEffect for HalloweenEffect {
         let setup_state = Rc::clone(&state);
         let draw_mouse_pos = mouse_pos.clone();
 
+        // Create timer and store its source ID for lifecycle management
+        let timer_source: Rc<RefCell<Option<glib::SourceId>>> = Rc::new(RefCell::new(None));
         let drawing_area_clone = drawing_area.clone();
-        glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
+        let source_id = glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
             drawing_area_clone.queue_draw();
             glib::ControlFlow::Continue
         });
+        *timer_source.borrow_mut() = Some(source_id);
 
         drawing_area.set_draw_func(move |_da, cr, width, height| {
             let mut state_ref = setup_state.borrow_mut();
@@ -108,9 +111,15 @@ impl SeasonalEffect for HalloweenEffect {
         setup_resize_handler(&drawing_area, state);
 
         if add_overlay_to_window(window, &drawing_area) {
+            // Register effect for lifecycle management (timer start/stop on toggle)
+            register_effect(drawing_area.clone(), timer_source);
             info!("Halloween effect overlay added successfully");
             Some(drawing_area)
         } else {
+            // Clean up timer if overlay failed
+            if let Some(source_id) = timer_source.borrow_mut().take() {
+                source_id.remove();
+            }
             info!("Failed to add Halloween effect overlay");
             None
         }
