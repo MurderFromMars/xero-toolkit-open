@@ -15,18 +15,19 @@ depends=(
     'vte4'
     'flatpak'
     'scx-tool'
-    'polkit')
+    'polkit'
+    'libdeflate')
 optdepends=(
     'scxctl: SCX scheduler management for sched-ext kernels')
 makedepends=(
     'rust'
     'cargo'
-    'pkgconf'
-    'libdeflate')
+    'pkgconf')
 provides=('xero-toolkit')
 conflicts=('xero-toolkit')
 replaces=('xlapit-cli')
-options=('!emptydirs')
+# !lto is needed to avoid issues with libdeflate causing undefined symbols
+options=('!emptydirs' '!lto')
 
 build() {
   cd "${startdir}/.."
