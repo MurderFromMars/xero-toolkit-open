@@ -4,8 +4,7 @@
   <requires lib="adw" version="1.4"/>
   <object class="AdwApplicationWindow" id="app_window">
     <property name="title">CyberXero Toolkit</property>
-    <property name="default-width">1100</property>
-    <property name="default-height">750</property>
+    <!-- Removed default-width and default-height to let system decide -->
     <property name="content">
       <object class="AdwToolbarView">
         <child type="top">
