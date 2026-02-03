@@ -62,7 +62,7 @@
         <property name="margin-bottom">16</property>
         <child>
           <object class="GtkImage">
-            <property name="icon-name">xfprintd-gui</property>
+            <property name="icon-name">fingerprint-symbolic</property>
             <property name="pixel-size">48</property>
             <property name="valign">center</property>
           </object>

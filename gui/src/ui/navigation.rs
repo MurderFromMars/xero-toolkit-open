@@ -91,7 +91,7 @@ pub const PAGES: &[PageConfig] = &[
     PageConfig {
         id: "biometrics",
         title: "Biometrics",
-        icon: "xfprintd-gui",
+        icon: "fingerprint-symbolic",
         ui_resource: crate::config::resources::tabs::BIOMETRICS,
         setup_handler: Some(pages::biometrics::setup_handlers),
     },
