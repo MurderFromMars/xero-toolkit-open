@@ -295,6 +295,15 @@ fn setup_howdy(page_builder: &Builder, window: &ApplicationWindow) {
             );
         }
 
+        // Remove python-dlib
+        commands = commands.then(
+            Command::builder()
+                .aur()
+                .args(&["-Rns", "--noconfirm", "python-dlib"])
+                .description("Uninstalling python-dlib...")
+                .build(),
+        );
+
         let commands = commands.build();
 
         task_runner::run(
