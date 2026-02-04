@@ -96,6 +96,7 @@ Added buttons in the **Servicing / System Tweaks** page to easily add popular Ar
 - **Install CachyOS Repos** - Adds the [CachyOS](https://cachyos.org/) repositories, providing access to performance-optimized packages, kernels, and tools like Falcond
 - **Install Chaotic-AUR** - Adds the [Chaotic-AUR](https://aur.chaotic.cx/) repository, providing pre-built AUR packages for faster installation
 - **Add XeroLinux Repo** - Providing access to the full suite of features of XeroLinux.
+- **Imported Biometrics and fixed xero-howdy-qt** in their most recent updates, they added the ability to use facial recognition ith howdy on a QT frontend. *this was designed in such a way that it fails to install/build outside of Xerolinux*   i solved this problem by replacng the deprecated howdy listed with one that actually builds correctly, rewriting the logic to build xero-howdy-qt from source with these modiified dependencies 
 ### Smart Package Installation
 - **Falcond Gaming Utility** - Now intelligently checks if packages are available in your configured repos (e.g., CachyOS) before falling back to AUR
   - Installs `falcond`, `falcond-gui`, `falcond-profiles`, and `tuned-ppd`
