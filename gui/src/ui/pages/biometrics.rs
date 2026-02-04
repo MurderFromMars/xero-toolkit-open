@@ -165,39 +165,42 @@ fn setup_howdy(page_builder: &Builder, window: &ApplicationWindow) {
                 error!("Failed to launch xero-howdy-qt: {}", e);
             }
         } else {
-            // Determine which howdy package to install
-            let howdy_package = if is_howdy_installed() {
-                info!("Howdy already installed, skipping installation");
-                None
-            } else if is_howdy_bin_in_repos() {
-                info!("howdy-bin found in repos, will install from there");
-                Some("howdy-bin")
-            } else {
-                info!("howdy-bin not in repos, will install howdy-git from AUR");
-                Some("howdy-git")
-            };
-
             // Build and install Howdy Qt from source
             let mut commands = CommandSequence::new();
 
-            // Install dependencies including the appropriate howdy package
-            if let Some(howdy_pkg) = howdy_package {
-                commands = commands.then(
-                    Command::builder()
-                        .aur()
-                        .args(&["-S", "--noconfirm", "--needed", "rust", "cargo", "clang", "qt6-base", "qt6-declarative", howdy_pkg])
-                        .description("Installing build dependencies and Howdy...")
-                        .build(),
-                );
+            // First, install build dependencies from AUR helper
+            commands = commands.then(
+                Command::builder()
+                    .aur()
+                    .args(&["-S", "--noconfirm", "--needed", "rust", "cargo", "clang", "qt6-base", "qt6-declarative"])
+                    .description("Installing build dependencies...")
+                    .build(),
+            );
+
+            // Then install Howdy if not already installed
+            if !is_howdy_installed() {
+                if is_howdy_bin_in_repos() {
+                    info!("howdy-bin found in repos, installing from there");
+                    commands = commands.then(
+                        Command::builder()
+                            .privileged()
+                            .program("pacman")
+                            .args(&["-S", "--noconfirm", "--needed", "howdy-bin"])
+                            .description("Installing Howdy from system repos...")
+                            .build(),
+                    );
+                } else {
+                    info!("howdy-bin not in repos, installing howdy-git from AUR");
+                    commands = commands.then(
+                        Command::builder()
+                            .aur()
+                            .args(&["-S", "--noconfirm", "--needed", "howdy-git"])
+                            .description("Installing Howdy from AUR...")
+                            .build(),
+                    );
+                }
             } else {
-                // Howdy already installed, just install build dependencies
-                commands = commands.then(
-                    Command::builder()
-                        .aur()
-                        .args(&["-S", "--noconfirm", "--needed", "rust", "cargo", "clang", "qt6-base", "qt6-declarative"])
-                        .description("Installing build dependencies...")
-                        .build(),
-                );
+                info!("Howdy already installed, skipping Howdy installation");
             }
 
             commands = commands
