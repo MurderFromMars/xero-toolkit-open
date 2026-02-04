@@ -19,34 +19,44 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
 }
 
 /// Helper to update button appearance based on installation status
-fn update_button_state(button: &gtk4::Button, is_installed: bool) {
+fn update_button_state(
+    setup_button: &gtk4::Button,
+    uninstall_button: &gtk4::Button,
+    is_installed: bool,
+) {
     if is_installed {
-        button.set_label("Launch App");
-        button.add_css_class("suggested-action");
+        setup_button.set_label("Launch App");
+        setup_button.add_css_class("suggested-action");
+        uninstall_button.set_visible(true);
     } else {
-        button.set_label("Install");
-        button.remove_css_class("suggested-action");
+        setup_button.set_label("Install");
+        setup_button.remove_css_class("suggested-action");
+        uninstall_button.set_visible(false);
     }
 }
 
 fn setup_fingerprint(page_builder: &Builder, window: &ApplicationWindow) {
     let btn_fingerprint_setup =
         extract_widget::<gtk4::Button>(page_builder, "btn_fingerprint_setup");
+    let btn_fingerprint_uninstall =
+        extract_widget::<gtk4::Button>(page_builder, "btn_fingerprint_uninstall");
 
     // Initial check
     let is_installed = core::is_package_installed("xfprintd-gui");
-    update_button_state(&btn_fingerprint_setup, is_installed);
+    update_button_state(&btn_fingerprint_setup, &btn_fingerprint_uninstall, is_installed);
 
     // Update on window focus (e.g. after installation completes)
-    let btn_clone = btn_fingerprint_setup.clone();
+    let btn_setup_clone = btn_fingerprint_setup.clone();
+    let btn_uninstall_clone = btn_fingerprint_uninstall.clone();
     window.connect_is_active_notify(move |window| {
         if window.is_active() {
             let is_installed = core::is_package_installed("xfprintd-gui");
-            update_button_state(&btn_clone, is_installed);
+            update_button_state(&btn_setup_clone, &btn_uninstall_clone, is_installed);
         }
     });
 
-    let window = window.clone();
+    // Setup/Launch button handler
+    let window_clone = window.clone();
     btn_fingerprint_setup.connect_clicked(move |_| {
         info!("Biometrics: Fingerprint setup button clicked");
 
@@ -73,31 +83,56 @@ fn setup_fingerprint(page_builder: &Builder, window: &ApplicationWindow) {
                 .build();
 
             task_runner::run(
-                window.upcast_ref(),
+                window_clone.upcast_ref(),
                 commands,
                 "Install Fingerprint GUI Tool",
             );
         }
     });
+
+    // Uninstall button handler
+    let window_clone = window.clone();
+    btn_fingerprint_uninstall.connect_clicked(move |_| {
+        info!("Biometrics: Fingerprint uninstall button clicked");
+
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&["-Rns", "--noconfirm", "xfprintd-gui"])
+                    .description("Uninstalling Fingerprint GUI Tool...")
+                    .build(),
+            )
+            .build();
+
+        task_runner::run(
+            window_clone.upcast_ref(),
+            commands,
+            "Uninstall Fingerprint GUI Tool",
+        );
+    });
 }
 
 fn setup_howdy(page_builder: &Builder, window: &ApplicationWindow) {
     let btn_howdy_setup = extract_widget::<gtk4::Button>(page_builder, "btn_howdy_setup");
+    let btn_howdy_uninstall = extract_widget::<gtk4::Button>(page_builder, "btn_howdy_uninstall");
 
     // Initial check - check if binary exists instead of package
     let is_installed = std::path::Path::new("/usr/bin/xero-howdy-qt").exists();
-    update_button_state(&btn_howdy_setup, is_installed);
+    update_button_state(&btn_howdy_setup, &btn_howdy_uninstall, is_installed);
 
     // Update on window focus (e.g. after installation completes)
-    let btn_clone = btn_howdy_setup.clone();
+    let btn_setup_clone = btn_howdy_setup.clone();
+    let btn_uninstall_clone = btn_howdy_uninstall.clone();
     window.connect_is_active_notify(move |window| {
         if window.is_active() {
             let is_installed = std::path::Path::new("/usr/bin/xero-howdy-qt").exists();
-            update_button_state(&btn_clone, is_installed);
+            update_button_state(&btn_setup_clone, &btn_uninstall_clone, is_installed);
         }
     });
 
-    let window = window.clone();
+    // Setup/Launch button handler
+    let window_clone = window.clone();
     btn_howdy_setup.connect_clicked(move |_| {
         info!("Biometrics: Howdy setup button clicked");
 
@@ -165,7 +200,37 @@ fn setup_howdy(page_builder: &Builder, window: &ApplicationWindow) {
                 )
                 .build();
 
-            task_runner::run(window.upcast_ref(), commands, "Install Howdy Qt (Build from Source)");
+            task_runner::run(window_clone.upcast_ref(), commands, "Install Howdy Qt (Build from Source)");
         }
+    });
+
+    // Uninstall button handler
+    let window_clone = window.clone();
+    btn_howdy_uninstall.connect_clicked(move |_| {
+        info!("Biometrics: Howdy uninstall button clicked");
+
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-f", "/usr/bin/xero-howdy-qt"])
+                    .description("Removing Howdy Qt binary...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&["-Rns", "--noconfirm", "howdy-git"])
+                    .description("Uninstalling Howdy...")
+                    .build(),
+            )
+            .build();
+
+        task_runner::run(
+            window_clone.upcast_ref(),
+            commands,
+            "Uninstall Howdy Qt",
+        );
     });
 }
