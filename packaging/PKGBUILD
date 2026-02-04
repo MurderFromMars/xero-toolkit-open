@@ -2,8 +2,8 @@
 # Maintainer: Steve C. <steve@techxero.com>
 
 pkgname=xero-toolkit
-pkgver=0.1.6
-pkgrel=3
+pkgver=0.1.8
+pkgrel=2
 pkgdesc="GTK4 GUI to manage XeroLinux specific tools and settings"
 arch=('x86_64')
 url="https://github.com/synsejse/xero-toolkit"
@@ -15,7 +15,8 @@ depends=(
     'vte4'
     'flatpak'
     'scx-tool'
-    'polkit')
+    'polkit'
+    'libdeflate')
 optdepends=(
     'scxctl: SCX scheduler management for sched-ext kernels')
 makedepends=(
@@ -25,7 +26,8 @@ makedepends=(
 provides=('xero-toolkit')
 conflicts=('xero-toolkit')
 replaces=('xlapit-cli')
-options=('!emptydirs')
+# !lto is needed to avoid issues with libdeflate causing undefined symbols
+options=('!emptydirs' '!lto')
 
 build() {
   cd "${startdir}/.."

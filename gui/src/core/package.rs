@@ -11,25 +11,45 @@ use log::debug;
 pub fn is_package_installed(package: &str) -> bool {
     debug!("Checking if package '{}' is installed", package);
 
-    // Try AUR helper first
-    if let Some(helper) = aur::detect() {
-        if let Ok(output) = std::process::Command::new(helper)
-            .args(["-Q", package])
-            .output()
-        {
-            if output.status.success() {
-                debug!("Package '{}' found via {}", package, helper);
-                return true;
-            }
+    // Try AUR helper first (prefer initialized, fall back to detection)
+    if let Some(helper) = aur::get().or_else(aur::detect) {
+        if check_with_helper(helper, package) {
+            return true;
         }
+    } else {
+        debug!("No AUR helper available, skipping AUR check");
     }
 
     // Fallback to pacman
+    check_with_pacman(package)
+}
+
+/// Check if a package is installed using a specific helper.
+fn check_with_helper(helper: &str, package: &str) -> bool {
+    debug!("Using '{}' to check package '{}'", helper, package);
+    
+    match std::process::Command::new(helper).args(["-Q", package]).output() {
+        Ok(output) if output.status.success() => {
+            debug!("Package '{}' found via {}", package, helper);
+            true
+        }
+        Ok(_) => {
+            debug!("'{}' did not find package '{}'", helper, package);
+            false
+        }
+        Err(e) => {
+            debug!("Failed to execute '{}': {}", helper, e);
+            false
+        }
+    }
+}
+
+/// Check if a package is installed using pacman.
+fn check_with_pacman(package: &str) -> bool {
     let installed = std::process::Command::new("pacman")
         .args(["-Q", package])
         .output()
-        .map(|output| output.status.success())
-        .unwrap_or(false);
+        .map_or(false, |output| output.status.success());
 
     if installed {
         debug!("Package '{}' found via pacman", package);
@@ -44,27 +64,21 @@ pub fn is_package_installed(package: &str) -> bool {
 pub fn is_flatpak_installed(package: &str) -> bool {
     debug!("Checking if Flatpak '{}' is installed", package);
 
-    // Use --columns=application to get only app IDs, one per line
     let installed = std::process::Command::new("flatpak")
         .args(["list", "--columns=application"])
         .output()
-        .map(|output| {
-            if output.status.success() {
-                // Check for exact match on any line
-                String::from_utf8_lossy(&output.stdout)
+        .map_or(false, |output| {
+            output.status.success()
+                && String::from_utf8_lossy(&output.stdout)
                     .lines()
                     .any(|line| line.trim() == package)
-            } else {
-                false
-            }
-        })
-        .unwrap_or(false);
+        });
 
-    if installed {
-        debug!("Flatpak '{}' found", package);
-    } else {
-        debug!("Flatpak '{}' not installed", package);
-    }
+    debug!(
+        "Flatpak '{}' {}",
+        package,
+        if installed { "found" } else { "not installed" }
+    );
 
     installed
 }

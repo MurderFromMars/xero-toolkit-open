@@ -94,14 +94,23 @@
             </child>
           </object>
         </child>
-        <!-- Row 3: Install Nix -->
+        <!-- Row 3: Nix, OBS Studio -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
             <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_install_nix">
-                <property name="label">Install Nix Package Manager</property>
+                <property name="label">Enable Nix Pkg Manager</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_obs_studio_aio">
+                <property name="label">OBS-Studio AiO</property>
                 <property name="width-request">200</property>
                 <property name="height-request">50</property>
                 <property name="css-classes">suggested-action pill</property>

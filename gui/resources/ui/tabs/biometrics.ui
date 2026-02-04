@@ -2,41 +2,6 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.0"/>
-
-  <!-- Size Groups for Perfect Vertical Alignment -->
-  <!-- 1. Ensure image containers are the same height -->
-  <object class="GtkSizeGroup">
-    <property name="mode">vertical</property>
-    <widgets>
-      <widget name="frame_fingerprint"/>
-      <widget name="frame_howdy"/>
-    </widgets>
-  </object>
-  <!-- 2. Ensure titles are the same height -->
-  <object class="GtkSizeGroup">
-    <property name="mode">vertical</property>
-    <widgets>
-      <widget name="lbl_fingerprint_title"/>
-      <widget name="lbl_howdy_title"/>
-    </widgets>
-  </object>
-  <!-- 3. Ensure descriptions are the same height (handles wrapping differences) -->
-  <object class="GtkSizeGroup">
-    <property name="mode">vertical</property>
-    <widgets>
-      <widget name="lbl_fingerprint_desc"/>
-      <widget name="lbl_howdy_desc"/>
-    </widgets>
-  </object>
-  <!-- 4. Ensure buttons are the same size -->
-  <object class="GtkSizeGroup">
-    <property name="mode">both</property>
-    <widgets>
-      <widget name="btn_fingerprint_setup"/>
-      <widget name="btn_howdy_setup"/>
-    </widgets>
-  </object>
-
   <object class="GtkBox" id="page_biometrics">
     <property name="orientation">vertical</property>
     <property name="spacing">0</property>
@@ -48,7 +13,6 @@
     <property name="vexpand">true</property>
     <property name="halign">fill</property>
     <property name="valign">fill</property>
-
     <!-- Header Section -->
     <child>
       <object class="GtkBox">
@@ -62,7 +26,7 @@
         <property name="margin-bottom">16</property>
         <child>
           <object class="GtkImage">
-            <property name="icon-name">xfprintd-gui</property>
+            <property name="icon-name">fingerprint-symbolic</property>
             <property name="pixel-size">48</property>
             <property name="valign">center</property>
           </object>
@@ -93,7 +57,6 @@
         </child>
       </object>
     </child>
-
     <!-- Main Content -->
     <child>
       <object class="GtkScrolledWindow">
@@ -107,20 +70,22 @@
             <property name="margin-end">12</property>
             <property name="margin-bottom">48</property>
             <property name="margin-top">24</property>
+            <property name="vexpand">true</property>
             <child>
               <object class="GtkBox">
                 <property name="orientation">horizontal</property>
                 <property name="spacing">24</property>
                 <property name="halign">center</property>
-                <property name="valign">start</property>
+                <property name="valign">fill</property>
                 <property name="homogeneous">true</property>
-
+                <property name="vexpand">true</property>
                 <!-- Fingerprint Card -->
                 <child>
                   <object class="GtkBox">
                     <property name="orientation">vertical</property>
                     <property name="css-classes">card</property>
                     <property name="overflow">hidden</property>
+                    <property name="vexpand">true</property>
                     <child>
                       <object class="GtkAspectFrame" id="frame_fingerprint">
                         <property name="ratio">1.0</property>
@@ -143,6 +108,7 @@
                         <property name="margin-bottom">24</property>
                         <property name="margin-start">24</property>
                         <property name="margin-end">24</property>
+                        <property name="vexpand">true</property>
                         <child>
                           <object class="GtkLabel" id="lbl_fingerprint_title">
                             <property name="label">Fingerprint Reader</property>
@@ -158,14 +124,18 @@
                             <property name="halign">center</property>
                             <property name="justify">center</property>
                             <property name="wrap">true</property>
-                            <property name="lines">2</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="vexpand">true</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_fingerprint_setup">
                             <property name="label">Setup / Enable</property>
                             <property name="halign">center</property>
-                            <property name="margin-top">12</property>
+                            <property name="valign">end</property>
                             <property name="width-request">140</property>
                             <property name="css-classes">suggested-action pill</property>
                           </object>
@@ -174,13 +144,13 @@
                     </child>
                   </object>
                 </child>
-
                 <!-- Howdy Card -->
                 <child>
                   <object class="GtkBox">
                     <property name="orientation">vertical</property>
                     <property name="css-classes">card</property>
                     <property name="overflow">hidden</property>
+                    <property name="vexpand">true</property>
                     <child>
                       <object class="GtkAspectFrame" id="frame_howdy">
                         <property name="ratio">1.0</property>
@@ -203,6 +173,7 @@
                         <property name="margin-bottom">24</property>
                         <property name="margin-start">24</property>
                         <property name="margin-end">24</property>
+                        <property name="vexpand">true</property>
                         <child>
                           <object class="GtkLabel" id="lbl_howdy_title">
                             <property name="label">Howdy Face Unlock</property>
@@ -213,19 +184,23 @@
                         </child>
                         <child>
                           <object class="GtkLabel" id="lbl_howdy_desc">
-                            <property name="label">Setup Windows Hello™ style facial recognition with IR camera support</property>
+                            <property name="label">Setup Windows Hello™ style facial recognition with IR camera support (Testers Needed)</property>
                             <property name="css-classes">dim-label</property>
                             <property name="halign">center</property>
                             <property name="justify">center</property>
                             <property name="wrap">true</property>
-                            <property name="lines">2</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="vexpand">true</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_howdy_setup">
-                            <property name="label">Setup / Enable</property>
+                            <property name="label">Coming Soon</property>
                             <property name="halign">center</property>
-                            <property name="margin-top">12</property>
+                            <property name="valign">end</property>
                             <property name="width-request">140</property>
                             <property name="css-classes">suggested-action pill</property>
                           </object>
@@ -234,7 +209,6 @@
                     </child>
                   </object>
                 </child>
-
               </object>
             </child>
           </object>

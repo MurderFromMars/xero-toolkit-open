@@ -129,7 +129,7 @@
             </child>
           </object>
         </child>
-        <!-- Row 4: OpenRazer, Fingerprint GUI -->
+        <!-- Row 4: OpenRazer, Zenergy -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
@@ -143,39 +143,6 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
-            <child>
-              <object class="GtkButton" id="btn_fingerprint">
-                <property name="child">
-                  <object class="GtkBox">
-                    <property name="orientation">horizontal</property>
-                    <property name="spacing">8</property>
-                    <property name="halign">center</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="icon-name">xfprintd-gui</property>
-                        <property name="pixel-size">32</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label">Fingerprint GUI</property>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <!-- Row 5: Zenergy -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_zenergy">
                 <property name="label">Zenergy Driver</property>

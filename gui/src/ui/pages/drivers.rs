@@ -4,7 +4,6 @@
 //! - Tailscale VPN
 //! - ASUS ROG laptop tools
 //! - OpenRazer drivers
-//! - Fingerprint GUI Tool
 
 use crate::core;
 use crate::ui::dialogs::selection::{
@@ -22,7 +21,6 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_tailscale(page_builder, window);
     setup_asus_rog(page_builder, window);
     setup_openrazer(page_builder, window);
-    setup_fingerprint(page_builder, window);
     setup_zenergy(page_builder, window);
     setup_nvidia_legacy(page_builder, window);
     setup_rocm(page_builder, window);
@@ -174,31 +172,6 @@ fn build_openrazer_commands(selected_frontends: &[String]) -> CommandSequence {
     }
 
     commands
-}
-
-fn setup_fingerprint(builder: &Builder, window: &ApplicationWindow) {
-    let button = extract_widget::<Button>(builder, "btn_fingerprint");
-    let window = window.clone();
-
-    button.connect_clicked(move |_| {
-        info!("Fingerprint GUI Tool button clicked");
-
-        let commands = CommandSequence::new()
-            .then(
-                Command::builder()
-                    .aur()
-                    .args(&["-S", "--noconfirm", "--needed", "xfprintd-gui"])
-                    .description("Installing Fingerprint GUI Tool...")
-                    .build(),
-            )
-            .build();
-
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Install Fingerprint GUI Tool",
-        );
-    });
 }
 
 fn setup_zenergy(builder: &Builder, window: &ApplicationWindow) {

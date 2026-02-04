@@ -43,6 +43,7 @@ fn setup_steam_aio(builder: &Builder, window: &ApplicationWindow) {
                         "gamescope",
                         "mangohud",
                         "mangoverlay",
+                        "protonplus",
                         "lib32-mangohud",
                         "wine-meta",
                         "wine-nine",

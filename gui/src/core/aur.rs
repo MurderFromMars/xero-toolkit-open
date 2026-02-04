@@ -20,15 +20,18 @@ const AUR_HELPERS: [&str; 2] = ["paru", "yay"];
 /// Searches for AUR helpers in priority order (paru, then yay).
 /// Returns the first found helper or None if none are available.
 pub fn detect() -> Option<&'static str> {
-    for &helper in AUR_HELPERS.iter() {
+    AUR_HELPERS.iter().find(|&&helper| {
         if is_executable_in_path(helper) {
             debug!("Found AUR helper: {}", helper);
-            return Some(helper);
+            true
+        } else {
+            false
         }
-    }
-
-    debug!("No AUR helper found");
-    None
+    }).copied()
+        .or_else(|| {
+            debug!("No AUR helper found");
+            None
+        })
 }
 
 /// Initialize the global AUR helper.
@@ -63,14 +66,10 @@ fn is_executable_in_path(cmd: &str) -> bool {
     };
 
     for dir in env::split_paths(&paths) {
-        let mut candidate = dir.clone();
-        candidate.push(cmd);
-        if candidate.exists() {
-            if let Ok(metadata) = std::fs::metadata(&candidate) {
-                let perms = metadata.permissions();
-                if perms.mode() & 0o111 != 0 {
-                    return true;
-                }
+        let candidate = dir.join(cmd);
+        if let Ok(metadata) = std::fs::metadata(&candidate) {
+            if metadata.permissions().mode() & 0o111 != 0 {
+                return true;
             }
         }
     }

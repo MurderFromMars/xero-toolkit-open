@@ -2,12 +2,16 @@
 //!
 //! This module provides animated overlay effects that appear during specific
 //! times of the year (e.g., snow for December, Halloween effects for October).
+//!
+//! Effects can be toggled on/off, and the animation timer is stopped when
+//! effects are disabled to save CPU/memory.
 
 mod common;
 mod halloween;
 mod snow;
 
 use crate::ui::seasonal::common::MouseContext;
+use gtk4::glib;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, DrawingArea};
 use log::info;
@@ -21,20 +25,24 @@ pub use snow::SnowEffect;
 /// Global state for whether seasonal effects are enabled.
 static EFFECTS_ENABLED: AtomicBool = AtomicBool::new(true);
 
-/// Global registry of active drawing areas for seasonal effects.
-/// SAFETY: GTK operations must be on the main thread, so this RefCell is safe to use.
-/// We use unsafe to implement Send+Sync, which is safe because GTK is single-threaded.
-struct DrawingAreaVec(RefCell<Vec<Rc<DrawingArea>>>);
+/// Entry for a registered effect with its drawing area and timer control.
+struct EffectEntry {
+    drawing_area: Rc<DrawingArea>,
+    timer_source: Rc<RefCell<Option<glib::SourceId>>>,
+}
+
+/// Global registry of active effects.
+struct EffectRegistry(RefCell<Vec<EffectEntry>>);
 
 // SAFETY: Safe because GTK operations are single-threaded (main thread only).
-unsafe impl Send for DrawingAreaVec {}
-unsafe impl Sync for DrawingAreaVec {}
+unsafe impl Send for EffectRegistry {}
+unsafe impl Sync for EffectRegistry {}
 
-static DRAWING_AREAS: std::sync::OnceLock<DrawingAreaVec> = std::sync::OnceLock::new();
+static EFFECT_REGISTRY: std::sync::OnceLock<EffectRegistry> = std::sync::OnceLock::new();
 
-fn get_drawing_areas() -> &'static RefCell<Vec<Rc<DrawingArea>>> {
-    &DRAWING_AREAS
-        .get_or_init(|| DrawingAreaVec(RefCell::new(Vec::new())))
+fn get_effect_registry() -> &'static RefCell<Vec<EffectEntry>> {
+    &EFFECT_REGISTRY
+        .get_or_init(|| EffectRegistry(RefCell::new(Vec::new())))
         .0
 }
 
@@ -43,13 +51,35 @@ pub fn are_effects_enabled() -> bool {
     EFFECTS_ENABLED.load(Ordering::Relaxed)
 }
 
-/// Set whether seasonal effects are enabled and update visibility of drawing areas.
+/// Set whether seasonal effects are enabled and update visibility/timers of drawing areas.
 pub fn set_effects_enabled(enabled: bool) {
     EFFECTS_ENABLED.store(enabled, Ordering::Relaxed);
 
-    let drawing_areas = get_drawing_areas();
-    for area in drawing_areas.borrow().iter() {
-        area.set_visible(enabled);
+    let registry = get_effect_registry();
+    for entry in registry.borrow().iter() {
+        entry.drawing_area.set_visible(enabled);
+
+        if enabled {
+            // Restart timer if not already running
+            let mut timer_ref = entry.timer_source.borrow_mut();
+            if timer_ref.is_none() {
+                let drawing_area_clone = entry.drawing_area.clone();
+                let source_id =
+                    glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
+                        drawing_area_clone.queue_draw();
+                        glib::ControlFlow::Continue
+                    });
+                *timer_ref = Some(source_id);
+                info!("Seasonal effect timer restarted");
+            }
+        } else {
+            // Stop the timer to save resources
+            let mut timer_ref = entry.timer_source.borrow_mut();
+            if let Some(source_id) = timer_ref.take() {
+                source_id.remove();
+                info!("Seasonal effect timer stopped");
+            }
+        }
     }
 }
 
@@ -61,10 +91,16 @@ pub fn has_active_effect() -> bool {
     effects.iter().any(|e| e.is_active())
 }
 
-/// Register a drawing area so its visibility can be controlled by the toggle.
-pub fn register_drawing_area(area: Rc<DrawingArea>) {
-    let drawing_areas = get_drawing_areas();
-    drawing_areas.borrow_mut().push(area);
+/// Register an effect with its drawing area and timer source for lifecycle management.
+pub fn register_effect(
+    drawing_area: Rc<DrawingArea>,
+    timer_source: Rc<RefCell<Option<glib::SourceId>>>,
+) {
+    let registry = get_effect_registry();
+    registry.borrow_mut().push(EffectEntry {
+        drawing_area,
+        timer_source,
+    });
 }
 
 /// Trait for seasonal effects that can be applied to application windows.
@@ -102,8 +138,8 @@ pub fn apply_seasonal_effects(window: &ApplicationWindow) {
     for effect in effects {
         if effect.is_active() {
             info!("Active seasonal effect detected: {}", effect.name());
-            if let Some(drawing_area) = effect.apply(window, Some(&mouse_context)) {
-                register_drawing_area(drawing_area);
+            if let Some(_drawing_area) = effect.apply(window, Some(&mouse_context)) {
+                // Effect registers itself via register_effect()
                 info!("Successfully applied {} effect", effect.name());
             } else {
                 info!("Failed to apply {} effect", effect.name());

@@ -2,11 +2,18 @@
 //!
 //! This module handles the sidebar navigation tabs that allow users
 //! to switch between different pages in the application.
+//!
+//! Pages are lazy-loaded asynchronously on first access to reduce initial memory usage
+//! and avoid UI lag spikes.
 
 use crate::ui::pages;
+use gtk4::glib;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Box as GtkBox, Builder, Button, Image, Label, Orientation, Stack};
 use log::{info, warn};
+use std::cell::RefCell;
+use std::collections::HashSet;
+use std::rc::Rc;
 
 /// Configuration for a single page in the application.
 pub struct PageConfig {
@@ -68,18 +75,18 @@ pub const PAGES: &[PageConfig] = &[
         setup_handler: Some(pages::containers_vms::setup_handlers),
     },
     PageConfig {
-        id: "multimedia_tools",
-        title: "Multimedia Tools",
-        icon: "play-symbolic",
-        ui_resource: crate::config::resources::tabs::MULTIMEDIA_TOOLS,
-        setup_handler: Some(pages::multimedia_tools::setup_handlers),
-    },
-    PageConfig {
         id: "kernel_schedulers",
         title: "Kernel & Schedulers",
         icon: "hammer-symbolic",
         ui_resource: crate::config::resources::tabs::KERNEL_SCHEDULERS,
         setup_handler: Some(pages::kernel_schedulers::setup_handlers),
+    },
+    PageConfig {
+        id: "biometrics",
+        title: "Biometrics",
+        icon: "fingerprint-symbolic",
+        ui_resource: crate::config::resources::tabs::BIOMETRICS,
+        setup_handler: Some(pages::biometrics::setup_handlers),
     },
     PageConfig {
         id: "servicing_system_tweaks",
@@ -88,14 +95,154 @@ pub const PAGES: &[PageConfig] = &[
         ui_resource: crate::config::resources::tabs::SERVICING_SYSTEM_TWEAKS,
         setup_handler: Some(pages::servicing::setup_handlers),
     },
-    PageConfig {
-        id: "biometrics",
-        title: "Biometrics",
-        icon: "xfprintd-gui",
-        ui_resource: crate::config::resources::tabs::BIOMETRICS,
-        setup_handler: Some(pages::biometrics::setup_handlers),
-    },
 ];
+
+/// Tracks which pages have been loaded or are currently loading.
+pub struct LazyPageLoader {
+    loaded_pages: RefCell<HashSet<String>>,
+    loading_pages: RefCell<HashSet<String>>,
+    main_builder: Builder,
+    window: ApplicationWindow,
+}
+
+impl LazyPageLoader {
+    /// Create a new lazy page loader.
+    fn new(main_builder: Builder, window: ApplicationWindow) -> Self {
+        Self {
+            loaded_pages: RefCell::new(HashSet::new()),
+            loading_pages: RefCell::new(HashSet::new()),
+            main_builder,
+            window,
+        }
+    }
+
+    /// Check if a page has been loaded.
+    fn is_loaded(&self, page_id: &str) -> bool {
+        self.loaded_pages.borrow().contains(page_id)
+    }
+
+    /// Check if a page is currently loading.
+    fn is_loading(&self, page_id: &str) -> bool {
+        self.loading_pages.borrow().contains(page_id)
+    }
+
+    /// Mark a page as currently loading.
+    fn mark_loading(&self, page_id: &str) {
+        self.loading_pages.borrow_mut().insert(page_id.to_string());
+    }
+
+    /// Load a page's content asynchronously into its container if not already loaded.
+    fn ensure_page_loaded(&self, stack: &Stack, page_id: &str) {
+        // Skip if already loaded or currently loading
+        if self.is_loaded(page_id) || self.is_loading(page_id) {
+            return;
+        }
+
+        // Find the page config
+        let Some(config) = PAGES.iter().find(|p| p.id == page_id) else {
+            warn!("Page config not found for: {}", page_id);
+            return;
+        };
+
+        // Find the placeholder container in the stack
+        let Some(child) = stack.child_by_name(page_id) else {
+            warn!("Stack child not found for: {}", page_id);
+            return;
+        };
+
+        let Some(container) = child.downcast_ref::<GtkBox>() else {
+            warn!("Stack child is not a GtkBox for: {}", page_id);
+            return;
+        };
+
+        info!("Starting async lazy load for page: {}", page_id);
+        self.mark_loading(page_id);
+
+        // Start the spinning animation on the loading indicator
+        if let Some(spinner) = find_child_by_name::<Image>(container, "loading_spinner") {
+            spinner.add_css_class("spinning");
+        }
+
+        // Clone what we need for the async callback
+        let page_id_str = page_id.to_string();
+        let ui_resource = config.ui_resource;
+        let setup_handler = config.setup_handler;
+        let title = config.title;
+        let main_builder = self.main_builder.clone();
+        let window = self.window.clone();
+        let container = container.clone();
+        let loaded_pages = self.loaded_pages.clone();
+        let loading_pages = self.loading_pages.clone();
+
+        // Use glib::idle_add_local_once to load the page asynchronously
+        // This allows the UI to update (show spinner) before the heavy work begins
+        glib::idle_add_local_once(move || {
+            // Load the actual page content
+            match load_page_content(
+                &page_id_str,
+                ui_resource,
+                setup_handler,
+                &main_builder,
+                &window,
+            ) {
+                Ok(page_widget) => {
+                    // Remove all children (loading placeholder)
+                    while let Some(child) = container.first_child() {
+                        container.remove(&child);
+                    }
+                    // Add the actual page content
+                    container.append(&page_widget);
+
+                    // Mark as loaded
+                    loading_pages.borrow_mut().remove(&page_id_str);
+                    loaded_pages.borrow_mut().insert(page_id_str.clone());
+
+                    info!("Successfully lazy-loaded page: {}", page_id_str);
+                }
+                Err(e) => {
+                    warn!("Failed to lazy-load page '{}': {}", page_id_str, e);
+
+                    // Stop spinner and show error
+                    if let Some(spinner) =
+                        find_child_by_name::<Image>(&container, "loading_spinner")
+                    {
+                        spinner.remove_css_class("spinning");
+                        spinner.set_icon_name(Some("dialog-error-symbolic"));
+                    }
+                    if let Some(label) = find_child_by_name::<Label>(&container, "loading_label") {
+                        label.set_label(&format!("Failed to load {}: {}", title, e));
+                    }
+
+                    // Remove from loading set but don't add to loaded
+                    loading_pages.borrow_mut().remove(&page_id_str);
+                }
+            }
+        });
+    }
+}
+
+/// Recursively find a child widget by name.
+fn find_child_by_name<T>(parent: &impl IsA<gtk4::Widget>, name: &str) -> Option<T>
+where
+    T: IsA<gtk4::Widget> + IsA<glib::Object>,
+{
+    let parent_widget = parent.upcast_ref::<gtk4::Widget>();
+    // Check direct children first
+    let mut child = parent_widget.first_child();
+    while let Some(widget) = child {
+        if widget.widget_name() == name {
+            if let Ok(typed) = widget.clone().downcast::<T>() {
+                return Some(typed);
+            }
+        }
+        // Recurse into children
+        if let Some(found) = find_child_by_name::<T>(&widget, name) {
+            return Some(found);
+        }
+        child = widget.next_sibling();
+    }
+    None
+}
 
 /// Represents a single tab in the navigation sidebar.
 struct Tab {
@@ -134,15 +281,20 @@ impl Tab {
         }
     }
 
-    /// Connect this tab's button to navigate to its page.
-    fn connect(&self, stack: &Stack, tabs_container: &GtkBox) {
+    /// Connect this tab's button to navigate to its page with lazy loading.
+    fn connect(&self, stack: &Stack, tabs_container: &GtkBox, loader: &Rc<LazyPageLoader>) {
         let stack_clone = stack.clone();
         let page_name = self.page_name.clone();
         let button_clone = self.button.clone();
         let tabs_clone = tabs_container.clone();
+        let loader_clone = Rc::clone(loader);
 
         self.button.connect_clicked(move |_| {
             info!("Navigating to page '{}'", page_name);
+
+            // Ensure page is loaded (async) before/while showing it
+            loader_clone.ensure_page_loaded(&stack_clone, &page_name);
+
             stack_clone.set_visible_child_name(&page_name);
             update_active_tab(&tabs_clone, &button_clone);
         });
@@ -151,13 +303,23 @@ impl Tab {
 
 /// Create dynamic stack with pages and set up navigation tabs.
 /// Returns the fully configured stack with all pages and tabs ready.
+/// Pages are lazy-loaded asynchronously on first access.
 pub fn create_stack_and_tabs(tabs_container: &GtkBox, main_builder: &Builder) -> Stack {
-    info!("Creating dynamic stack and loading pages");
+    info!("Creating dynamic stack with async lazy loading");
 
-    // Create new stack and populate with pages
-    let stack = create_dynamic_stack(main_builder);
+    // Extract window for lazy loader
+    let window: ApplicationWindow = crate::ui::utils::extract_widget(main_builder, "app_window");
 
-    info!("Dynamic stack created with {} pages", PAGES.len());
+    // Create lazy loader
+    let loader = Rc::new(LazyPageLoader::new(main_builder.clone(), window));
+
+    // Create new stack with placeholder containers
+    let stack = create_lazy_stack(main_builder);
+
+    info!(
+        "Dynamic stack created with {} page placeholders",
+        PAGES.len()
+    );
 
     // Set up navigation tabs
     info!("Setting up navigation tabs");
@@ -165,7 +327,7 @@ pub fn create_stack_and_tabs(tabs_container: &GtkBox, main_builder: &Builder) ->
 
     for page_config in PAGES {
         let tab = Tab::new(page_config.title, page_config.id, page_config.icon);
-        tab.connect(&stack, tabs_container);
+        tab.connect(&stack, tabs_container, &loader);
 
         if first_button.is_none() {
             first_button = Some(tab.button.clone());
@@ -180,34 +342,26 @@ pub fn create_stack_and_tabs(tabs_container: &GtkBox, main_builder: &Builder) ->
         button.add_css_class("active");
     }
 
+    // Eagerly load the first page (main_page) since it's shown immediately
+    if let Some(first_page) = PAGES.first() {
+        loader.ensure_page_loaded(&stack, first_page.id);
+    }
+
     stack
 }
 
-/// Create a dynamic stack with pages from PAGES configuration.
-fn create_dynamic_stack(main_builder: &Builder) -> Stack {
+/// Create a dynamic stack with placeholder containers for lazy loading.
+fn create_lazy_stack(main_builder: &Builder) -> Stack {
     let stack = Stack::new();
     stack.set_hexpand(true);
     stack.set_vexpand(true);
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
 
-    // Dynamically create stack pages from PAGES configuration
+    // Create placeholder containers for each page
     for page_config in PAGES {
-        match create_page_from_config(page_config, main_builder) {
-            Ok(page_widget) => {
-                stack.add_titled(&page_widget, Some(page_config.id), page_config.title);
-                info!("Successfully loaded page: {}", page_config.id);
-            }
-            Err(e) => {
-                warn!("Failed to load page '{}': {}", page_config.id, e);
-                // Create a fallback page
-                let fallback = GtkBox::new(Orientation::Vertical, 0);
-                let label = Label::builder()
-                    .label(format!("{} page content not available", page_config.title))
-                    .build();
-                fallback.append(&label);
-                stack.add_titled(&fallback, Some(page_config.id), page_config.title);
-            }
-        }
+        let container = create_placeholder_container(page_config);
+        stack.add_titled(&container, Some(page_config.id), page_config.title);
+        info!("Created placeholder for page: {}", page_config.id);
     }
 
     // Add the dynamic stack to the right container
@@ -219,37 +373,66 @@ fn create_dynamic_stack(main_builder: &Builder) -> Stack {
     stack
 }
 
-/// Create a page widget from PageConfig.
-fn create_page_from_config(config: &PageConfig, main_builder: &Builder) -> anyhow::Result<GtkBox> {
-    use crate::ui::utils::extract_widget;
-    use gtk4::ApplicationWindow;
-
-    let page_builder = Builder::from_resource(config.ui_resource);
-
-    let page_widget: gtk4::Widget = page_builder
-        .object(format!("page_{}", config.id))
-        .ok_or_else(|| {
-            anyhow::anyhow!(
-                "Could not find page_{} widget in {}",
-                config.id,
-                config.ui_resource
-            )
-        })?;
-
+/// Create a placeholder container for a page that will be lazy-loaded.
+/// Uses a spinning refresh icon similar to the kernel_schedulers page design.
+fn create_placeholder_container(config: &PageConfig) -> GtkBox {
+    // Outer container matches the page layout (fill alignment)
     let container = GtkBox::new(Orientation::Vertical, 0);
     container.set_hexpand(true);
     container.set_vexpand(true);
-    container.append(&page_widget);
+    container.set_halign(gtk4::Align::Fill);
+    container.set_valign(gtk4::Align::Fill);
 
-    // Extract main window from builder
-    let window: ApplicationWindow = extract_widget(main_builder, "app_window");
+    // Inner box for centering the loading indicator
+    let inner_box = GtkBox::new(Orientation::Vertical, 12);
+    inner_box.set_hexpand(true);
+    inner_box.set_vexpand(true);
+    inner_box.set_halign(gtk4::Align::Center);
+    inner_box.set_valign(gtk4::Align::Center);
+
+    // Spinning refresh icon (same style as kernel_schedulers page)
+    let spinner = Image::from_icon_name("arrows-rotate-symbolic");
+    spinner.set_pixel_size(32);
+    spinner.set_widget_name("loading_spinner");
+    // Don't add spinning class yet - it will be added when loading starts
+
+    // Loading label
+    let loading_label = Label::builder()
+        .label(format!("Loading {}...", config.title))
+        .halign(gtk4::Align::Center)
+        .build();
+    loading_label.set_widget_name("loading_label");
+    loading_label.add_css_class("dim-label");
+
+    inner_box.append(&spinner);
+    inner_box.append(&loading_label);
+    container.append(&inner_box);
+
+    container
+}
+
+/// Load the actual content for a page.
+fn load_page_content(
+    page_id: &str,
+    ui_resource: &str,
+    setup_handler: Option<fn(&Builder, &Builder, &ApplicationWindow)>,
+    main_builder: &Builder,
+    window: &ApplicationWindow,
+) -> anyhow::Result<gtk4::Widget> {
+    let page_builder = Builder::from_resource(ui_resource);
+
+    let page_widget: gtk4::Widget = page_builder
+        .object(format!("page_{}", page_id))
+        .ok_or_else(|| {
+            anyhow::anyhow!("Could not find page_{} widget in {}", page_id, ui_resource)
+        })?;
 
     // Call setup handler if provided
-    if let Some(setup_fn) = config.setup_handler {
-        setup_fn(&page_builder, main_builder, &window);
+    if let Some(setup_fn) = setup_handler {
+        setup_fn(&page_builder, main_builder, window);
     }
 
-    Ok(container)
+    Ok(page_widget)
 }
 
 /// Update which tab is marked as active.
