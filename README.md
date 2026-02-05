@@ -141,7 +141,7 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 ## 🙏 Credits
 
-- Original [XeroLinux Toolkit](https://github.com/xerolinux/xero-toolkit) by the XeroLinux team
+- Original [XeroLinux Toolkit](https://github.com/synsejse/xero-toolkit) by Synse and DarkZero
 - [XeroLinux](https://xerolinux.xyz/) project
 - [CachyOS](https://cachyos.org/) for their optimized repositories
 - [Chaotic-AUR](https://aur.chaotic.cx/) for pre-built AUR packages
