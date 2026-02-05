@@ -100,10 +100,10 @@ fn setup_fingerprint(page_builder: &Builder, window: &ApplicationWindow) {
                 .then(
                     Command::builder()
                         .normal()
-                        .program("sh")
+                        .program("bash")
                         .args(&[
                             "-c",
-                            "cd /tmp/xfprintd-jailbreak && sh /tmp/xfprintd-jailbreak/install.sh",
+                            "cd /tmp/xfprintd-jailbreak && bash /tmp/xfprintd-jailbreak/install.sh",
                         ])
                         .description("Building and installing Fingerprint GUI (Jailbroken Edition)...")
                         .build(),
