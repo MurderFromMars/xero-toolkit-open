@@ -109,7 +109,7 @@ Bringing the latest upstream toolkit updates, with none of the restrictions!
 - Fixed broken dependencies — upstream pointed to `howdy-bin` which fails to build; we use `howdy-git` instead
 - Builds [xero-howdy-qt](https://github.com/XeroLinuxDev/xero-howdy-qt) from source with correct dependencies
 
-**Install AND uninstall buttons** for both tools — proper lifecycle management, another CyberXero-first feature
+**Install AND uninstall buttons** for easy removal, another added feature unique to this fork
 
 ### Smart Mirror Updates
 - **Auto-detects all installed repositories** and updates their mirrorlists automatically
@@ -126,7 +126,7 @@ Added buttons in the **Servicing / System Tweaks** page to easily add popular Ar
 
 ### Smart Package Installation
 - **Falcond Gaming Utility** - Intelligently checks if packages are available in your configured repos before falling back to AUR
-- Automatically uses pacman for repo packages, AUR helper only when needed
+- Automatically uses pacman for repo packages, AUR helper only when needed **Also added the new falcond-gui app to this**
 
 ### Rebranding
 - **Updated About Dialog** - Reflects the fork's origin and enhancements
