@@ -97,7 +97,7 @@ Installed automatically by the installer:
 - Added `uninstall.sh` for clean removal
 
 ### 🔓 Biometrics — Jailbroken Edition
-CyberXero Toolkit has properly integrated biometrics functions *before* upstream!
+Bringing the latest upstream toolkit updates, with none of the restrictions!
 
 **Fingerprint Authentication (XFPrintD GUI)**
 - Builds from source using a [jailbroken fork](https://github.com/MurderFromMars/xfprintd-gui) that bypasses upstream lockdowns
