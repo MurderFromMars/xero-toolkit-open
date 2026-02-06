@@ -33,6 +33,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_cachyos_repos(page_builder, window);
     setup_chaotic_aur(page_builder, window);
     setup_xero_repo(page_builder, window);
+    setup_xpackagemanager(page_builder, window);
 }
 
 fn setup_clr_pacman(page_builder: &Builder, window: &ApplicationWindow) {
@@ -405,5 +406,158 @@ fn setup_xero_repo(page_builder: &Builder, window: &ApplicationWindow) {
             .build();
 
         task_runner::run(window.upcast_ref(), commands, "Add Xero Linux Repository");
+    });
+}
+
+fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
+    let btn_xpackagemanager = extract_widget::<gtk4::Button>(page_builder, "btn_xpackagemanager");
+    let btn_xpackagemanager_uninstall = extract_widget::<gtk4::Button>(page_builder, "btn_xpackagemanager_uninstall");
+
+    // Helper to update button state
+    fn update_button_state(setup_btn: &gtk4::Button, uninstall_btn: &gtk4::Button, is_installed: bool) {
+        if is_installed {
+            setup_btn.set_label("Launch");
+            setup_btn.add_css_class("suggested-action");
+            uninstall_btn.set_visible(true);
+        } else {
+            setup_btn.set_label("Install");
+            setup_btn.remove_css_class("suggested-action");
+            uninstall_btn.set_visible(false);
+        }
+    }
+
+    // Initial state check
+    let is_installed = std::path::Path::new("/usr/bin/xpackagemanager").exists();
+    update_button_state(&btn_xpackagemanager, &btn_xpackagemanager_uninstall, is_installed);
+
+    // Update on window focus
+    let btn_setup_clone = btn_xpackagemanager.clone();
+    let btn_uninstall_clone = btn_xpackagemanager_uninstall.clone();
+    window.connect_is_active_notify(move |window| {
+        if window.is_active() {
+            let is_installed = std::path::Path::new("/usr/bin/xpackagemanager").exists();
+            update_button_state(&btn_setup_clone, &btn_uninstall_clone, is_installed);
+        }
+    });
+
+    // Install/Launch button
+    let window_clone = window.clone();
+    btn_xpackagemanager.connect_clicked(move |_| {
+        info!("Servicing: xPackageManager button clicked");
+
+        if std::path::Path::new("/usr/bin/xpackagemanager").exists() {
+            // Launch the app
+            info!("Launching xPackageManager...");
+            if let Err(e) = std::process::Command::new("xpackagemanager")
+                .stdin(std::process::Stdio::null())
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .spawn()
+            {
+                log::error!("Failed to launch xPackageManager: {}", e);
+            }
+        } else {
+            // Install from jailbroken repo
+            let commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .aur()
+                        .args(&["-S", "--noconfirm", "--needed", "pacman", "flatpak", "polkit", "fontconfig", "freetype2", "qt6-base", "git"])
+                        .description("Installing dependencies...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .normal()
+                        .program("sh")
+                        .args(&[
+                            "-c",
+                            "rm -rf /tmp/xpackagemanager-jailbreak && git clone https://github.com/MurderFromMars/xpackagemanager.git /tmp/xpackagemanager-jailbreak",
+                        ])
+                        .description("Cloning xPackageManager (Jailbroken Edition)...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .normal()
+                        .program("bash")
+                        .args(&[
+                            "-c",
+                            "cd /tmp/xpackagemanager-jailbreak && bash /tmp/xpackagemanager-jailbreak/install.sh",
+                        ])
+                        .description("Installing xPackageManager (Jailbroken Edition)...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .normal()
+                        .program("rm")
+                        .args(&["-rf", "/tmp/xpackagemanager-jailbreak"])
+                        .description("Cleaning up...")
+                        .build(),
+                )
+                .build();
+
+            task_runner::run(
+                window_clone.upcast_ref(),
+                commands,
+                "Install xPackageManager (Jailbroken Edition)",
+            );
+        }
+    });
+
+    // Uninstall button
+    let window_clone = window.clone();
+    btn_xpackagemanager_uninstall.connect_clicked(move |_| {
+        info!("Servicing: xPackageManager uninstall button clicked");
+
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-f", "/usr/bin/xpackagemanager"])
+                    .description("Removing xPackageManager binary...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-f", "/usr/share/applications/xpackagemanager.desktop"])
+                    .description("Removing desktop entry...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-f", "/usr/share/mime/packages/x-alpm-package.xml"])
+                    .description("Removing MIME type...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-f", "/usr/share/polkit-1/actions/org.xpackagemanager.policy"])
+                    .description("Removing polkit policy...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("update-desktop-database")
+                    .args(&["/usr/share/applications"])
+                    .description("Updating desktop database...")
+                    .build(),
+            )
+            .build();
+
+        task_runner::run(
+            window_clone.upcast_ref(),
+            commands,
+            "Uninstall xPackageManager",
+        );
     });
 }
