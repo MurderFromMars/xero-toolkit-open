@@ -430,9 +430,10 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
             let commands = CommandSequence::new()
                 .then(
                     Command::builder()
-                        .aur()
-                        .args(&["-S", "--noconfirm", "--needed", "rust", "qt6-base", "qt6-declarative", "pacman", "flatpak", "git"])
-                        .description("Installing dependencies...")
+                        .privileged()
+                        .program("pacman")
+                        .args(&["-S", "--needed", "--noconfirm", "rust", "qt6-base", "qt6-declarative", "pacman", "flatpak", "git"])
+                        .description("Installing build dependencies...")
                         .build(),
                 )
                 .then(
@@ -449,9 +450,112 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
                 .then(
                     Command::builder()
                         .normal()
-                        .program("bash")
-                        .args(&["/tmp/xpm-build/install.sh"])
-                        .description("Building and installing xPackageManager...")
+                        .program("sh")
+                        .args(&["-c", "cd /tmp/xpm-build && cargo build --release"])
+                        .description("Building xPackageManager (this may take a few minutes)...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&[
+                            "-c",
+                            "mkdir -p /opt/xpackagemanager && install -Dm755 /tmp/xpm-build/target/release/xpackagemanager /opt/xpackagemanager/xpackagemanager && ln -sf /opt/xpackagemanager/xpackagemanager /usr/bin/xpackagemanager",
+                        ])
+                        .description("Installing binary to /opt/xpackagemanager...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&[
+                            "-c",
+                            r#"cat > /usr/share/applications/xpackagemanager.desktop << 'EOF'
+[Desktop Entry]
+Name=xPackage Manager
+Comment=Modern package manager for Arch Linux
+Exec=xpackagemanager
+Icon=system-software-install
+Terminal=false
+Type=Application
+Categories=System;PackageManager;
+Keywords=package;manager;pacman;flatpak;
+EOF"#,
+                        ])
+                        .description("Installing desktop entry...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&[
+                            "-c",
+                            r#"cat > /usr/share/mime/packages/x-alpm-package.xml << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-alpm-package">
+    <comment>Arch Linux Package</comment>
+    <glob pattern="*.pkg.tar.zst"/>
+    <glob pattern="*.pkg.tar.xz"/>
+    <glob pattern="*.pkg.tar.gz"/>
+  </mime-type>
+</mime-info>
+EOF"#,
+                        ])
+                        .description("Installing MIME type definition...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&[
+                            "-c",
+                            r#"cat > /usr/share/polkit-1/actions/org.xpackagemanager.policy << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <action id="org.xpackagemanager.pkexec">
+    <description>Run xPackageManager privileged operations</description>
+    <message>Authentication is required to manage packages</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/opt/xpackagemanager/xpackagemanager</annotate>
+  </action>
+</policyconfig>
+EOF"#,
+                        ])
+                        .description("Installing polkit policy...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&[
+                            "-c",
+                            "update-desktop-database /usr/share/applications 2>/dev/null || true",
+                        ])
+                        .description("Updating desktop database...")
+                        .build(),
+                )
+                .then(
+                    Command::builder()
+                        .privileged()
+                        .program("sh")
+                        .args(&[
+                            "-c",
+                            "update-mime-database /usr/share/mime 2>/dev/null || true",
+                        ])
+                        .description("Updating MIME database...")
                         .build(),
                 )
                 .then(
@@ -459,7 +563,7 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
                         .normal()
                         .program("rm")
                         .args(&["-rf", "/tmp/xpm-build"])
-                        .description("Cleaning up...")
+                        .description("Cleaning up temporary files...")
                         .build(),
                 )
                 .build();
