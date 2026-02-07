@@ -1,15 +1,4 @@
 //! Servicing and system tweaks page button handlers.
-//!
-//! Handles:
-//! - Clear Pacman cache
-//! - Unlock Pacman database
-//! - Plasma X11 session installation
-//! - Pacman local database fix
-//! - WayDroid guide
-//! - Fix GPGME database
-//! - Fix Arch keyring
-//! - Update mirrorlist
-//! - Parallel downloads adjustment
 
 use crate::core;
 use crate::ui::dialogs::terminal;
@@ -19,7 +8,6 @@ use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Builder};
 use log::info;
 
-/// Set up all button handlers for the servicing/system tweaks page
 pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &ApplicationWindow) {
     setup_clr_pacman(page_builder, window);
     setup_unlock_pacman(page_builder, window);
@@ -129,7 +117,6 @@ fn setup_fix_gpgme(page_builder: &Builder, window: &ApplicationWindow) {
     let window = window.clone();
     btn_fix_gpgme.connect_clicked(move |_| {
         info!("Servicing: Fix GPGME Database button clicked");
-        // Use terminal dialog for interactive GPGME fix
         terminal::show_terminal_dialog(
             window.upcast_ref(),
             "Fix GPGME Database",
@@ -181,16 +168,13 @@ fn setup_fix_arch_keyring(page_builder: &Builder, window: &ApplicationWindow) {
 }
 
 fn setup_update_mirrorlist(page_builder: &Builder, window: &ApplicationWindow) {
-    let btn_update_mirrorlist =
-        extract_widget::<gtk4::Button>(page_builder, "btn_update_mirrorlist");
+    let btn_update_mirrorlist = extract_widget::<gtk4::Button>(page_builder, "btn_update_mirrorlist");
     let window = window.clone();
     btn_update_mirrorlist.connect_clicked(move |_| {
         info!("Servicing: Update Mirrorlist button clicked");
 
         let rate_mirrors_installed = core::is_package_installed("rate-mirrors");
 
-        // Mapping of mirrorlist files to rate-mirrors repository identifiers
-        // rate-mirrors supports: arch, artix, cachyos, chaotic-aur, endeavouros, manjaro, rebornos
         let mirror_mappings: Vec<(&str, &str, &str)> = vec![
             ("/etc/pacman.d/mirrorlist", "arch", "Arch"),
             ("/etc/pacman.d/chaotic-mirrorlist", "chaotic-aur", "Chaotic-AUR"),
@@ -203,7 +187,6 @@ fn setup_update_mirrorlist(page_builder: &Builder, window: &ApplicationWindow) {
 
         let mut commands = CommandSequence::new();
 
-        // Install rate-mirrors if needed
         if !rate_mirrors_installed {
             commands = commands.then(Command::builder()
                 .aur()
@@ -212,7 +195,6 @@ fn setup_update_mirrorlist(page_builder: &Builder, window: &ApplicationWindow) {
                 .build());
         }
 
-        // Check each mirrorlist and add update command if it exists
         for (file_path, repo_id, repo_name) in mirror_mappings {
             if std::path::Path::new(file_path).exists() {
                 let cmd = format!(
@@ -234,12 +216,10 @@ fn setup_update_mirrorlist(page_builder: &Builder, window: &ApplicationWindow) {
 }
 
 fn setup_parallel_downloads(page_builder: &Builder, window: &ApplicationWindow) {
-    let btn_parallel_downloads =
-        extract_widget::<gtk4::Button>(page_builder, "btn_parallel_downloads");
+    let btn_parallel_downloads = extract_widget::<gtk4::Button>(page_builder, "btn_parallel_downloads");
     let window = window.clone();
     btn_parallel_downloads.connect_clicked(move |_| {
         info!("Servicing: Change Parallel Downloads button clicked");
-        // Use terminal dialog for interactive pmpd tool
         terminal::show_terminal_dialog(
             window.upcast_ref(),
             "Change Parallel Downloads",
@@ -255,8 +235,6 @@ fn setup_cachyos_repos(page_builder: &Builder, window: &ApplicationWindow) {
     btn_cachyos_repos.connect_clicked(move |_| {
         info!("Servicing: Install CachyOS Repos button clicked");
         
-        // CachyOS provides an official install script
-        // https://wiki.cachyos.org/configuration/general_system_tweaks/
         let commands = CommandSequence::new()
             .then(
                 Command::builder()
@@ -308,8 +286,6 @@ fn setup_chaotic_aur(page_builder: &Builder, window: &ApplicationWindow) {
     btn_chaotic_aur.connect_clicked(move |_| {
         info!("Servicing: Install Chaotic-AUR button clicked");
         
-        // Chaotic-AUR official install method
-        // https://aur.chaotic.cx/
         let commands = CommandSequence::new()
             .then(
                 Command::builder()
@@ -375,14 +351,13 @@ fn setup_chaotic_aur(page_builder: &Builder, window: &ApplicationWindow) {
         task_runner::run(window.upcast_ref(), commands, "Install Chaotic-AUR Repository");
     });
 }
+
 fn setup_xero_repo(page_builder: &Builder, window: &ApplicationWindow) {
     let btn_xero_repo = extract_widget::<gtk4::Button>(page_builder, "btn_xero_repo");
     let window = window.clone();
     btn_xero_repo.connect_clicked(move |_| {
         info!("Servicing: Add Xero Linux Repository button clicked");
         
-        // Xero Linux repository setup
-        // https://repos.xerolinux.xyz/
         let commands = CommandSequence::new()
             .then(
                 Command::builder()
@@ -413,7 +388,6 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
     let btn_xpackagemanager = extract_widget::<gtk4::Button>(page_builder, "btn_xpackagemanager");
     let btn_xpackagemanager_uninstall = extract_widget::<gtk4::Button>(page_builder, "btn_xpackagemanager_uninstall");
 
-    // Helper to update button state
     fn update_button_state(setup_btn: &gtk4::Button, uninstall_btn: &gtk4::Button, is_installed: bool) {
         if is_installed {
             setup_btn.set_label("Launch");
@@ -426,11 +400,9 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
         }
     }
 
-    // Initial state check
     let is_installed = std::path::Path::new("/usr/bin/xpackagemanager").exists();
     update_button_state(&btn_xpackagemanager, &btn_xpackagemanager_uninstall, is_installed);
 
-    // Update on window focus
     let btn_setup_clone = btn_xpackagemanager.clone();
     let btn_uninstall_clone = btn_xpackagemanager_uninstall.clone();
     window.connect_is_active_notify(move |window| {
@@ -440,13 +412,11 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
         }
     });
 
-    // Install/Launch button
     let window_clone = window.clone();
     btn_xpackagemanager.connect_clicked(move |_| {
         info!("Servicing: xPackageManager button clicked");
 
         if std::path::Path::new("/usr/bin/xpackagemanager").exists() {
-            // Launch the app
             info!("Launching xPackageManager...");
             if let Err(e) = std::process::Command::new("xpackagemanager")
                 .stdin(std::process::Stdio::null())
@@ -457,12 +427,11 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
                 log::error!("Failed to launch xPackageManager: {}", e);
             }
         } else {
-            // Install from jailbroken repo
             let commands = CommandSequence::new()
                 .then(
                     Command::builder()
                         .aur()
-                        .args(&["-S", "--noconfirm", "--needed", "pacman", "flatpak", "polkit", "fontconfig", "freetype2", "qt6-base", "git"])
+                        .args(&["-S", "--noconfirm", "--needed", "rust", "qt6-base", "qt6-declarative", "pacman", "flatpak", "git"])
                         .description("Installing dependencies...")
                         .build(),
                 )
@@ -472,27 +441,24 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
                         .program("sh")
                         .args(&[
                             "-c",
-                            "rm -rf /tmp/xpackagemanager-jailbreak && git clone https://github.com/MurderFromMars/xpackagemanager.git /tmp/xpackagemanager-jailbreak",
+                            "rm -rf /tmp/xpm-build && git clone https://github.com/MurderFromMars/xPackageManager.git /tmp/xpm-build",
                         ])
-                        .description("Cloning xPackageManager (Jailbroken Edition)...")
+                        .description("Cloning xPackageManager source...")
                         .build(),
                 )
                 .then(
                     Command::builder()
                         .normal()
                         .program("bash")
-                        .args(&[
-                            "-c",
-                            "cd /tmp/xpackagemanager-jailbreak && bash /tmp/xpackagemanager-jailbreak/install.sh",
-                        ])
-                        .description("Installing xPackageManager (Jailbroken Edition)...")
+                        .args(&["/tmp/xpm-build/install.sh"])
+                        .description("Building and installing xPackageManager...")
                         .build(),
                 )
                 .then(
                     Command::builder()
                         .normal()
                         .program("rm")
-                        .args(&["-rf", "/tmp/xpackagemanager-jailbreak"])
+                        .args(&["-rf", "/tmp/xpm-build"])
                         .description("Cleaning up...")
                         .build(),
                 )
@@ -501,12 +467,11 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
             task_runner::run(
                 window_clone.upcast_ref(),
                 commands,
-                "Install xPackageManager (Jailbroken Edition)",
+                "Install xPackageManager",
             );
         }
     });
 
-    // Uninstall button
     let window_clone = window.clone();
     btn_xpackagemanager_uninstall.connect_clicked(move |_| {
         info!("Servicing: xPackageManager uninstall button clicked");
@@ -518,6 +483,14 @@ fn setup_xpackagemanager(page_builder: &Builder, window: &ApplicationWindow) {
                     .program("rm")
                     .args(&["-f", "/usr/bin/xpackagemanager"])
                     .description("Removing xPackageManager binary...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("rm")
+                    .args(&["-rf", "/opt/xpackagemanager"])
+                    .description("Removing application files...")
                     .build(),
             )
             .then(
