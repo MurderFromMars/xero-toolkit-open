@@ -16,7 +16,7 @@ use gtk4::glib;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, DrawingArea};
 use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
+use rand::{RngExt, SeedableRng};
 use std::cell::RefCell;
 use std::f64::consts::PI;
 use std::rc::Rc;

@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <interface>
-  <requires lib="gtk" version="4.0"/>
-  <requires lib="adw" version="1.0"/>
+  <requires lib="gtk" version="4.0" />
+  <requires lib="adw" version="1.0" />
   <object class="AdwWindow" id="xerolinux_error_window">
-    <property name="title">Xero Toolkit - Unsupported Distribution</property>
+    <property name="title">Xero Toolkit - Limited Support</property>
     <property name="icon-name">xero-toolkit</property>
     <property name="default-width">400</property>
     <property name="default-height">250</property>
@@ -32,14 +32,16 @@
                 <property name="spacing">10</property>
                 <property name="halign">center</property>
                 <child>
-                  <object class="GtkImage" id="error_icon">
-                    <property name="icon-name">circle-xmark</property>
+                  <object class="GtkImage" id="warning_icon">
+                    <property
+                                            name="icon-name"
+                                        >triangle-exclamation-symbolic</property>
                     <property name="pixel-size">48</property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkLabel" id="title_label">
-                    <property name="label">Unsupported Distribution</property>
+                    <property name="label">Limited Support Notice</property>
                     <property name="halign">center</property>
                     <property name="css-classes">title-2</property>
                   </object>
@@ -49,9 +51,12 @@
             <!-- Main message -->
             <child>
               <object class="GtkLabel" id="main_message">
-                <property name="label">This application is designed for XeroLinux.</property>
+                <property
+                                    name="label"
+                                >This application is designed for XeroLinux. Some features may not work correctly on other distributions.</property>
                 <property name="halign">center</property>
                 <property name="margin-top">10</property>
+                <property name="wrap">true</property>
               </object>
             </child>
             <!-- Distribution info -->
@@ -65,11 +70,20 @@
             <!-- Link -->
             <child>
               <object class="GtkLabel" id="link_label">
-                <property name="label">For more info visit &lt;a href="https://xerolinux.xyz/"&gt;https://xerolinux.xyz/&lt;/a&gt;</property>
+                <property
+                                    name="label"
+                                >For more info visit &lt;a href="https://xerolinux.xyz/"&gt;https://xerolinux.xyz/&lt;/a&gt;</property>
                 <property name="use-markup">true</property>
                 <property name="halign">center</property>
                 <property name="margin-top">10</property>
                 <property name="vexpand">true</property>
+              </object>
+            </child>
+            <!-- Checkbox -->
+            <child>
+              <object class="GtkCheckButton" id="dismiss_checkbox">
+                <property name="label">Don't show this again</property>
+                <property name="halign">center</property>
               </object>
             </child>
             <!-- Button section -->
@@ -79,8 +93,8 @@
                 <property name="halign">center</property>
                 <property name="margin-top">20</property>
                 <child>
-                  <object class="GtkButton" id="exit_button">
-                    <property name="label">Exit</property>
+                  <object class="GtkButton" id="ok_button">
+                    <property name="label">OK</property>
                     <property name="width-request">100</property>
                   </object>
                 </child>

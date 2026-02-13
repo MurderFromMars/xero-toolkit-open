@@ -105,15 +105,8 @@ fn check_aur_helper() -> bool {
     false
 }
 
-/// Check if current distribution is XeroLinux.
-fn is_xerolinux() -> bool {
-    get_distribution_name()
-        .map(|name| name.to_lowercase().contains("xerolinux"))
-        .unwrap_or(false)
-}
-
 /// Get distribution name from os-release files.
-fn get_distribution_name() -> Option<String> {
+pub fn get_distribution_name() -> Option<String> {
     use std::fs;
 
     // Try /etc/os-release first (most common)
@@ -211,49 +204,45 @@ pub fn check_dependencies() -> DependencyCheckResult {
     result
 }
 
-/// Check if running on XeroLinux distribution.
-pub fn check_xerolinux_distribution() -> bool {
-    info!("Checking Linux distribution compatibility");
-    let is_xero = is_xerolinux();
+/// Show generic distribution notice dialog with "don't show again" checkbox.
+/// This is a warning, not an error - the app continues after dismissal.
+pub fn show_generic_distro_notice(
+    main_window: &ApplicationWindow,
+    config: std::rc::Rc<std::cell::RefCell<crate::config::user::Config>>,
+    distro_name: String,
+) {
+    use std::rc::Rc;
 
-    if !is_xero {
-        let distro_name = get_distribution_name().unwrap_or_else(|| "Unknown".to_string());
-        warn!("Current distribution: {}", distro_name);
-        warn!("This application is designed specifically for XeroLinux");
-    } else {
-        info!("XeroLinux detected - proceeding with application startup");
-    }
+    warn!("Showing generic distribution notice dialog");
 
-    is_xero
-}
-
-/// Show XeroLinux distribution error dialog.
-pub fn show_xerolinux_error_dialog(main_window: &ApplicationWindow) {
-    error!("Showing XeroLinux distribution error dialog");
-
-    let distro_name = get_distribution_name().unwrap_or_else(|| "Unknown".to_string());
-
-    // Load error dialog from UI file
     let builder = Builder::from_resource(crate::config::resources::dialogs::XEROLINUX_CHECK);
 
-    let error_window: gtk4::Window = extract_widget(&builder, "xerolinux_error_window");
+    let notice_window: gtk4::Window = extract_widget(&builder, "xerolinux_error_window");
 
     let distro_label: Label = extract_widget(&builder, "distro_label");
-
-    let exit_button: Button = extract_widget(&builder, "exit_button");
+    let dismiss_checkbox: gtk4::CheckButton = extract_widget(&builder, "dismiss_checkbox");
+    let ok_button: Button = extract_widget(&builder, "ok_button");
 
     distro_label.set_label(&format!("Current distribution: <b>{}</b>", distro_name));
 
-    error_window.set_transient_for(Some(main_window));
+    notice_window.set_transient_for(Some(main_window));
 
-    let main_window_clone = main_window.clone();
-    exit_button.connect_clicked(move |_| {
-        error!("User clicked exit on XeroLinux error dialog");
-        main_window_clone.close();
-        std::process::exit(1);
+    let config_clone = Rc::clone(&config);
+    let dismiss_checkbox_clone = dismiss_checkbox.clone();
+    let notice_window_clone = notice_window.clone();
+    ok_button.connect_clicked(move |_| {
+        if dismiss_checkbox_clone.is_active() {
+            // Update in-memory flag only; persistence happens on app shutdown.
+            config_clone
+                .borrow_mut()
+                .warnings
+                .dismissed_generic_distro_notice = true;
+            info!("User dismissed generic distro notice (in-memory); will be saved on shutdown");
+        }
+        notice_window_clone.close();
     });
 
-    error_window.present();
+    notice_window.present();
 }
 
 /// Show dependency error dialog and prevent app from continuing.
@@ -263,7 +252,6 @@ pub fn show_dependency_error_dialog(
 ) {
     error!("Showing dependency error dialog");
 
-    // Load error dialog from UI file
     let builder = Builder::from_resource(crate::config::resources::dialogs::DEPENDENCY_ERROR);
 
     let error_window: gtk4::Window = extract_widget(&builder, "dependency_error_window");
@@ -288,27 +276,4 @@ pub fn show_dependency_error_dialog(
     });
 
     error_window.present();
-}
-
-/// Check system requirements (XeroLinux distribution and dependencies) on app startup.
-/// Shows appropriate error dialog if checks fail.
-/// Returns true if all checks pass, false otherwise.
-pub fn check_system_requirements(main_window: &ApplicationWindow) -> bool {
-    // First check: XeroLinux distribution
-    if !check_xerolinux_distribution() {
-        error!("Cannot start application - not running on XeroLinux");
-        show_xerolinux_error_dialog(main_window);
-        return false;
-    }
-
-    // Second check: Required dependencies
-    let check_result = check_dependencies();
-    if check_result.has_missing_dependencies() {
-        error!("Cannot start application - missing required dependencies");
-        show_dependency_error_dialog(main_window, &check_result);
-        return false;
-    }
-
-    info!("All checks passed successfully");
-    true
 }

@@ -17,4 +17,4 @@ pub mod system_check;
 // Re-export commonly used items
 pub use aur::get as aur_helper;
 pub use package::{is_flatpak_installed, is_package_installed};
-pub use system_check::check_system_requirements;
+pub use system_check::{check_dependencies, get_distribution_name, show_dependency_error_dialog};

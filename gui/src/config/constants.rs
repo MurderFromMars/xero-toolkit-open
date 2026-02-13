@@ -1,4 +1,4 @@
-//! Centralized configuration and constants for the application.
+//! Application constants.
 
 /// Application information constants.
 pub mod app_info {
@@ -25,101 +25,44 @@ pub mod links {
 pub mod paths {
     use std::path::PathBuf;
 
-    /// Path to the xero-authd daemon binary.
-    pub const DAEMON: &str = "/opt/xero-toolkit/xero-authd";
-
-    /// Path to the xero-auth client binary.
-    pub const CLIENT: &str = "/opt/xero-toolkit/xero-auth";
-
     /// Path to the sources directory (contains scripts and systemd).
     #[allow(dead_code)]
     pub const SOURCES: &str = "/opt/xero-toolkit/sources";
 
-    /// Path to the scripts directory.
+    pub const DAEMON: &str = "/opt/xero-toolkit/xero-authd";
+    pub const CLIENT: &str = "/opt/xero-toolkit/xero-auth";
     pub const SCRIPTS: &str = "/opt/xero-toolkit/sources/scripts";
-
-    /// Path to the systemd units directory.
     pub const SYSTEMD: &str = "/opt/xero-toolkit/sources/systemd";
-
-    /// Path to the desktop file in system applications.
     pub const DESKTOP_FILE: &str = "/usr/share/applications/xero-toolkit.desktop";
-
-    /// Path to the system-wide autostart desktop file.
     pub const SYSTEM_AUTOSTART: &str = "/etc/xdg/autostart/xero-toolkit.desktop";
 
-    /// Get the daemon path as a PathBuf.
     pub fn daemon() -> PathBuf {
         PathBuf::from(DAEMON)
     }
 
-    /// Get the client path as a PathBuf.
     pub fn client() -> PathBuf {
         PathBuf::from(CLIENT)
     }
 
-    /// Get the sources path as a PathBuf.
     #[allow(dead_code)]
     pub fn sources() -> PathBuf {
         PathBuf::from(SOURCES)
     }
 
-    /// Get the scripts path as a PathBuf.
     pub fn scripts() -> PathBuf {
         PathBuf::from(SCRIPTS)
     }
 
-    /// Get the systemd units path as a PathBuf.
     pub fn systemd() -> PathBuf {
         PathBuf::from(SYSTEMD)
     }
 
-    /// Get the desktop file path as a PathBuf.
     pub fn desktop_file() -> PathBuf {
         PathBuf::from(DESKTOP_FILE)
     }
 
-    /// Get the system autostart path as a PathBuf.
     pub fn system_autostart() -> PathBuf {
         PathBuf::from(SYSTEM_AUTOSTART)
-    }
-}
-
-/// Cached environment variables read at startup.
-pub mod env {
-    use std::sync::OnceLock;
-
-    static ENV: OnceLock<Env> = OnceLock::new();
-
-    /// Cached environment variables.
-    pub struct Env {
-        pub user: String,
-        pub home: String,
-    }
-
-    impl Env {
-        fn new() -> anyhow::Result<Self> {
-            Ok(Self {
-                user: std::env::var("USER")
-                    .map_err(|_| anyhow::anyhow!("USER environment variable is not set"))?,
-                home: std::env::var("HOME")
-                    .map_err(|_| anyhow::anyhow!("HOME environment variable is not set"))?,
-            })
-        }
-    }
-
-    /// Initialize environment variables. Must be called at application startup.
-    /// Returns an error if required environment variables (USER, HOME) are not set.
-    pub fn init() -> anyhow::Result<()> {
-        ENV.set(Env::new()?)
-            .map_err(|_| anyhow::anyhow!("Environment variables already initialized"))?;
-        Ok(())
-    }
-
-    /// Get the cached environment variables.
-    /// Panics if not initialized (call `init()` at application startup).
-    pub fn get() -> &'static Env {
-        ENV.get()
-            .expect("Environment variables not initialized. Call config::env::init() at startup.")
     }
 }
 
@@ -128,16 +71,12 @@ pub mod seasonal_debug {
     pub const ENABLE_SNOW: &str = "XERO_TOOLKIT_ENABLE_SNOW";
     pub const ENABLE_HALLOWEEN: &str = "XERO_TOOLKIT_ENABLE_HALLOWEEN";
 
-    /// Check if an environment variable is set to enable an effect.
-    /// Returns `Some(true)` if enabled, `Some(false)` if explicitly disabled, `None` if not set.
     pub fn check_effect_env(var_name: &str) -> Option<bool> {
         std::env::var(var_name).ok().and_then(|value| {
-            // Try parsing as boolean first
             if let Ok(enabled) = value.parse::<bool>() {
                 return Some(enabled);
             }
 
-            // Check for truthy/falsy string values (case-insensitive)
             let lower = value.to_lowercase();
             match lower.as_str() {
                 "1" | "true" | "yes" => Some(true),
@@ -150,16 +89,10 @@ pub mod seasonal_debug {
 
 /// UI resource paths for GResource files.
 pub mod resources {
-    /// Main application window UI.
     pub const MAIN_UI: &str = "/xyz/xerolinux/xero-toolkit/ui/main.ui";
-
-    /// Icons resource path.
     pub const ICONS: &str = "/xyz/xerolinux/xero-toolkit/icons";
-
-    /// CSS stylesheet resource path.
     pub const CSS: &str = "/xyz/xerolinux/xero-toolkit/css/style.css";
 
-    /// Dialog UI resources.
     pub mod dialogs {
         pub const ABOUT: &str = "/xyz/xerolinux/xero-toolkit/ui/dialogs/about_dialog.ui";
         pub const DEPENDENCY_ERROR: &str =
@@ -177,7 +110,6 @@ pub mod resources {
             "/xyz/xerolinux/xero-toolkit/ui/dialogs/xerolinux_check_dialog.ui";
     }
 
-    /// Page/tab UI resources.
     pub mod tabs {
         pub const BIOMETRICS: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/biometrics.ui";
         pub const CONTAINERS_VMS: &str = "/xyz/xerolinux/xero-toolkit/ui/tabs/containers_vms.ui";

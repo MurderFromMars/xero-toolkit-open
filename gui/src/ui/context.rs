@@ -3,19 +3,24 @@
 //! This module contains the application-wide context and UI component
 //! references used for navigation and state management.
 
+use crate::config::user::Config;
 use adw::prelude::*;
 use gtk4::{Box as GtkBox, Stack, ToggleButton};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Main application context with UI elements.
 #[derive(Clone)]
 pub struct AppContext {
     pub ui: UiComponents,
+    #[allow(dead_code)]
+    pub config: Rc<RefCell<Config>>,
 }
 
 impl AppContext {
     /// Create a new application context with UI components.
-    pub fn new(ui: UiComponents) -> Self {
-        Self { ui }
+    pub fn new(ui: UiComponents, config: Rc<RefCell<Config>>) -> Self {
+        Self { ui, config }
     }
 
     /// Navigate to a specific page in the stack.

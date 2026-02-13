@@ -1,6 +1,7 @@
 //! Application setup and initialization.
 
 use crate::config;
+use crate::config::user::Config;
 use crate::core;
 use crate::ui::context::AppContext;
 use crate::ui::context::UiComponents;
@@ -11,6 +12,8 @@ use adw::Application;
 use gtk4::glib;
 use gtk4::{gio, ApplicationWindow, Builder, CssProvider, Stack};
 use log::{error, info, warn};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Initialize and set up main application UI.
 pub fn setup_application_ui(app: &Application) {
@@ -18,56 +21,90 @@ pub fn setup_application_ui(app: &Application) {
 
     setup_resources_and_theme();
 
+    let config = Rc::new(RefCell::new(Config::load()));
+    info!("User configuration loaded");
+
+    // Persist configuration once on application shutdown to avoid IO during interaction.
+    {
+        let config_for_shutdown = Rc::clone(&config);
+        app.connect_shutdown(move |_| {
+            if let Err(e) = config_for_shutdown.borrow().save() {
+                eprintln!("Failed to save config on shutdown: {e}");
+            } else {
+                info!("Configuration saved on shutdown");
+            }
+        });
+    }
+
     let builder = Builder::from_resource(config::resources::MAIN_UI);
     let window = create_main_window(app, &builder);
 
     window.present();
 
-    // Initialize environment variables
     info!("Initializing environment variables");
     if let Err(e) = config::env::init() {
         error!("Failed to initialize environment variables: {}", e);
-        crate::ui::dialogs::error::show_error(&window, &format!("Failed to initialize environment variables: {}\n\nRequired environment variables (USER, HOME) are not set.", e));
+        crate::ui::dialogs::error::show_error(
+            &window,
+            &format!(
+                "Failed to initialize environment variables: {}\n\nRequired environment variables (USER, HOME) are not set.",
+                e
+            ),
+        );
         return;
     }
 
-    // Extract tabs_container first for stack creation
+    let distribution_name = core::get_distribution_name()
+        .unwrap_or_else(|| "Unknown".to_string())
+        .to_lowercase();
+    match distribution_name.as_str() {
+        "xerolinux" => info!("Running on XeroLinux"),
+        _ => {
+            warn!(
+                "Not running on XeroLinux - current distribution: {}",
+                distribution_name
+            );
+            warn!("Some features may not work correctly on non-XeroLinux systems");
+
+            if !config.borrow().warnings.dismissed_generic_distro_notice {
+                core::system_check::show_generic_distro_notice(
+                    &window,
+                    config.clone(),
+                    distribution_name.clone(),
+                );
+            }
+        }
+    }
+
     let tabs_container = extract_widget(&builder, "tabs_container");
 
-    // Create dynamic stack with all pages and set up navigation tabs
     let stack = navigation::create_stack_and_tabs(&tabs_container, &builder);
 
-    // Set up UI components with the dynamic stack
-    let ctx = setup_ui_components(&builder, stack, &window);
+    let ctx = setup_ui_components(&builder, stack, &window, config.clone());
 
     info!("Setting initial view to first page");
     if let Some(first_page) = navigation::PAGES.first() {
         ctx.navigate_to_page(first_page.id);
     }
 
-    // Apply seasonal effects (snow for December, Halloween for October, etc.)
     crate::ui::seasonal::apply_seasonal_effects(&window);
 
-    // Perform system checks after UI is ready
-    let window_clone = window.clone();
-    glib::idle_add_local(move || {
-        info!("Checking system dependencies");
-        if !core::check_system_requirements(&window_clone) {
-            warn!("Dependency check failed - application will not continue");
-        } else {
-            // Initialize AUR helper after dependency checks pass
-            if core::aur::init() {
-                info!("AUR helper initialized successfully");
-            }
-            info!("Dependency check passed");
-        }
-        glib::ControlFlow::Break
-    });
+    info!("Running dependency checks");
+    let dependency_result = core::check_dependencies();
+    if dependency_result.has_missing_dependencies() {
+        core::show_dependency_error_dialog(&window, &dependency_result);
+        return;
+    }
+
+    if core::aur::init() {
+        info!("AUR helper initialized successfully");
+    } else {
+        warn!("No AUR helper detected");
+    }
 
     info!("Xero Toolkit application startup complete");
 }
 
-/// Set up resources and theme.
 fn setup_resources_and_theme() {
     info!("Setting up resources and theme");
 
@@ -78,7 +115,6 @@ fn setup_resources_and_theme() {
         info!("Setting up UI theme and styling");
 
         let theme = gtk4::IconTheme::for_display(&display);
-        // Don't inherit system icon themes
         theme.set_search_path(&[]);
         theme.add_resource_path(config::resources::ICONS);
         info!("Icon theme paths configured");
@@ -96,7 +132,6 @@ fn setup_resources_and_theme() {
     }
 }
 
-/// Create main application window.
 fn create_main_window(app: &Application, builder: &Builder) -> ApplicationWindow {
     let window: ApplicationWindow = extract_widget(builder, "app_window");
 
@@ -108,39 +143,39 @@ fn create_main_window(app: &Application, builder: &Builder) -> ApplicationWindow
     window
 }
 
-/// Set up UI components and return application context.
-fn setup_ui_components(builder: &Builder, stack: Stack, window: &ApplicationWindow) -> AppContext {
+fn setup_ui_components(
+    builder: &Builder,
+    stack: Stack,
+    window: &ApplicationWindow,
+    config: Rc<RefCell<Config>>,
+) -> AppContext {
     let tabs_container = extract_widget(builder, "tabs_container");
     let main_split_view = extract_widget(builder, "main_split_view");
     let sidebar_toggle = extract_widget(builder, "sidebar_toggle_button");
 
-    // Set up autostart toggle in sidebar
-    setup_autostart_toggle(builder);
-
-    // Set up about button
+    setup_autostart_toggle(builder, config.clone());
     setup_about_button(builder, window);
-
-    // Set up seasonal effects toggle
     setup_seasonal_effects_toggle(builder, window);
 
     info!("All UI components successfully initialized from UI builder");
 
     let ui = UiComponents::new(stack, tabs_container, main_split_view, sidebar_toggle);
 
-    // Configure sidebar with size constraints from config
     ui.configure_sidebar(config::sidebar::MIN_WIDTH, config::sidebar::MAX_WIDTH);
 
-    AppContext::new(ui)
+    AppContext::new(ui, config)
 }
 
-/// Set up the autostart toggle switch in the sidebar.
-fn setup_autostart_toggle(builder: &Builder) {
+fn setup_autostart_toggle(builder: &Builder, config: Rc<RefCell<Config>>) {
     let switch = extract_widget::<gtk4::Switch>(builder, "switch_autostart");
-    // Set initial state based on whether autostart is enabled
-    switch.set_active(core::autostart::is_enabled());
+    switch.set_active(config.borrow().general.autostart);
 
+    let config_clone = Rc::clone(&config);
     switch.connect_state_set(move |_switch, state| {
         info!("Autostart toggle changed to: {}", state);
+
+        // Update in-memory config; actual persistence happens on app shutdown.
+        config_clone.borrow_mut().general.autostart = state;
 
         let result = if state {
             core::autostart::enable()
@@ -154,16 +189,14 @@ fn setup_autostart_toggle(builder: &Builder) {
                 if state { "enable" } else { "disable" },
                 e
             );
-            // Return Propagation::Stop to prevent the switch from updating its state
+            // Prevent the switch from updating its state on failure
             return glib::Propagation::Stop;
         }
 
-        // Return Propagation::Proceed to allow the switch to update its state
         glib::Propagation::Proceed
     });
 }
 
-/// Set up the about button in the header bar.
 fn setup_about_button(builder: &Builder, window: &ApplicationWindow) {
     use crate::ui::dialogs::about;
 
@@ -175,18 +208,15 @@ fn setup_about_button(builder: &Builder, window: &ApplicationWindow) {
     });
 }
 
-/// Set up the seasonal effects toggle button in the header bar.
 fn setup_seasonal_effects_toggle(builder: &Builder, _window: &ApplicationWindow) {
     use crate::ui::seasonal;
 
     let toggle = extract_widget::<gtk4::ToggleButton>(builder, "seasonal_effects_toggle");
 
-    // Show/hide button based on whether any effect is active
     let has_active = seasonal::has_active_effect();
     toggle.set_visible(has_active);
     toggle.set_active(seasonal::are_effects_enabled());
 
-    // Connect toggle action
     toggle.connect_toggled(move |btn| {
         let enabled = btn.is_active();
         seasonal::set_effects_enabled(enabled);

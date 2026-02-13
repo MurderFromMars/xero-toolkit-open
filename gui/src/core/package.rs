@@ -27,8 +27,11 @@ pub fn is_package_installed(package: &str) -> bool {
 /// Check if a package is installed using a specific helper.
 fn check_with_helper(helper: &str, package: &str) -> bool {
     debug!("Using '{}' to check package '{}'", helper, package);
-    
-    match std::process::Command::new(helper).args(["-Q", package]).output() {
+
+    match std::process::Command::new(helper)
+        .args(["-Q", package])
+        .output()
+    {
         Ok(output) if output.status.success() => {
             debug!("Package '{}' found via {}", package, helper);
             true
@@ -49,7 +52,7 @@ fn check_with_pacman(package: &str) -> bool {
     let installed = std::process::Command::new("pacman")
         .args(["-Q", package])
         .output()
-        .map_or(false, |output| output.status.success());
+        .is_ok_and(|output| output.status.success());
 
     if installed {
         debug!("Package '{}' found via pacman", package);
@@ -67,7 +70,7 @@ pub fn is_flatpak_installed(package: &str) -> bool {
     let installed = std::process::Command::new("flatpak")
         .args(["list", "--columns=application"])
         .output()
-        .map_or(false, |output| {
+        .is_ok_and(|output| {
             output.status.success()
                 && String::from_utf8_lossy(&output.stdout)
                     .lines()

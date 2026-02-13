@@ -15,11 +15,6 @@ pub fn get_autostart_path() -> PathBuf {
     config_dir.join("autostart").join("xero-toolkit.desktop")
 }
 
-/// Check if autostart is enabled
-pub fn is_enabled() -> bool {
-    get_autostart_path().exists() || config::paths::system_autostart().exists()
-}
-
 /// Enable autostart by creating a symlink to the desktop file in autostart directory
 pub fn enable() -> Result<(), std::io::Error> {
     let autostart_dir = dirs::config_dir()
