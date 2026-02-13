@@ -47,6 +47,39 @@ When you install packages or run system operations, you'll see live updates show
 - **Flatpak integration** - manage both native and Flatpak packages
 - **Modern GTK4 interface** that fits naturally in your desktop
 
+## 🛠️ Build
+
+To build and package the project locally:
+
+1. Clone the repository:
+
+```
+git clone https://github.com/synsejse/xero-toolkit
+```
+
+2. Build the package from the packaging directory:
+
+```
+cd xero-toolkit/packaging
+makepkg -scif
+```
+
+After installation, run the application from your desktop/menu or execute:
+```
+XeroLinux Toolkit
+```
+
+For updating an existing clone, simply pull the latest changes and rebuild:
+```
+cd xero-toolkit
+git pull
+cd packaging
+makepkg -scif
+```
+
+> Notes:
+> - `makepkg -scif` will synchronize dependencies, clean up, install, and create the package.
+
 ## 💻 System Requirements
 
 - **XeroLinux** — primary supported platform. The tool may run on other distributions, but those will receive a limited‑support notice at startup; support for non‑XeroLinux systems is best‑effort and not guaranteed.

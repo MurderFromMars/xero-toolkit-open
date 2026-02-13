@@ -8,6 +8,6 @@ edition = "2021"
 authors = ["Kristián Kekeš <gamerix2006@gmail.com>", "Steve C. <steve@techxero.com>"]
 license = "GPL-3.0-or-later"
 description = "GTK4 GUI to manage XeroLinux specific tools and settings"
-repository = "https://github.com/BananikXenos/xero-toolkit"
+repository = "https://github.com/synsejse/xero-toolkit"
 keywords = ["xerolinux", "gtk4", "system-management", "tools"]
 categories = ["gui", "os::linux-apis"]
