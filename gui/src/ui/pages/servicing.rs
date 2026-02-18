@@ -5,12 +5,18 @@ use crate::ui::dialogs::terminal;
 use crate::ui::task_runner::{self, Command, CommandSequence};
 use crate::ui::utils::extract_widget;
 use gtk4::prelude::*;
-use gtk4::{ApplicationWindow, Builder};
+use gtk4::{
+    ApplicationWindow, Box as GtkBox, Builder, CheckButton, Frame, Label, Orientation,
+    ScrolledWindow, Separator,
+};
 use log::info;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &ApplicationWindow) {
     setup_clr_pacman(page_builder, window);
     setup_unlock_pacman(page_builder, window);
+    setup_remove_orphans(page_builder, window);
     setup_plasma_x11(page_builder, window);
     setup_pacman_db_fix(page_builder, window);
     setup_waydroid_guide(page_builder);
@@ -59,6 +65,284 @@ fn setup_unlock_pacman(page_builder: &Builder, window: &ApplicationWindow) {
             )
             .build();
         task_runner::run(window.upcast_ref(), commands, "Unlock Pacman Database");
+    });
+}
+
+/// Query pacman for orphaned packages (installed as deps, no longer required).
+fn get_orphan_packages() -> Vec<String> {
+    std::process::Command::new("pacman")
+        .args(["-Qdtq"])
+        .output()
+        .ok()
+        .filter(|o| o.status.success())
+        .map(|o| {
+            String::from_utf8_lossy(&o.stdout)
+                .lines()
+                .filter(|l| !l.is_empty())
+                .map(|l| l.to_string())
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn setup_remove_orphans(page_builder: &Builder, window: &ApplicationWindow) {
+    let btn = extract_widget::<gtk4::Button>(page_builder, "btn_remove_orphans");
+    let window = window.clone();
+
+    btn.connect_clicked(move |_| {
+        info!("Servicing: Remove Orphans button clicked");
+
+        let orphans = get_orphan_packages();
+
+        if orphans.is_empty() {
+            // No orphans — show a simple info dialog
+            let dialog = adw::Window::new();
+            dialog.set_title(Some("Xero Toolkit - Remove Orphans"));
+            dialog.set_default_size(400, 200);
+            dialog.set_modal(true);
+            dialog.set_transient_for(Some(&window));
+
+            let toolbar = adw::ToolbarView::new();
+            let header = adw::HeaderBar::new();
+            toolbar.add_top_bar(&header);
+
+            let content = GtkBox::new(Orientation::Vertical, 16);
+            content.set_margin_top(24);
+            content.set_margin_bottom(24);
+            content.set_margin_start(24);
+            content.set_margin_end(24);
+            content.set_halign(gtk4::Align::Center);
+            content.set_valign(gtk4::Align::Center);
+
+            let icon = gtk4::Image::from_icon_name("emblem-ok-symbolic");
+            icon.set_pixel_size(48);
+            content.append(&icon);
+
+            let label = Label::new(Some("No orphaned packages found.\nYour system is clean!"));
+            label.set_halign(gtk4::Align::Center);
+            label.set_justify(gtk4::Justification::Center);
+            content.append(&label);
+
+            let ok_btn = gtk4::Button::with_label("OK");
+            ok_btn.add_css_class("suggested-action");
+            ok_btn.add_css_class("pill");
+            ok_btn.set_halign(gtk4::Align::Center);
+            let dialog_clone = dialog.clone();
+            ok_btn.connect_clicked(move |_| dialog_clone.close());
+            content.append(&ok_btn);
+
+            toolbar.set_content(Some(&content));
+            dialog.set_content(Some(&toolbar));
+            dialog.present();
+            return;
+        }
+
+        // ── Build the orphan review dialog ───────────────────────────────
+        let dialog = adw::Window::new();
+        dialog.set_title(Some("Xero Toolkit - Remove Orphans"));
+        dialog.set_default_size(550, 500);
+        dialog.set_modal(true);
+        dialog.set_transient_for(Some(&window));
+
+        let toolbar = adw::ToolbarView::new();
+        let header = adw::HeaderBar::new();
+        toolbar.add_top_bar(&header);
+
+        let outer = GtkBox::new(Orientation::Vertical, 12);
+        outer.set_margin_top(12);
+        outer.set_margin_bottom(12);
+        outer.set_margin_start(12);
+        outer.set_margin_end(12);
+
+        // Title + description
+        let title_box = GtkBox::new(Orientation::Vertical, 4);
+        title_box.set_halign(gtk4::Align::Center);
+
+        let title = Label::new(Some("Remove Orphaned Packages"));
+        title.add_css_class("title-2");
+        title_box.append(&title);
+
+        let count_text = format!(
+            "Found {} orphaned package{}. Uncheck any you want to keep.",
+            orphans.len(),
+            if orphans.len() == 1 { "" } else { "s" }
+        );
+        let subtitle = Label::new(Some(&count_text));
+        subtitle.add_css_class("dim-label");
+        subtitle.set_wrap(true);
+        subtitle.set_halign(gtk4::Align::Center);
+        title_box.append(&subtitle);
+
+        outer.append(&title_box);
+
+        // Select All / Deselect All row
+        let toggle_row = GtkBox::new(Orientation::Horizontal, 8);
+        toggle_row.set_halign(gtk4::Align::End);
+        toggle_row.set_margin_end(24);
+
+        let btn_select_all = gtk4::Button::with_label("Select All");
+        btn_select_all.add_css_class("flat");
+        btn_select_all.add_css_class("caption");
+        toggle_row.append(&btn_select_all);
+
+        let btn_deselect_all = gtk4::Button::with_label("Deselect All");
+        btn_deselect_all.add_css_class("flat");
+        btn_deselect_all.add_css_class("caption");
+        toggle_row.append(&btn_deselect_all);
+
+        outer.append(&toggle_row);
+
+        // Scrollable package list inside a frame
+        let frame = Frame::new(None);
+        frame.add_css_class("view");
+        frame.set_hexpand(true);
+        frame.set_vexpand(true);
+        frame.set_margin_start(24);
+        frame.set_margin_end(24);
+        frame.set_margin_top(4);
+        frame.set_margin_bottom(8);
+
+        let scroll = ScrolledWindow::new();
+        scroll.set_hexpand(true);
+        scroll.set_vexpand(true);
+        scroll.set_min_content_height(250);
+
+        let list_box = GtkBox::new(Orientation::Vertical, 0);
+        list_box.set_margin_start(16);
+        list_box.set_margin_end(16);
+        list_box.set_margin_top(8);
+        list_box.set_margin_bottom(8);
+
+        let checkboxes: Rc<RefCell<Vec<(String, CheckButton)>>> =
+            Rc::new(RefCell::new(Vec::new()));
+
+        for (i, pkg) in orphans.iter().enumerate() {
+            let row = GtkBox::new(Orientation::Horizontal, 12);
+            row.set_margin_top(4);
+            row.set_margin_bottom(4);
+
+            let checkbox = CheckButton::new();
+            checkbox.set_active(true); // pre-checked for removal
+            row.append(&checkbox);
+
+            let label = Label::new(Some(pkg));
+            label.set_halign(gtk4::Align::Start);
+            label.set_hexpand(true);
+            label.add_css_class("monospace");
+            row.append(&label);
+
+            list_box.append(&row);
+            checkboxes.borrow_mut().push((pkg.clone(), checkbox));
+
+            if i < orphans.len() - 1 {
+                let sep = Separator::new(Orientation::Horizontal);
+                list_box.append(&sep);
+            }
+        }
+
+        scroll.set_child(Some(&list_box));
+        frame.set_child(Some(&scroll));
+        outer.append(&frame);
+
+        // Select All / Deselect All logic
+        let cbs = checkboxes.clone();
+        btn_select_all.connect_clicked(move |_| {
+            for (_, cb) in cbs.borrow().iter() {
+                cb.set_active(true);
+            }
+        });
+
+        let cbs = checkboxes.clone();
+        btn_deselect_all.connect_clicked(move |_| {
+            for (_, cb) in cbs.borrow().iter() {
+                cb.set_active(false);
+            }
+        });
+
+        // Update remove button label with count
+        let remove_btn = gtk4::Button::with_label(&format!("Remove {}", orphans.len()));
+        remove_btn.add_css_class("destructive-action");
+        remove_btn.add_css_class("pill");
+
+        let cbs = checkboxes.clone();
+        let remove_btn_clone = remove_btn.clone();
+        let update_count = move || {
+            let count = cbs.borrow().iter().filter(|(_, cb)| cb.is_active()).count();
+            if count > 0 {
+                remove_btn_clone.set_label(&format!("Remove {}", count));
+                remove_btn_clone.set_sensitive(true);
+            } else {
+                remove_btn_clone.set_label("Remove");
+                remove_btn_clone.set_sensitive(false);
+            }
+        };
+
+        // Connect each checkbox toggle to update the count
+        for (_, cb) in checkboxes.borrow().iter() {
+            let update = update_count.clone();
+            cb.connect_toggled(move |_| update());
+        }
+
+        // Button row
+        let btn_row = GtkBox::new(Orientation::Horizontal, 8);
+        btn_row.set_halign(gtk4::Align::Center);
+        btn_row.set_margin_top(12);
+
+        let cancel_btn = gtk4::Button::with_label("Cancel");
+        cancel_btn.add_css_class("pill");
+        let dialog_clone = dialog.clone();
+        cancel_btn.connect_clicked(move |_| {
+            info!("Orphan removal cancelled");
+            dialog_clone.close();
+        });
+
+        btn_row.append(&cancel_btn);
+        btn_row.append(&remove_btn);
+        outer.append(&btn_row);
+
+        // Remove button → collect checked packages and run removal
+        let dialog_clone = dialog.clone();
+        let window_clone = window.clone();
+        let cbs = checkboxes.clone();
+        remove_btn.connect_clicked(move |_| {
+            let selected: Vec<String> = cbs
+                .borrow()
+                .iter()
+                .filter(|(_, cb)| cb.is_active())
+                .map(|(pkg, _)| pkg.clone())
+                .collect();
+
+            info!("Removing {} orphaned packages", selected.len());
+            dialog_clone.close();
+
+            if selected.is_empty() {
+                return;
+            }
+
+            let mut args: Vec<&str> = vec!["-Rns", "--noconfirm"];
+            let refs: Vec<&str> = selected.iter().map(|s| s.as_str()).collect();
+            args.extend_from_slice(&refs);
+
+            let commands = CommandSequence::new()
+                .then(
+                    Command::builder()
+                        .aur()
+                        .args(&args)
+                        .description("Removing orphaned packages...")
+                        .build(),
+                )
+                .build();
+
+            task_runner::run(
+                window_clone.upcast_ref(),
+                commands,
+                "Remove Orphaned Packages",
+            );
+        });
+
+        toolbar.set_content(Some(&outer));
+        dialog.set_content(Some(&toolbar));
+        dialog.present();
     });
 }
 
