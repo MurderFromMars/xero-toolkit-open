@@ -11,8 +11,8 @@ use log::debug;
 pub fn is_package_installed(package: &str) -> bool {
     debug!("Checking if package '{}' is installed", package);
 
-    // Try AUR helper first
-    if let Some(helper) = aur::detect() {
+    // Use the cached AUR helper if available (avoids re-scanning PATH)
+    if let Some(helper) = aur::get() {
         if let Ok(output) = std::process::Command::new(helper)
             .args(["-Q", package])
             .output()
@@ -21,10 +21,13 @@ pub fn is_package_installed(package: &str) -> bool {
                 debug!("Package '{}' found via {}", package, helper);
                 return true;
             }
+            // AUR helper -Q failed → package not installed, no need for pacman fallback
+            debug!("Package '{}' not installed", package);
+            return false;
         }
     }
 
-    // Fallback to pacman
+    // Fallback to pacman (AUR helper not initialized yet or not available)
     let installed = std::process::Command::new("pacman")
         .args(["-Q", package])
         .output()
