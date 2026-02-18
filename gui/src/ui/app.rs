@@ -54,8 +54,8 @@ pub fn setup_application_ui(app: &Application) {
     window.present();
 
     // Perform system checks off the main thread so they don't block
-    // window rendering. Results are sent back via a GLib channel.
-    let (sender, receiver) = glib::channel::<(bool, Option<core::system_check::DependencyCheckResult>, bool)>(glib::Priority::DEFAULT);
+    // window rendering. Results are sent back via an async channel.
+    let (sender, receiver) = async_channel::bounded::<(bool, Option<core::system_check::DependencyCheckResult>, bool)>(1);
 
     std::thread::spawn(move || {
         info!("Checking system dependencies (background thread)");
@@ -73,26 +73,27 @@ pub fn setup_application_ui(app: &Application) {
             (None, false)
         };
 
-        let _ = sender.send((is_xero, dep_result, aur_ok));
+        let _ = sender.send_blocking((is_xero, dep_result, aur_ok));
     });
 
     let window_clone = window.clone();
-    receiver.attach(None, move |(is_xero, dep_result, aur_ok)| {
-        if !is_xero {
-            warn!("Dependency check failed - not running on XeroLinux");
-            core::system_check::show_xerolinux_error_dialog(&window_clone);
-        } else if let Some(ref result) = dep_result {
-            if result.has_missing_dependencies() {
-                warn!("Dependency check failed - missing dependencies");
-                core::system_check::show_dependency_error_dialog(&window_clone, result);
-            } else {
-                if aur_ok {
-                    info!("AUR helper initialized successfully");
+    glib::MainContext::default().spawn_local(async move {
+        if let Ok((is_xero, dep_result, aur_ok)) = receiver.recv().await {
+            if !is_xero {
+                warn!("Dependency check failed - not running on XeroLinux");
+                core::system_check::show_xerolinux_error_dialog(&window_clone);
+            } else if let Some(ref result) = dep_result {
+                if result.has_missing_dependencies() {
+                    warn!("Dependency check failed - missing dependencies");
+                    core::system_check::show_dependency_error_dialog(&window_clone, result);
+                } else {
+                    if aur_ok {
+                        info!("AUR helper initialized successfully");
+                    }
+                    info!("All dependency checks passed");
                 }
-                info!("All dependency checks passed");
             }
         }
-        glib::ControlFlow::Break
     });
 
     info!("Xero Toolkit application startup complete");
