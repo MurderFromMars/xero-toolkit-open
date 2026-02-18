@@ -21,12 +21,12 @@ pub fn setup_application_ui(app: &Application) {
     let builder = Builder::from_resource(config::resources::MAIN_UI);
     let window = create_main_window(app, &builder);
 
-    window.present();
-
-    // Initialize environment variables
+    // Initialize environment variables before building UI
+    // (some page handlers need USER/HOME)
     info!("Initializing environment variables");
     if let Err(e) = config::env::init() {
         error!("Failed to initialize environment variables: {}", e);
+        window.present();
         crate::ui::dialogs::error::show_error(&window, &format!("Failed to initialize environment variables: {}\n\nRequired environment variables (USER, HOME) are not set.", e));
         return;
     }
@@ -47,6 +47,11 @@ pub fn setup_application_ui(app: &Application) {
 
     // Apply seasonal effects (snow for December, Halloween for October, etc.)
     crate::ui::seasonal::apply_seasonal_effects(&window);
+
+    // Present the window only after the full UI is assembled —
+    // this prevents the visible resize/hitch where the window
+    // appears empty at a small size before the WM tiles it.
+    window.present();
 
     // Perform system checks after UI is ready
     let window_clone = window.clone();
