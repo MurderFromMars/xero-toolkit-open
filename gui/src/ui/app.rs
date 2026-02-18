@@ -55,7 +55,7 @@ pub fn setup_application_ui(app: &Application) {
 
     // Perform system checks off the main thread so they don't block
     // window rendering. Results are sent back via a GLib channel.
-    let (sender, receiver) = glib::MainContext::channel::<(bool, Option<core::system_check::DependencyCheckResult>, bool)>(glib::Priority::DEFAULT);
+    let (sender, receiver) = glib::channel::<(bool, Option<core::system_check::DependencyCheckResult>, bool)>(glib::Priority::DEFAULT);
 
     std::thread::spawn(move || {
         info!("Checking system dependencies (background thread)");
