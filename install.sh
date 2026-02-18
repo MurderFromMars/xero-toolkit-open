@@ -82,6 +82,8 @@ print_success "Dependencies satisfied"
 print_status "Building Xero Toolkit (this may take a few minutes)..."
 cd "$SCRIPT_DIR"
 
+cargo clean
+
 if ! cargo build --release; then
     die "Build failed. Check the error messages above."
 fi
