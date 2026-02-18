@@ -105,90 +105,6 @@ fn check_aur_helper() -> bool {
     false
 }
 
-/// Check if current distribution is XeroLinux.
-fn is_xerolinux() -> bool {
-    get_distribution_name()
-        .map(|name| name.to_lowercase().contains("xerolinux"))
-        .unwrap_or(false)
-}
-
-/// Get distribution name from os-release files.
-fn get_distribution_name() -> Option<String> {
-    use std::fs;
-
-    // Try /etc/os-release first (most common)
-    if let Ok(content) = fs::read_to_string("/etc/os-release") {
-        if let Some(name) = parse_os_release_name(&content) {
-            return Some(name);
-        }
-    }
-
-    // Fallback to /usr/lib/os-release
-    if let Ok(content) = fs::read_to_string("/usr/lib/os-release") {
-        if let Some(name) = parse_os_release_name(&content) {
-            return Some(name);
-        }
-    }
-
-    // Fallback to /etc/lsb-release
-    if let Ok(content) = fs::read_to_string("/etc/lsb-release") {
-        for line in content.lines() {
-            if line.starts_with("DISTRIB_ID=") {
-                let name = line
-                    .trim_start_matches("DISTRIB_ID=")
-                    .trim_matches('"')
-                    .to_string();
-                if !name.is_empty() {
-                    return Some(name);
-                }
-            }
-        }
-    }
-
-    None
-}
-
-/// Parse NAME field from os-release content.
-fn parse_os_release_name(content: &str) -> Option<String> {
-    // Try NAME first
-    for line in content.lines() {
-        if line.starts_with("NAME=") {
-            let name = line
-                .trim_start_matches("NAME=")
-                .trim_matches('"')
-                .to_string();
-            if !name.is_empty() {
-                return Some(name);
-            }
-        }
-    }
-
-    // Fallback to PRETTY_NAME
-    for line in content.lines() {
-        if line.starts_with("PRETTY_NAME=") {
-            let name = line
-                .trim_start_matches("PRETTY_NAME=")
-                .trim_matches('"')
-                .to_string();
-            if !name.is_empty() {
-                return Some(name);
-            }
-        }
-    }
-
-    // Final fallback to ID
-    for line in content.lines() {
-        if line.starts_with("ID=") {
-            let name = line.trim_start_matches("ID=").trim_matches('"').to_string();
-            if !name.is_empty() {
-                return Some(name);
-            }
-        }
-    }
-
-    None
-}
-
 /// Perform all dependency checks and return results.
 pub fn check_dependencies() -> DependencyCheckResult {
     info!("Performing system dependency checks");
@@ -209,51 +125,6 @@ pub fn check_dependencies() -> DependencyCheckResult {
     }
 
     result
-}
-
-/// Check if running on XeroLinux distribution.
-pub fn check_xerolinux_distribution() -> bool {
-    info!("Checking Linux distribution compatibility");
-    let is_xero = is_xerolinux();
-
-    if !is_xero {
-        let distro_name = get_distribution_name().unwrap_or_else(|| "Unknown".to_string());
-        warn!("Current distribution: {}", distro_name);
-        warn!("This application is designed specifically for XeroLinux");
-    } else {
-        info!("XeroLinux detected - proceeding with application startup");
-    }
-
-    is_xero
-}
-
-/// Show XeroLinux distribution error dialog.
-pub fn show_xerolinux_error_dialog(main_window: &ApplicationWindow) {
-    error!("Showing XeroLinux distribution error dialog");
-
-    let distro_name = get_distribution_name().unwrap_or_else(|| "Unknown".to_string());
-
-    // Load error dialog from UI file
-    let builder = Builder::from_resource(crate::config::resources::dialogs::XEROLINUX_CHECK);
-
-    let error_window: gtk4::Window = extract_widget(&builder, "xerolinux_error_window");
-
-    let distro_label: Label = extract_widget(&builder, "distro_label");
-
-    let exit_button: Button = extract_widget(&builder, "exit_button");
-
-    distro_label.set_label(&format!("Current distribution: <b>{}</b>", distro_name));
-
-    error_window.set_transient_for(Some(main_window));
-
-    let main_window_clone = main_window.clone();
-    exit_button.connect_clicked(move |_| {
-        error!("User clicked exit on XeroLinux error dialog");
-        main_window_clone.close();
-        std::process::exit(1);
-    });
-
-    error_window.present();
 }
 
 /// Show dependency error dialog and prevent app from continuing.
@@ -288,27 +159,4 @@ pub fn show_dependency_error_dialog(
     });
 
     error_window.present();
-}
-
-/// Check system requirements (XeroLinux distribution and dependencies) on app startup.
-/// Shows appropriate error dialog if checks fail.
-/// Returns true if all checks pass, false otherwise.
-pub fn check_system_requirements(main_window: &ApplicationWindow) -> bool {
-    // First check: XeroLinux distribution
-    if !check_xerolinux_distribution() {
-        error!("Cannot start application - not running on XeroLinux");
-        show_xerolinux_error_dialog(main_window);
-        return false;
-    }
-
-    // Second check: Required dependencies
-    let check_result = check_dependencies();
-    if check_result.has_missing_dependencies() {
-        error!("Cannot start application - missing required dependencies");
-        show_dependency_error_dialog(main_window, &check_result);
-        return false;
-    }
-
-    info!("All checks passed successfully");
-    true
 }
