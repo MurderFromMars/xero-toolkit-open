@@ -504,26 +504,25 @@ fn setup_kvm(builder: &Builder, window: &ApplicationWindow) {
 
         let mut commands = CommandSequence::new();
 
-        // Remove conflicting packages if installed
-        if core::is_package_installed("iptables") {
-            commands = commands.then(
-                Command::builder()
-                    .aur()
-                    .args(&["-Rdd", "--noconfirm", "iptables"])
-                    .description("Removing conflicting iptables...")
-                    .build(),
-            );
-        }
-
-        if core::is_package_installed("gnu-netcat") {
-            commands = commands.then(
-                Command::builder()
-                    .aur()
-                    .args(&["-Rdd", "--noconfirm", "gnu-netcat"])
-                    .description("Removing conflicting gnu-netcat...")
-                    .build(),
-            );
-        }
+        // Resolve package conflicts safely before installing.
+        // iptables conflicts with iptables-nft (pulled by virt-manager-meta),
+        // gnu-netcat conflicts with openbsd-netcat. Only remove if the
+        // conflicting variant is actually present — skip gracefully otherwise.
+        commands = commands.then(
+            Command::builder()
+                .privileged()
+                .program("sh")
+                .args(&[
+                    "-c",
+                    "pacman -Qi iptables &>/dev/null && \
+                     ! pacman -Qi iptables-nft &>/dev/null && \
+                     pacman -Rdd --noconfirm iptables || true; \
+                     pacman -Qi gnu-netcat &>/dev/null && \
+                     pacman -Rdd --noconfirm gnu-netcat || true",
+                ])
+                .description("Resolving package conflicts if needed...")
+                .build(),
+        );
 
         commands = commands.then(
             Command::builder()
