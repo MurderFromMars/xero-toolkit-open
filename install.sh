@@ -78,30 +78,6 @@ fi
 
 print_success "Dependencies satisfied"
 
-# Patch the XeroLinux check
-print_status "Patching XeroLinux distribution check..."
-
-SYSTEM_CHECK_FILE="$SCRIPT_DIR/gui/src/core/system_check.rs"
-
-if [ ! -f "$SYSTEM_CHECK_FILE" ]; then
-    die "Could not find system_check.rs at $SYSTEM_CHECK_FILE"
-fi
-
-# Check if already patched
-if grep -q "// PATCHED: Removed XeroLinux check" "$SYSTEM_CHECK_FILE"; then
-    print_success "Already patched"
-else
-    # Create backup
-    cp "$SYSTEM_CHECK_FILE" "$SYSTEM_CHECK_FILE.bak"
-    
-    # Replace the check_system_requirements function to skip XeroLinux check
-    if sed -i 's/if !check_xerolinux_distribution() {/if false \&\& !check_xerolinux_distribution() { \/\/ PATCHED: Removed XeroLinux check/g' "$SYSTEM_CHECK_FILE"; then
-        print_success "Patched system_check.rs"
-    else
-        die "Failed to patch system_check.rs"
-    fi
-fi
-
 # Build the project
 print_status "Building Xero Toolkit (this may take a few minutes)..."
 cd "$SCRIPT_DIR"
