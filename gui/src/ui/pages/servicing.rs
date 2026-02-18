@@ -5,7 +5,6 @@ use crate::core;
 use crate::ui::dialogs::terminal;
 use crate::ui::task_runner::{self, Command, CommandSequence};
 use crate::ui::utils::extract_widget;
-use gtk4::prelude::*;
 use gtk4::{
     ApplicationWindow, Box as GtkBox, Builder, CheckButton, Frame, Label, Orientation,
     ScrolledWindow, Separator,
