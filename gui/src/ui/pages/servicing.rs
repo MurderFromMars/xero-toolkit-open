@@ -1,5 +1,6 @@
 //! Servicing and system tweaks page button handlers.
 
+use adw::prelude::*;
 use crate::core;
 use crate::ui::dialogs::terminal;
 use crate::ui::task_runner::{self, Command, CommandSequence};
