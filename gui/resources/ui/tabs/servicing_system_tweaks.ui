@@ -55,7 +55,7 @@
         <property name="valign">center</property>
         <property name="vexpand">true</property>
         <property name="margin-top">32</property>
-        <!-- Row 1: Clear Pacman, Unlock Pacman, Plasma X11 -->
+        <!-- Row 1: Clear Pacman, Unlock Pacman, Remove Orphans -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
@@ -78,8 +78,8 @@
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_plasma_x11">
-                <property name="label">Plasma X11 Session</property>
+              <object class="GtkButton" id="btn_remove_orphans">
+                <property name="label">Remove Orphans</property>
                 <property name="width-request">200</property>
                 <property name="height-request">50</property>
                 <property name="css-classes">suggested-action pill</property>
@@ -87,12 +87,20 @@
             </child>
           </object>
         </child>
-        <!-- Row 2: VM Guest Utils, WayDroid Guide, Fix GPGME -->
+        <!-- Row 2: Plasma X11, Pacman DB Fix, WayDroid Guide -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
             <property name="spacing">16</property>
             <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_plasma_x11">
+                <property name="label">Plasma X11 Session</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
             <child>
               <object class="GtkButton" id="btn_pacman_db_fix">
                 <property name="label">Pacman DB Fix</property>
@@ -109,6 +117,14 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
+          </object>
+        </child>
+        <!-- Row 3: Fix GPGME, Fix Arch Keyring, Update Mirrorlist -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_fix_gpgme">
                 <property name="label">Fix GPGME Database</property>
@@ -117,14 +133,6 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
-          </object>
-        </child>
-        <!-- Row 3: Fix Arch Keyring, Update Mirrorlist -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_fix_arch_keyring">
                 <property name="label">Fix Arch Keyring</property>
@@ -141,6 +149,14 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
+          </object>
+        </child>
+        <!-- Row 4: Parallel Downloads -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_parallel_downloads">
                 <property name="label">Change Parallel Downloads</property>
@@ -149,14 +165,6 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
-          </object>
-        </child>
-        <!-- Row 4: Third-Party Repos -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_cachyos_repos">
                 <property name="label">Install CachyOS Repos</property>
@@ -173,6 +181,14 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
+          </object>
+        </child>
+        <!-- Row 5: XeroLinux Repo -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_xero_repo">
                 <property name="label">Add XeroLinux Repo</property>
@@ -183,7 +199,7 @@
             </child>
           </object>
         </child>
-        <!-- Row 5: xPackageManager -->
+        <!-- Row 6: xPackageManager -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
