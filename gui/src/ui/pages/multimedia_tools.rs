@@ -4,6 +4,7 @@
 //! - OBS-Studio with plugins and V4L2
 //! - Kdenlive video editor
 //! - Jellyfin server installation
+//! - GPU Screen Recorder GTK (repo-first, AUR fallback)
 
 use crate::core;
 use crate::ui::dialogs::selection::{
@@ -20,6 +21,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_obs_studio_aio(page_builder, window);
     setup_kdenlive(page_builder, window);
     setup_jellyfin(page_builder, window);
+    setup_gpu_screen_recorder(page_builder, window);
 }
 
 fn setup_obs_studio_aio(page_builder: &Builder, window: &ApplicationWindow) {
@@ -252,5 +254,38 @@ fn setup_jellyfin(page_builder: &Builder, window: &ApplicationWindow) {
             .build();
 
         task_runner::run(window.upcast_ref(), commands, "Jellyfin Server Setup");
+    });
+}
+
+fn setup_gpu_screen_recorder(page_builder: &Builder, window: &ApplicationWindow) {
+    let btn_gpu_screen_recorder =
+        extract_widget::<gtk4::Button>(page_builder, "btn_gpu_screen_recorder");
+    let window = window.clone();
+    btn_gpu_screen_recorder.connect_clicked(move |_| {
+        info!("Multimedia tools: GPU Screen Recorder button clicked");
+
+        // Check official repos first; fall back to AUR if unavailable.
+        let in_repos = core::is_package_in_repos("gpu-screen-recorder-gtk");
+
+        let install_cmd = if in_repos {
+            info!("gpu-screen-recorder-gtk found in official repos – installing via pacman");
+            Command::builder()
+                .privileged()
+                .program("pacman")
+                .args(&["-S", "--noconfirm", "--needed", "gpu-screen-recorder-gtk"])
+                .description("Installing GPU Screen Recorder GTK from official repos...")
+                .build()
+        } else {
+            info!("gpu-screen-recorder-gtk not in official repos – installing via AUR");
+            Command::builder()
+                .aur()
+                .args(&["-S", "--noconfirm", "--needed", "gpu-screen-recorder-gtk"])
+                .description("Installing GPU Screen Recorder GTK from AUR...")
+                .build()
+        };
+
+        let commands = CommandSequence::new().then(install_cmd).build();
+
+        task_runner::run(window.upcast_ref(), commands, "GPU Screen Recorder Setup");
     });
 }
