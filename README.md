@@ -131,19 +131,6 @@ Installed automatically by `install.sh`:
 
 ---
 
-## Screenshots
-
-![Main Page](screenshots/main_page.png)
-*Main application window*
-
-![Installation Dialog](screenshots/installing_dialog.png)
-*Real-time terminal output during package operations*
-
-![Selection Dialog](screenshots/selection_dialog.png)
-*Multi-select interface for tool installation*
-
----
-
 ## License
 
 GNU General Public License v3.0 — see [LICENSE](LICENSE).
