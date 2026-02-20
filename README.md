@@ -8,7 +8,7 @@ Built in Rust. Ships with 11 system utility scripts. Adds an entire new feature 
 
 ---
 
-## What Changed — And How Much
+## What Changed, And How Much
 
 This is not a cosmetic fork. Here is what the numbers look like:
 
