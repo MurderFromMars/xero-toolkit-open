@@ -287,15 +287,4 @@ fn setup_external_links(builder: &Builder) {
         let _ = core::package::open_url(config::links::GITHUB);
     });
 
-    let btn_website = extract_widget::<Button>(builder, "link_website");
-    btn_website.connect_clicked(|_| {
-        info!("Website link clicked");
-        let _ = core::package::open_url(config::links::WEBSITE);
-    });
-
-    let btn_donate = extract_widget::<Button>(builder, "link_donate");
-    btn_donate.connect_clicked(|_| {
-        info!("Donate link clicked");
-        let _ = core::package::open_url(config::links::DONATE);
-    });
 }
