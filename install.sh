@@ -55,10 +55,10 @@ install_aur_helper() {
 
     print_status "Installing $helper from the AUR..."
 
-    # Ensure git is available
-    if ! command -v git &> /dev/null; then
-        print_status "git not found — installing..."
-        sudo pacman -S --needed --noconfirm git || die "Failed to install git"
+    # Ensure base-devel and git are available (required for makepkg)
+    if ! pacman -Qi base-devel &> /dev/null || ! command -v git &> /dev/null; then
+        print_status "Installing required build dependencies (base-devel, git)..."
+        sudo pacman -S --needed --noconfirm base-devel git || die "Failed to install build dependencies"
     fi
 
     local tmp_dir
@@ -191,6 +191,13 @@ sudo install -Dm644 "gui/resources/icons/scalable/apps/xero-toolkit.png" \
 # Update icon cache
 print_status "Updating icon cache..."
 sudo gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor 2>/dev/null || true
+
+# Store current commit hash for update checking
+if command -v git &> /dev/null && git -C "$SCRIPT_DIR" rev-parse HEAD &> /dev/null; then
+    COMMIT_HASH=$(git -C "$SCRIPT_DIR" rev-parse HEAD)
+    echo "$COMMIT_HASH" | sudo tee /opt/xero-toolkit/.commit > /dev/null
+    print_success "Stored commit hash: ${COMMIT_HASH:0:12}"
+fi
 
 # Install extra scripts
 EXTRA_SCRIPTS_DIR="$SCRIPT_DIR/extra-scripts/usr/local/bin"
