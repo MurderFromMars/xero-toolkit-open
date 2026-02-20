@@ -18,8 +18,7 @@ pub mod links {
     pub const DISCORD: &str = "https://discord.gg/2pdhYusbKV";
     pub const YOUTUBE: &str = "https://www.youtube.com/@MurderFromMars";
     pub const GITHUB: &str = "https://github.com/MurderFromMars";
-    pub const WEBSITE: &str = "https://xerolinux.xyz/";
-    pub const DONATE: &str = "https://ko-fi.com/xerolinux";
+
 }
 
 /// Binary paths for system executables.
