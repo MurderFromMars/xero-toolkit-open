@@ -2,7 +2,7 @@
 
 **The Xero Toolkit, unchained.** A GTK4/libadwaita system management application for *any* Arch-based distribution, not just one.
 
-Built in Rust. Ships with 11 system utility scripts. Adds an entire new feature page. Rewrites two others from the ground up. Strips out every distribution lock. And it does all of this while fixing the upstream codebase's ineffecient architecture.
+Built in Rust. Ships with 11 system utility scripts.. Rewrites two feature pages from the ground up. Strips out every distribution lock. And it does all of this while fixing the upstream codebase's ineffecient architecture.
 
 > **Origin:** This is a hard fork of the [XeroLinux Toolkit](https://github.com/synsejse/xero-toolkit) by Synse and DarkZero. The original is a competent tool, if you happen to be running XeroLinux. If you aren't, it refuses to start. CyberXero removes that restriction at the source level, then goes dramatically further: rewriting entire subsystems, adding several features the original never shipped, and delivering a toolkit that treats every Arch-based system as a first class citizen.
 
