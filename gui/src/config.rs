@@ -18,7 +18,7 @@ pub mod links {
     pub const DISCORD: &str = "https://discord.gg/2pdhYusbKV";
     pub const YOUTUBE: &str = "https://www.youtube.com/@MurderFromMars";
     pub const GITHUB: &str = "https://github.com/MurderFromMars";
-
+    pub const TOOLKIT_REPO: &str = "https://github.com/MurderFromMars/CyberXero-Toolkit.git";
 }
 
 /// Binary paths for system executables.
