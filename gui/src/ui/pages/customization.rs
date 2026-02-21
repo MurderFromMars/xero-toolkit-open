@@ -193,7 +193,7 @@ fn setup_grub_theme(builder: &Builder, window: &ApplicationWindow) {
     button.connect_clicked(move |_| {
         info!("GRUB Theme button clicked");
 
-        let install_command = "cd /tmp && curl -fsSL 'https://xerolinux.xyz/script/grubs/xero-grubs.py' -o xero-grubs.py && python3 /tmp/xero-grubs.py &";
+        let install_command = "cd /tmp && curl -fsSL 'https://xerolinux.xyz/script/grubs/xero-grubs.py' -o xero-grubs.py && setsid -f python3 /tmp/xero-grubs.py > /dev/null 2>&1 < /dev/null";
 
         terminal::show_terminal_dialog(
             window.upcast_ref(),
