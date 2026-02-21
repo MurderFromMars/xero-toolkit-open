@@ -32,7 +32,7 @@ options=('!emptydirs' '!lto')
 build() {
   cd "${startdir}/.."
 
-  cargo build --release --locked
+  cargo build --release --offline
 }
 
 package() {
