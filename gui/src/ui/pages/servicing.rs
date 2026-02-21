@@ -1140,7 +1140,7 @@ fn setup_update_toolkit(page_builder: &Builder, window: &ApplicationWindow) {
 
             let repo_url = config::links::TOOLKIT_REPO;
             let commit_store_cmd = format!(
-                "echo '{}' | sudo tee /opt/xero-toolkit/.commit > /dev/null",
+                "echo '{}' | tee /opt/xero-toolkit/.commit > /dev/null",
                 remote_hash_clone
             );
 
