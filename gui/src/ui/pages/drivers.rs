@@ -4,7 +4,7 @@
 //! - Tailscale VPN
 //! - ASUS ROG laptop tools
 //! - OpenRazer drivers
-//! - Fingerprint GUI Tool
+//! - Cooler Control daemon tools
 
 use crate::core;
 use crate::ui::dialogs::selection::{
@@ -22,7 +22,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_tailscale(page_builder, window);
     setup_asus_rog(page_builder, window);
     setup_openrazer(page_builder, window);
-    setup_fingerprint(page_builder, window);
+    setup_cooler_control(page_builder, window);
     setup_zenergy(page_builder, window);
     setup_nvidia_legacy(page_builder, window);
     setup_rocm(page_builder, window);
@@ -128,6 +128,42 @@ fn setup_openrazer(builder: &Builder, window: &ApplicationWindow) {
     });
 }
 
+fn setup_cooler_control(builder: &Builder, window: &ApplicationWindow) {
+    let button = extract_widget::<Button>(builder, "btn_cooler_control");
+    let window = window.clone();
+
+    button.connect_clicked(move |_| {
+        info!("Cooler Control button clicked");
+
+        let commands = CommandSequence::new()
+            .then(
+                Command::builder()
+                    .aur()
+                    .args(&[
+                        "-S",
+                        "--noconfirm",
+                        "--needed",
+                        "coolercontrol",
+                        "coolercontrold",
+                        "liquidctl",
+                    ])
+                    .description("Installing Cooler Control daemon and liquidctl...")
+                    .build(),
+            )
+            .then(
+                Command::builder()
+                    .privileged()
+                    .program("systemctl")
+                    .args(&["enable", "--now", "coolercontrold.service"])
+                    .description("Enabling Cooler Control daemon service...")
+                    .build(),
+            )
+            .build();
+
+        task_runner::run(window.upcast_ref(), commands, "Install Cooler Control");
+    });
+}
+
 /// Build commands for OpenRazer installation.
 fn build_openrazer_commands(selected_frontends: &[String]) -> CommandSequence {
     let user = crate::config::env::get().user.clone();
@@ -174,31 +210,6 @@ fn build_openrazer_commands(selected_frontends: &[String]) -> CommandSequence {
     }
 
     commands
-}
-
-fn setup_fingerprint(builder: &Builder, window: &ApplicationWindow) {
-    let button = extract_widget::<Button>(builder, "btn_fingerprint");
-    let window = window.clone();
-
-    button.connect_clicked(move |_| {
-        info!("Fingerprint GUI Tool button clicked");
-
-        let commands = CommandSequence::new()
-            .then(
-                Command::builder()
-                    .aur()
-                    .args(&["-S", "--noconfirm", "--needed", "xfprintd-gui"])
-                    .description("Installing Fingerprint GUI Tool...")
-                    .build(),
-            )
-            .build();
-
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Install Fingerprint GUI Tool",
-        );
-    });
 }
 
 fn setup_zenergy(builder: &Builder, window: &ApplicationWindow) {
