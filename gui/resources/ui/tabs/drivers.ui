@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
@@ -129,7 +130,7 @@
             </child>
           </object>
         </child>
-        <!-- Row 4: OpenRazer, Fingerprint GUI -->
+        <!-- Row 4: OpenRazer, Zenergy -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
@@ -144,25 +145,8 @@
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_fingerprint">
-                <property name="child">
-                  <object class="GtkBox">
-                    <property name="orientation">horizontal</property>
-                    <property name="spacing">8</property>
-                    <property name="halign">center</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="icon-name">xfprintd-gui</property>
-                        <property name="pixel-size">32</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label">Fingerprint GUI</property>
-                      </object>
-                    </child>
-                  </object>
-                </property>
+              <object class="GtkButton" id="btn_zenergy">
+                <property name="label">Zenergy Driver</property>
                 <property name="width-request">200</property>
                 <property name="height-request">50</property>
                 <property name="css-classes">suggested-action pill</property>
@@ -170,15 +154,15 @@
             </child>
           </object>
         </child>
-        <!-- Row 5: Zenergy -->
+        <!-- Row 5: Cooler Control -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
             <property name="spacing">16</property>
             <property name="halign">center</property>
             <child>
-              <object class="GtkButton" id="btn_zenergy">
-                <property name="label">Zenergy Driver</property>
+              <object class="GtkButton" id="btn_cooler_control">
+                <property name="label">Cooler Control</property>
                 <property name="width-request">200</property>
                 <property name="height-request">50</property>
                 <property name="css-classes">suggested-action pill</property>
