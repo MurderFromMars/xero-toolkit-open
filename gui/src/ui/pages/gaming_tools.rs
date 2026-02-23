@@ -3,7 +3,7 @@
 //! Handles:
 //! - Gaming Meta installation (CachyOS meta or AUR fallback)
 //! - LACT GPU overclocking
-//! - Game launchers (Lutris, Heroic, Bottles)
+//! - Game launchers (Bottles)
 //! - Controller tools
 //! - Falcond gaming utility
 
@@ -17,8 +17,6 @@ use log::info;
 pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &ApplicationWindow) {
     setup_gaming_meta(page_builder, window);
     setup_lact_oc(page_builder, window);
-    setup_lutris(page_builder, window);
-    setup_heroic(page_builder, window);
     setup_bottles(page_builder, window);
     setup_controller(page_builder, window);
     setup_falcond(page_builder, window);
@@ -99,66 +97,6 @@ fn setup_lact_oc(builder: &Builder, window: &ApplicationWindow) {
             .build();
 
         task_runner::run(window.upcast_ref(), commands, "LACT GPU Tools");
-    });
-}
-
-fn setup_lutris(builder: &Builder, window: &ApplicationWindow) {
-    let button = extract_widget::<Button>(builder, "btn_lutris");
-    let window = window.clone();
-
-    button.connect_clicked(move |_| {
-        info!("Lutris button clicked");
-
-        let commands = CommandSequence::new()
-            .then(
-                Command::builder()
-                    .normal()
-                    .program("flatpak")
-                    .args(&[
-                        "install",
-                        "-y",
-                        "net.lutris.Lutris",
-                        "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
-                        "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
-                    ])
-                    .description("Installing Lutris and Vulkan layers...")
-                    .build(),
-            )
-            .build();
-
-        task_runner::run(window.upcast_ref(), commands, "Lutris Installation");
-    });
-}
-
-fn setup_heroic(builder: &Builder, window: &ApplicationWindow) {
-    let button = extract_widget::<Button>(builder, "btn_heroic");
-    let window = window.clone();
-
-    button.connect_clicked(move |_| {
-        info!("Heroic button clicked");
-
-        let commands = CommandSequence::new()
-            .then(
-                Command::builder()
-                    .normal()
-                    .program("flatpak")
-                    .args(&[
-                        "install",
-                        "-y",
-                        "com.heroicgameslauncher.hgl",
-                        "org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/25.08",
-                        "org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08",
-                    ])
-                    .description("Installing Heroic Games Launcher...")
-                    .build(),
-            )
-            .build();
-
-        task_runner::run(
-            window.upcast_ref(),
-            commands,
-            "Heroic Launcher Installation",
-        );
     });
 }
 
