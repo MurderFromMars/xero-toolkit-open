@@ -55,15 +55,15 @@
         <property name="valign">center</property>
         <property name="vexpand">true</property>
         <property name="margin-top">32</property>
-        <!-- Row 1: Steam AiO, LACT OC -->
+        <!-- Row 1: Gaming Meta, LACT OC -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
             <property name="spacing">16</property>
             <property name="halign">center</property>
             <child>
-              <object class="GtkButton" id="btn_steam_aio">
-                <property name="label">Steam AiO</property>
+              <object class="GtkButton" id="btn_gaming_meta">
+                <property name="label">Gaming Meta</property>
                 <property name="width-request">200</property>
                 <property name="height-request">50</property>
                 <property name="css-classes">suggested-action pill</property>
@@ -79,28 +79,12 @@
             </child>
           </object>
         </child>
-        <!-- Row 2: Lutris, Heroic, Bottles -->
+        <!-- Row 2: Bottles, Controller Tools -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
             <property name="spacing">16</property>
             <property name="halign">center</property>
-            <child>
-              <object class="GtkButton" id="btn_lutris">
-                <property name="label">Lutris</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_heroic">
-                <property name="label">Heroic</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
             <child>
               <object class="GtkButton" id="btn_bottles">
                 <property name="label">Bottles</property>
@@ -109,14 +93,6 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
-          </object>
-        </child>
-        <!-- Row 3: Controller Tools, Falcond -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_controller">
                 <property name="label">Controller Tools</property>
@@ -125,6 +101,14 @@
                 <property name="css-classes">suggested-action pill</property>
               </object>
             </child>
+          </object>
+        </child>
+        <!-- Row 3: Falcond -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_falcond">
                 <property name="label">Falcond</property>
