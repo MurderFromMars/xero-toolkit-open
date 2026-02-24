@@ -5,7 +5,7 @@ use crate::config;
 use crate::core;
 use crate::ui::dialogs::terminal;
 use crate::ui::task_runner::{self, Command, CommandSequence};
-use crate::ui::utils::extract_widget;
+use crate::ui::utils::{extract_widget, is_package_installed, is_service_enabled, is_user_service_enabled};
 use gtk4::{
     ApplicationWindow, Box as GtkBox, Builder, CheckButton, Frame, Label, Orientation,
     ScrolledWindow, Separator,
@@ -30,6 +30,7 @@ pub fn setup_handlers(page_builder: &Builder, _main_builder: &Builder, window: &
     setup_xero_repo(page_builder, window);
     setup_xpackagemanager(page_builder, window);
     setup_update_toolkit(page_builder, window);
+    setup_optimization_services(page_builder, window);
 }
 
 fn setup_clr_pacman(page_builder: &Builder, window: &ApplicationWindow) {
@@ -1258,4 +1259,151 @@ fn setup_update_toolkit(page_builder: &Builder, window: &ApplicationWindow) {
         dialog.set_content(Some(&toolbar));
         dialog.present();
     });
+}
+
+/// Service definition for the optimization toggles.
+struct ServiceDef {
+    switch_id: &'static str,
+    package: Option<&'static str>,
+    service: &'static str,
+    is_user: bool,
+}
+
+const OPTIMIZATION_SERVICES: &[ServiceDef] = &[
+    ServiceDef {
+        switch_id: "switch_psd",
+        package: Some("profile-sync-daemon"),
+        service: "psd.service",
+        is_user: true,
+    },
+    ServiceDef {
+        switch_id: "switch_systemd_oomd",
+        package: None, // built into systemd
+        service: "systemd-oomd.service",
+        is_user: false,
+    },
+    ServiceDef {
+        switch_id: "switch_bpftune",
+        package: Some("bpftune"),
+        service: "bpftune.service",
+        is_user: false,
+    },
+    ServiceDef {
+        switch_id: "switch_ananicy_cpp",
+        package: Some("ananicy-cpp"),
+        service: "ananicy-cpp.service",
+        is_user: false,
+    },
+];
+
+fn setup_optimization_services(page_builder: &Builder, window: &ApplicationWindow) {
+    for svc in OPTIMIZATION_SERVICES {
+        let switch = extract_widget::<adw::SwitchRow>(page_builder, svc.switch_id);
+
+        // Set initial state based on whether the service is currently enabled
+        let enabled = if svc.is_user {
+            is_user_service_enabled(svc.service)
+        } else {
+            is_service_enabled(svc.service)
+        };
+        // Use a guard flag to prevent the initial set from triggering the handler
+        let guard = Rc::new(RefCell::new(true));
+        switch.set_active(enabled);
+        *guard.borrow_mut() = false;
+
+        let window = window.clone();
+        let service = svc.service;
+        let package = svc.package;
+        let is_user = svc.is_user;
+        let switch_id = svc.switch_id;
+
+        switch.connect_active_notify(move |sw| {
+            if *guard.borrow() {
+                return;
+            }
+            let enabling = sw.is_active();
+            info!(
+                "Optimization service toggle: {} -> {} (service={})",
+                switch_id,
+                if enabling { "enable" } else { "disable" },
+                service,
+            );
+
+            if enabling {
+                let mut seq = CommandSequence::new();
+
+                // Install the package first if it's not already present
+                if let Some(pkg) = package {
+                    if !is_package_installed(pkg) {
+                        seq = seq.then(
+                            Command::builder()
+                                .privileged()
+                                .program("pacman")
+                                .args(&["-S", "--noconfirm", "--needed", pkg])
+                                .description(&format!("Installing {}...", pkg))
+                                .build(),
+                        );
+                    }
+                }
+
+                // Enable and start the service
+                if is_user {
+                    seq = seq.then(
+                        Command::builder()
+                            .normal()
+                            .program("systemctl")
+                            .args(&["--user", "enable", "--now", service])
+                            .description(&format!("Enabling user service {}...", service))
+                            .build(),
+                    );
+                } else {
+                    seq = seq.then(
+                        Command::builder()
+                            .privileged()
+                            .program("systemctl")
+                            .args(&["enable", "--now", service])
+                            .description(&format!("Enabling {}...", service))
+                            .build(),
+                    );
+                }
+
+                task_runner::run(
+                    window.upcast_ref(),
+                    seq.build(),
+                    &format!("Enable {}", service),
+                );
+            } else {
+                // Disable and stop the service
+                let seq = if is_user {
+                    CommandSequence::new()
+                        .then(
+                            Command::builder()
+                                .normal()
+                                .program("systemctl")
+                                .args(&["--user", "disable", "--now", service])
+                                .description(&format!("Disabling user service {}...", service))
+                                .build(),
+                        )
+                        .build()
+                } else {
+                    CommandSequence::new()
+                        .then(
+                            Command::builder()
+                                .privileged()
+                                .program("systemctl")
+                                .args(&["disable", "--now", service])
+                                .description(&format!("Disabling {}...", service))
+                                .build(),
+                        )
+                        .build()
+                };
+
+                task_runner::run(
+                    window.upcast_ref(),
+                    seq,
+                    &format!("Disable {}", service),
+                );
+            }
+        });
+    }
 }
