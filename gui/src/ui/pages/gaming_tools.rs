@@ -1,7 +1,7 @@
 //! Gaming tools page button handlers.
 //!
 //! Handles:
-//! - Gaming Meta installation (CachyOS meta or AUR fallback)
+//! - Gaming suite installation (CachyOS meta or curated package list fallback)
 //! - LACT GPU overclocking
 //! - Game launchers (Bottles)
 //! - Controller tools
@@ -27,13 +27,13 @@ fn setup_gaming_meta(builder: &Builder, window: &ApplicationWindow) {
     let window = window.clone();
 
     button.connect_clicked(move |_| {
-        info!("Gaming Meta button clicked");
+        info!("Gaming Suite button clicked");
 
         let mut commands = CommandSequence::new();
 
         // Check if CachyOS gaming packages are available in repos
-        let cachy_meta_available = crate::core::is_package_in_repos("cachy-gaming-meta");
-        let cachy_apps_available = crate::core::is_package_in_repos("cachy-gaming-applications");
+        let cachy_meta_available = crate::core::is_package_in_repos("cachyos-gaming-meta");
+        let cachy_apps_available = crate::core::is_package_in_repos("cachyos-gaming-applications");
 
         if cachy_meta_available && cachy_apps_available {
             info!("CachyOS gaming packages found in repos, installing from repos");
@@ -45,14 +45,76 @@ fn setup_gaming_meta(builder: &Builder, window: &ApplicationWindow) {
                         "-S",
                         "--noconfirm",
                         "--needed",
-                        "cachy-gaming-meta",
-                        "cachy-gaming-applications",
+                        "cachyos-gaming-meta",
+                        "cachyos-gaming-applications",
                     ])
                     .description("Installing CachyOS gaming meta packages...")
                     .build(),
             );
         } else {
-            info!("CachyOS gaming packages not in repos, falling back to arch-gaming-meta from AUR");
+            info!("CachyOS gaming packages not in repos, installing curated gaming suite");
+
+            // -- Step 1: Multilib runtime libraries & Wine/Proton stack --
+            commands = commands.then(
+                Command::builder()
+                    .privileged()
+                    .program("pacman")
+                    .args(&[
+                        "-S",
+                        "--noconfirm",
+                        "--needed",
+                        // Audio
+                        "alsa-plugins",
+                        "lib32-alsa-plugins",
+                        // Media/codec libs
+                        "giflib",
+                        "lib32-giflib",
+                        "gst-plugins-base-libs",
+                        "lib32-gst-plugins-base-libs",
+                        "libjpeg-turbo",
+                        "lib32-libjpeg-turbo",
+                        "mpg123",
+                        "lib32-mpg123",
+                        "libxslt",
+                        "openal",
+                        "lib32-openal",
+                        // Video acceleration
+                        "libva",
+                        "lib32-libva",
+                        // OpenCL
+                        "opencl-icd-loader",
+                        "lib32-opencl-icd-loader",
+                        // Vulkan
+                        "vulkan-icd-loader",
+                        "lib32-vulkan-icd-loader",
+                        "vulkan-tools",
+                        // GTK (needed by some launchers/games)
+                        "lib32-gtk3",
+                        // GLFW
+                        "glfw",
+                        // Fonts (required by many Windows games)
+                        "ttf-liberation",
+                        "wqy-zenhei",
+                        // Wine & Proton tools
+                        "wine-staging",
+                        "winetricks",
+                        "protontricks",
+                        "umu-launcher",
+                        // Gaming tools & launchers
+                        "steam",
+                        "gamescope",
+                        "gamemode",
+                        "lib32-gamemode",
+                        "mangohud",
+                        "lib32-mangohud",
+                        "goverlay",
+                        "lutris",
+                    ])
+                    .description("Installing gaming libraries, Wine, and tools from repos...")
+                    .build(),
+            );
+
+            // -- Step 2: AUR packages --
             commands = commands.then(
                 Command::builder()
                     .aur()
@@ -60,14 +122,27 @@ fn setup_gaming_meta(builder: &Builder, window: &ApplicationWindow) {
                         "-S",
                         "--noconfirm",
                         "--needed",
-                        "arch-gaming-meta",
+                        "heroic-games-launcher-bin",
                     ])
-                    .description("Installing Arch Gaming Meta from AUR...")
+                    .description("Installing Heroic Games Launcher from AUR...")
+                    .build(),
+            );
+
+            // -- Step 3: Splitlock mitigation disable (gaming perf optimization) --
+            commands = commands.then(
+                Command::builder()
+                    .privileged()
+                    .program("sh")
+                    .args(&[
+                        "-c",
+                        "echo 'kernel.split_lock_mitigate=0' > /etc/sysctl.d/99-splitlock.conf && sysctl --system",
+                    ])
+                    .description("Disabling split-lock mitigation for gaming performance...")
                     .build(),
             );
         }
 
-        task_runner::run(window.upcast_ref(), commands.build(), "Gaming Meta Installation");
+        task_runner::run(window.upcast_ref(), commands.build(), "Gaming Suite Installation");
     });
 }
 
