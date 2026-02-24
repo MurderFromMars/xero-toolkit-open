@@ -8,7 +8,7 @@ use crate::ui::task_runner::{self, Command, CommandSequence};
 use crate::ui::utils::{extract_widget, is_package_installed, is_service_enabled, is_user_service_enabled};
 use gtk4::{
     ApplicationWindow, Box as GtkBox, Builder, CheckButton, Frame, Label, Orientation,
-    ScrolledWindow, Separator,
+    ScrolledWindow, Separator, ToggleButton,
 };
 use log::info;
 use std::cell::RefCell;
@@ -1298,7 +1298,7 @@ const OPTIMIZATION_SERVICES: &[ServiceDef] = &[
 
 fn setup_optimization_services(page_builder: &Builder, window: &ApplicationWindow) {
     for svc in OPTIMIZATION_SERVICES {
-        let switch = extract_widget::<adw::SwitchRow>(page_builder, svc.switch_id);
+        let button = extract_widget::<ToggleButton>(page_builder, svc.switch_id);
 
         // Set initial state based on whether the service is currently enabled
         let enabled = if svc.is_user {
@@ -1308,7 +1308,7 @@ fn setup_optimization_services(page_builder: &Builder, window: &ApplicationWindo
         };
         // Use a guard flag to prevent the initial set from triggering the handler
         let guard = Rc::new(RefCell::new(true));
-        switch.set_active(enabled);
+        button.set_active(enabled);
         *guard.borrow_mut() = false;
 
         let window = window.clone();
@@ -1317,11 +1317,11 @@ fn setup_optimization_services(page_builder: &Builder, window: &ApplicationWindo
         let is_user = svc.is_user;
         let switch_id = svc.switch_id;
 
-        switch.connect_active_notify(move |sw| {
+        button.connect_toggled(move |btn| {
             if *guard.borrow() {
                 return;
             }
-            let enabling = sw.is_active();
+            let enabling = btn.is_active();
             info!(
                 "Optimization service toggle: {} -> {} (service={})",
                 switch_id,
