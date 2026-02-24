@@ -38,6 +38,22 @@ pub fn is_service_enabled(service: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// Check if a systemd user service is enabled.
+pub fn is_user_service_enabled(service: &str) -> bool {
+    run_command("systemctl", &["--user", "is-enabled", service])
+        .map(|s| s.to_lowercase().contains("enabled"))
+        .unwrap_or(false)
+}
+
+/// Check if a pacman package is installed.
+pub fn is_package_installed(package: &str) -> bool {
+    Command::new("pacman")
+        .args(["-Q", package])
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false)
+}
+
 /// Check if a path exists.
 pub fn path_exists(path: &str) -> bool {
     std::path::Path::new(path).exists()
