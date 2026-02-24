@@ -46,15 +46,22 @@
         </child>
       </object>
     </child>
-    <!-- Bottom Section: Buttons Layout (centered in remaining space) -->
+    <!-- Bottom Section: Scrollable content -->
     <child>
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <property name="spacing">16</property>
-        <property name="halign">center</property>
-        <property name="valign">center</property>
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar-policy">never</property>
+        <property name="vscrollbar-policy">automatic</property>
         <property name="vexpand">true</property>
-        <property name="margin-top">32</property>
+        <property name="hexpand">true</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <property name="valign">start</property>
+            <property name="vexpand">false</property>
+            <property name="margin-top">32</property>
+            <property name="margin-bottom">48</property>
         <!-- Row 1: Clear Pacman, Unlock Pacman, Remove Orphans -->
         <child>
           <object class="GtkBox">
@@ -279,6 +286,77 @@
             </child>
           </object>
         </child>
+        <!-- Optimization Services Section -->
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">16</property>
+            <property name="halign">center</property>
+            <property name="margin-top">16</property>
+            <child>
+              <object class="GtkSeparator">
+                <property name="orientation">horizontal</property>
+                <property name="hexpand">true</property>
+                <property name="width-request">600</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <property name="halign">center</property>
+            <property name="margin-top">8</property>
+            <property name="width-request">600</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Optimization Services</property>
+                <property name="css-classes">title-3</property>
+                <property name="halign">center</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Enable system optimization daemons. Packages will be installed automatically if not present.</property>
+                <property name="css-classes">dim-label</property>
+                <property name="halign">center</property>
+                <property name="wrap">true</property>
+                <property name="justify">center</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup" id="services_group">
+                <child>
+                  <object class="AdwSwitchRow" id="switch_psd">
+                    <property name="title">Profile Sync Daemon</property>
+                    <property name="subtitle">Symlinks browser profiles to tmpfs for faster I/O (user service)</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwSwitchRow" id="switch_systemd_oomd">
+                    <property name="title">systemd-oomd</property>
+                    <property name="subtitle">Userspace out-of-memory killer to prevent system freezes</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwSwitchRow" id="switch_bpftune">
+                    <property name="title">bpftune</property>
+                    <property name="subtitle">Auto-tunes kernel networking and memory parameters via BPF</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwSwitchRow" id="switch_ananicy_cpp">
+                    <property name="title">Ananicy C++</property>
+                    <property name="subtitle">Auto-applies CPU/IO priorities for better responsiveness</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        </object>
+      </child>
       </object>
     </child>
   </object>
