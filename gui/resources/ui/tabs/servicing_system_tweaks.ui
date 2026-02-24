@@ -5,48 +5,53 @@
   <object class="GtkBox" id="page_servicing_system_tweaks">
     <property name="orientation">vertical</property>
     <property name="spacing">0</property>
-    <property name="margin-top">48</property>
+    <property name="margin-top">32</property>
     <property name="margin-bottom">0</property>
-    <property name="margin-start">48</property>
-    <property name="margin-end">48</property>
+    <property name="margin-start">32</property>
+    <property name="margin-end">32</property>
     <property name="hexpand">true</property>
     <property name="vexpand">true</property>
-    <property name="halign">fill</property>
-    <property name="valign">fill</property>
-    <!-- Top Section: Header (pinned at top) -->
+
+    <!-- Compact horizontal header -->
     <child>
       <object class="GtkBox">
-        <property name="orientation">vertical</property>
+        <property name="orientation">horizontal</property>
         <property name="spacing">16</property>
         <property name="halign">center</property>
-        <property name="valign">start</property>
         <property name="vexpand">false</property>
+        <property name="margin-bottom">20</property>
         <child>
           <object class="GtkImage">
             <property name="icon-name">toolbox-symbolic</property>
-            <property name="pixel-size">96</property>
-            <property name="halign">center</property>
+            <property name="pixel-size">48</property>
+            <property name="valign">center</property>
           </object>
         </child>
         <child>
-          <object class="GtkLabel">
-            <property name="label">Servicing / System Tweaks</property>
-            <property name="css-classes">title-1</property>
-            <property name="halign">center</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="label">System maintenance, repair and performance tweaks</property>
-            <property name="css-classes">dim-label</property>
-            <property name="halign">center</property>
-            <property name="wrap">true</property>
-            <property name="justify">center</property>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">2</property>
+            <property name="valign">center</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Servicing / System Tweaks</property>
+                <property name="css-classes">title-2</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">System maintenance, repair and performance tweaks</property>
+                <property name="css-classes">dim-label</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
     </child>
-    <!-- Bottom Section: Scrollable content -->
+
+    <!-- Scrollable content -->
     <child>
       <object class="GtkScrolledWindow">
         <property name="hscrollbar-policy">never</property>
@@ -56,215 +61,277 @@
         <child>
           <object class="GtkBox">
             <property name="orientation">vertical</property>
-            <property name="spacing">16</property>
+            <property name="spacing">6</property>
             <property name="halign">center</property>
             <property name="valign">start</property>
-            <property name="vexpand">false</property>
-            <property name="margin-top">32</property>
+            <property name="margin-top">4</property>
             <property name="margin-bottom">48</property>
-        <!-- Row 1: Clear Pacman, Unlock Pacman, Remove Orphans -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
+            <property name="width-request">680</property>
+
+            <!-- SECTION: Maintenance -->
             <child>
-              <object class="GtkButton" id="btn_clr_pacman">
-                <property name="label">Clear Pacman Cache</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkLabel">
+                <property name="label">Maintenance</property>
+                <property name="css-classes">svc-section-label</property>
+                <property name="halign">start</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">4</property>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_unlock_pacman">
-                <property name="label">Unlock Pacman DB</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkGrid">
+                <property name="column-spacing">8</property>
+                <property name="row-spacing">8</property>
+                <property name="column-homogeneous">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkButton" id="btn_clr_pacman">
+                    <property name="label">Clear Pacman Cache</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">0</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_unlock_pacman">
+                    <property name="label">Unlock Pacman DB</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">1</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_remove_orphans">
+                    <property name="label">Remove Orphans</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">2</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <!-- SECTION: Repair -->
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Repair</property>
+                <property name="css-classes">svc-section-label</property>
+                <property name="halign">start</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">4</property>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_remove_orphans">
-                <property name="label">Remove Orphans</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkGrid">
+                <property name="column-spacing">8</property>
+                <property name="row-spacing">8</property>
+                <property name="column-homogeneous">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkButton" id="btn_fix_gpgme">
+                    <property name="label">Fix GPGME Database</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">0</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_fix_arch_keyring">
+                    <property name="label">Fix Arch Keyring</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">1</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_pacman_db_fix">
+                    <property name="label">Pacman DB Fix</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">2</property><property name="row">0</property></layout>
+                  </object>
+                </child>
               </object>
             </child>
-          </object>
-        </child>
-        <!-- Row 2: Plasma X11, Pacman DB Fix, WayDroid Guide -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
+
+            <!-- SECTION: Mirrors and Downloads -->
             <child>
-              <object class="GtkButton" id="btn_plasma_x11">
-                <property name="label">Plasma X11 Session</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_pacman_db_fix">
-                <property name="label">Pacman DB Fix</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_waydroid_guide">
-                <property name="label">WayDroid Guide</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <!-- Row 3: Fix GPGME, Fix Arch Keyring, Update Mirrorlist -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
-            <child>
-              <object class="GtkButton" id="btn_fix_gpgme">
-                <property name="label">Fix GPGME Database</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkLabel">
+                <property name="label">Mirrors &amp; Downloads</property>
+                <property name="css-classes">svc-section-label</property>
+                <property name="halign">start</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">4</property>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_fix_arch_keyring">
-                <property name="label">Fix Arch Keyring</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkGrid">
+                <property name="column-spacing">8</property>
+                <property name="row-spacing">8</property>
+                <property name="column-homogeneous">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkButton" id="btn_update_mirrorlist">
+                    <property name="label">Update Mirrorlist</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">0</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_parallel_downloads">
+                    <property name="label">Parallel Downloads</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">1</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <layout><property name="column">2</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <!-- SECTION: Repositories -->
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Repositories</property>
+                <property name="css-classes">svc-section-label</property>
+                <property name="halign">start</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">4</property>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_update_mirrorlist">
-                <property name="label">Update Mirrorlist</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkGrid">
+                <property name="column-spacing">8</property>
+                <property name="row-spacing">8</property>
+                <property name="column-homogeneous">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkButton" id="btn_cachyos_repos">
+                    <property name="label">Install CachyOS Repos</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">0</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_chaotic_aur">
+                    <property name="label">Install Chaotic-AUR</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">1</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_xero_repo">
+                    <property name="label">Add XeroLinux Repo</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">2</property><property name="row">0</property></layout>
+                  </object>
+                </child>
               </object>
             </child>
-          </object>
-        </child>
-        <!-- Row 4: Parallel Downloads -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
+
+            <!-- SECTION: Tools -->
             <child>
-              <object class="GtkButton" id="btn_parallel_downloads">
-                <property name="label">Change Parallel Downloads</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkLabel">
+                <property name="label">Tools</property>
+                <property name="css-classes">svc-section-label</property>
+                <property name="halign">start</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">4</property>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_cachyos_repos">
-                <property name="label">Install CachyOS Repos</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+              <object class="GtkGrid">
+                <property name="column-spacing">8</property>
+                <property name="row-spacing">8</property>
+                <property name="column-homogeneous">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkButton" id="btn_plasma_x11">
+                    <property name="label">Plasma X11 Session</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">0</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_waydroid_guide">
+                    <property name="label">WayDroid Guide</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">suggested-action svc-btn</property>
+                    <layout><property name="column">1</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <layout><property name="column">2</property><property name="row">0</property></layout>
+                  </object>
+                </child>
               </object>
             </child>
-            <child>
-              <object class="GtkButton" id="btn_chaotic_aur">
-                <property name="label">Install Chaotic-AUR</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <!-- Row 5: XeroLinux Repo -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
-            <child>
-              <object class="GtkButton" id="btn_xero_repo">
-                <property name="label">Add XeroLinux Repo</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <!-- Row 6: xPackageManager -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
-            <child>
-              <object class="GtkButton" id="btn_xpackagemanager">
-                <property name="label">Install</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">pill</property>
-              </object>
-            </child>
+
+            <!-- SECTION: xPackageManager -->
             <child>
               <object class="GtkLabel">
                 <property name="label">xPackageManager</property>
-                <property name="css-classes">heading</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
+                <property name="css-classes">svc-section-label</property>
+                <property name="halign">start</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">4</property>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_xpackagemanager_uninstall">
-                <property name="label">Uninstall</property>
-                <property name="width-request">200</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">destructive-action pill</property>
-                <property name="visible">false</property>
+              <object class="GtkGrid">
+                <property name="column-spacing">8</property>
+                <property name="column-homogeneous">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkButton" id="btn_xpackagemanager">
+                    <property name="label">Install</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">svc-btn</property>
+                    <layout><property name="column">0</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_xpackagemanager_uninstall">
+                    <property name="label">Uninstall</property>
+                    <property name="height-request">42</property>
+                    <property name="css-classes">destructive-action svc-btn</property>
+                    <property name="visible">false</property>
+                    <layout><property name="column">1</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <layout><property name="column">2</property><property name="row">0</property></layout>
+                  </object>
+                </child>
               </object>
             </child>
-          </object>
-        </child>
-        <!-- Row 7: Update Toolkit -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
-            <property name="margin-top">8</property>
+
+            <!-- Update Toolkit -->
             <child>
               <object class="GtkSeparator">
                 <property name="orientation">horizontal</property>
                 <property name="hexpand">true</property>
-                <property name="width-request">600</property>
+                <property name="margin-top">14</property>
+                <property name="margin-bottom">14</property>
               </object>
             </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
             <child>
               <object class="GtkButton" id="btn_update_toolkit">
-                <property name="width-request">250</property>
-                <property name="height-request">50</property>
-                <property name="css-classes">suggested-action pill</property>
+                <property name="height-request">46</property>
+                <property name="css-classes">suggested-action</property>
+                <property name="halign">center</property>
+                <property name="width-request">260</property>
                 <child>
                   <object class="GtkBox">
                     <property name="orientation">horizontal</property>
@@ -284,79 +351,160 @@
                 </child>
               </object>
             </child>
-          </object>
-        </child>
-        <!-- Optimization Services Section -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">16</property>
-            <property name="halign">center</property>
-            <property name="margin-top">16</property>
+
+            <!-- SECTION: Optimization Services -->
             <child>
               <object class="GtkSeparator">
                 <property name="orientation">horizontal</property>
                 <property name="hexpand">true</property>
-                <property name="width-request">600</property>
+                <property name="margin-top">14</property>
+                <property name="margin-bottom">4</property>
               </object>
             </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <property name="halign">start</property>
+                <property name="margin-bottom">6</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Optimization Services</property>
+                    <property name="css-classes">svc-section-label</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">— packages auto-installed if absent</property>
+                    <property name="css-classes">dim-label caption</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkGrid">
+                <property name="column-spacing">8</property>
+                <property name="row-spacing">8</property>
+                <property name="column-homogeneous">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkToggleButton" id="switch_psd">
+                    <property name="css-classes">opt-toggle</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">3</property>
+                        <property name="margin-top">10</property>
+                        <property name="margin-bottom">10</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Profile Sync Daemon</property>
+                            <property name="css-classes">heading opt-toggle-title</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Symlinks browser profiles to tmpfs for faster I/O</property>
+                            <property name="css-classes">caption opt-toggle-subtitle</property>
+                            <property name="wrap">true</property>
+                            <property name="justify">center</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <layout><property name="column">0</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="switch_systemd_oomd">
+                    <property name="css-classes">opt-toggle</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">3</property>
+                        <property name="margin-top">10</property>
+                        <property name="margin-bottom">10</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">systemd-oomd</property>
+                            <property name="css-classes">heading opt-toggle-title</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Userspace OOM killer to prevent system freezes</property>
+                            <property name="css-classes">caption opt-toggle-subtitle</property>
+                            <property name="wrap">true</property>
+                            <property name="justify">center</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <layout><property name="column">1</property><property name="row">0</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="switch_bpftune">
+                    <property name="css-classes">opt-toggle</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">3</property>
+                        <property name="margin-top">10</property>
+                        <property name="margin-bottom">10</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">bpftune</property>
+                            <property name="css-classes">heading opt-toggle-title</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Auto-tunes kernel networking and memory via BPF</property>
+                            <property name="css-classes">caption opt-toggle-subtitle</property>
+                            <property name="wrap">true</property>
+                            <property name="justify">center</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <layout><property name="column">0</property><property name="row">1</property></layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="switch_ananicy_cpp">
+                    <property name="css-classes">opt-toggle</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">3</property>
+                        <property name="margin-top">10</property>
+                        <property name="margin-bottom">10</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Ananicy C++</property>
+                            <property name="css-classes">heading opt-toggle-title</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Auto-applies CPU/IO priorities for better responsiveness</property>
+                            <property name="css-classes">caption opt-toggle-subtitle</property>
+                            <property name="wrap">true</property>
+                            <property name="justify">center</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <layout><property name="column">1</property><property name="row">1</property></layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+
           </object>
         </child>
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="spacing">12</property>
-            <property name="halign">center</property>
-            <property name="margin-top">8</property>
-            <property name="width-request">600</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="label">Optimization Services</property>
-                <property name="css-classes">title-3</property>
-                <property name="halign">center</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="label">Enable system optimization daemons. Packages will be installed automatically if not present.</property>
-                <property name="css-classes">dim-label</property>
-                <property name="halign">center</property>
-                <property name="wrap">true</property>
-                <property name="justify">center</property>
-              </object>
-            </child>
-            <child>
-              <object class="AdwPreferencesGroup" id="services_group">
-                <child>
-                  <object class="AdwSwitchRow" id="switch_psd">
-                    <property name="title">Profile Sync Daemon</property>
-                    <property name="subtitle">Symlinks browser profiles to tmpfs for faster I/O (user service)</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="AdwSwitchRow" id="switch_systemd_oomd">
-                    <property name="title">systemd-oomd</property>
-                    <property name="subtitle">Userspace out-of-memory killer to prevent system freezes</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="AdwSwitchRow" id="switch_bpftune">
-                    <property name="title">bpftune</property>
-                    <property name="subtitle">Auto-tunes kernel networking and memory parameters via BPF</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="AdwSwitchRow" id="switch_ananicy_cpp">
-                    <property name="title">Ananicy C++</property>
-                    <property name="subtitle">Auto-applies CPU/IO priorities for better responsiveness</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-        </child>
-        </object>
-      </child>
       </object>
     </child>
   </object>
