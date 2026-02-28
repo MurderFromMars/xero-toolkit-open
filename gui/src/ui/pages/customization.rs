@@ -321,9 +321,9 @@ fn setup_decky_loader(builder: &Builder, window: &ApplicationWindow) {
         let is_installed = std::path::Path::new(&plugin_loader_path).exists();
 
         let (title, description) = if is_installed {
-            ("Decky Loader", "Decky Loader is currently installed — select an action")
+            ("Decky Loader", "Decky Loader is currently installed, select an action")
         } else {
-            ("Decky Loader", "Steam Deck plugin loader — select a branch to install")
+            ("Decky Loader", "Setup Decky loader, select a branch to install")
         };
 
         let mut config = crate::ui::dialogs::selection::SelectionDialogConfig::new(title, description)
@@ -335,13 +335,13 @@ fn setup_decky_loader(builder: &Builder, window: &ApplicationWindow) {
                 .add_option(crate::ui::dialogs::selection::SelectionOption::new(
                     "update_release",
                     "Update to Latest Release",
-                    "Recommended for stable SteamOS",
+                    "Recommended for stable Steam client",
                     false,
                 ))
                 .add_option(crate::ui::dialogs::selection::SelectionOption::new(
                     "update_prerelease",
                     "Update to Latest Pre-Release",
-                    "Recommended for beta/preview SteamOS",
+                    "Recommended for beta Steam client",
                     false,
                 ))
                 .add_option(crate::ui::dialogs::selection::SelectionOption::new(
