@@ -127,12 +127,20 @@
             </child>
           </object>
         </child>
-        <!-- Row 3: Config/Rice Reset -->
+        <!-- Row 3: Decky Loader, Config/Rice Reset -->
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
             <property name="spacing">16</property>
             <property name="halign">center</property>
+            <child>
+              <object class="GtkButton" id="btn_decky_loader">
+                <property name="label">Decky Loader</property>
+                <property name="width-request">200</property>
+                <property name="height-request">50</property>
+                <property name="css-classes">suggested-action pill</property>
+              </object>
+            </child>
             <child>
               <object class="GtkButton" id="btn_config_reset">
                 <property name="label">Config/Rice Reset</property>
