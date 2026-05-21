@@ -109,10 +109,10 @@ detect_distro() {
     log "scanning system architecture…"
     if command -v pacman >/dev/null 2>&1; then
         DISTRO="arch"
-        ok "arch‑based system detected"
+        ok "arch-based system detected"
     elif command -v apt >/dev/null 2>&1; then
         DISTRO="debian"
-        ok "debian‑based system detected"
+        ok "debian-based system detected"
     else
         err "unsupported distribution"
         exit 1
@@ -155,14 +155,24 @@ install_dependencies() {
 }
 
 build_panel_colorizer() {
-    log "compiling plasma‑panel‑colorizer…"
+    log "compiling plasma-panel-colorizer…"
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" "$tmp/plasma-panel-colorizer" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
-    cd "$tmp/plasma-panel-colorizer"
-    chmod +x install.sh
-    ./install.sh >/dev/null 2>&1 || true
-    cd ~
+
+    if ! git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" \
+            "$tmp/plasma-panel-colorizer" 2>/dev/null; then
+        warn "failed to clone plasma-panel-colorizer — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
+    if ! (cd "$tmp/plasma-panel-colorizer" && chmod +x install.sh && \
+            ./install.sh >/dev/null 2>&1); then
+        warn "plasma-panel-colorizer install failed — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
     rm -rf "$tmp"
     ok "panel colorizer installed"
 }
@@ -171,11 +181,21 @@ build_kurve() {
     log "installing kurve…"
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/luisbocanegra/kurve.git" "$tmp/kurve" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
-    cd "$tmp/kurve"
-    chmod +x install.sh
-    ./install.sh >/dev/null 2>&1 || true
-    cd ~
+
+    if ! git clone "https://github.com/luisbocanegra/kurve.git" \
+            "$tmp/kurve" 2>/dev/null; then
+        warn "failed to clone kurve — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
+    if ! (cd "$tmp/kurve" && chmod +x install.sh && \
+            ./install.sh >/dev/null 2>&1); then
+        warn "kurve install failed — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
     rm -rf "$tmp"
     ok "kurve installed"
 }
@@ -211,31 +231,61 @@ install_krohnkite() {
 }
 
 build_kde_rounded_corners() {
-    log "compiling kde‑rounded‑corners…"
+    log "compiling kde-rounded-corners…"
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" "$tmp/kde-rounded-corners" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
-    cd "$tmp/kde-rounded-corners"
-    mkdir build && cd build
-    cmake .. >/dev/null 2>&1
-    cmake --build . -j"$(nproc)" 2>&1 | grep -E "Built target|^\[" || true
-    sudo make install >/dev/null 2>&1
-    cd ~
+
+    if ! git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" \
+            "$tmp/kde-rounded-corners" 2>/dev/null; then
+        warn "failed to clone KDE-Rounded-Corners — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
+    if ! (cd "$tmp/kde-rounded-corners" && mkdir build && cd build && \
+            cmake .. >/dev/null 2>&1 && \
+            cmake --build . -j"$(nproc)" >/dev/null 2>&1); then
+        warn "KDE-Rounded-Corners build failed — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
+    if ! (cd "$tmp/kde-rounded-corners/build" && sudo make install >/dev/null 2>&1); then
+        warn "KDE-Rounded-Corners install failed — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
     rm -rf "$tmp"
     ok "rounded corners installed"
 }
 
 build_better_blur() {
-    log "compiling kwin‑effects‑better‑blur‑dx…"
+    log "compiling kwin-effects-better-blur-dx…"
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/xarblu/kwin-effects-better-blur-dx" "$tmp/kwin-effects-better-blur-dx" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
-    cd "$tmp/kwin-effects-better-blur-dx"
-    mkdir build && cd build
-    cmake .. -DCMAKE_INSTALL_PREFIX=/usr >/dev/null 2>&1
-    make -j"$(nproc)" 2>&1 | grep -E "Built target|^\[" || true
-    sudo make install >/dev/null 2>&1
-    cd ~
+
+    if ! git clone "https://github.com/xarblu/kwin-effects-better-blur-dx" \
+            "$tmp/kwin-effects-better-blur-dx" 2>/dev/null; then
+        warn "failed to clone kwin-effects-better-blur-dx — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
+    if ! (cd "$tmp/kwin-effects-better-blur-dx" && mkdir build && cd build && \
+            cmake .. -DCMAKE_INSTALL_PREFIX=/usr >/dev/null 2>&1 && \
+            make -j"$(nproc)" >/dev/null 2>&1); then
+        warn "kwin-effects-better-blur-dx build failed — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
+    if ! (cd "$tmp/kwin-effects-better-blur-dx/build" && sudo make install >/dev/null 2>&1); then
+        warn "kwin-effects-better-blur-dx install failed — skipping"
+        rm -rf "$tmp"
+        return
+    fi
+
     rm -rf "$tmp"
     ok "better blur dx installed"
 }
