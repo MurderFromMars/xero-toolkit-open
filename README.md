@@ -63,6 +63,10 @@ Gamescope session and compositor configuration.
 ### Customization
 Desktop theming and customization tools, including the bundled `cyberxero-theme` installer with backup/restore.
 
+### Kernel And Scheduler Management
+
+Allows for full management of all available kernels in repos, as well as global scheduler management via scx_loader.
+
 ---
 
 ## Bundled Scripts
